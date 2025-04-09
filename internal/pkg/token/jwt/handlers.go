@@ -8,17 +8,12 @@ import (
 	"time"
 )
 
-func (prv *Provider) CreateTokenForUser(userID uuid.UUID, isAccess bool) (string, error) {
-	prv.log.Debug("start creating jwt token")
+func (prv *Provider) CreateAccessTokenForUser(userID uuid.UUID) (string, error) {
+	prv.log.Debug("start creating access token")
 
 	now := time.Now()
-	var add time.Duration
 
-	if isAccess {
-		add = time.Duration(prv.accessLifetime) * time.Hour
-	} else {
-		add = time.Duration(prv.refreshLifetime) * time.Hour
-	}
+	add := time.Duration(prv.accessLifetime) * time.Hour
 
 	claims := &JWT{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -27,7 +22,7 @@ func (prv *Provider) CreateTokenForUser(userID uuid.UUID, isAccess bool) (string
 			NotBefore: jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(add)),
 		},
-		IsAccess: isAccess,
+		IsAccess: true,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -38,7 +33,36 @@ func (prv *Provider) CreateTokenForUser(userID uuid.UUID, isAccess bool) (string
 		return "", tok.ErrorSignedToken
 	}
 
-	prv.log.Debug("created jwt token")
+	prv.log.Debug("created access token")
+
+	return tokenString, nil
+}
+
+func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error) {
+	prv.log.Debug("start creating refresh token")
+
+	now := time.Now()
+	add := time.Duration(prv.refreshLifetime) * time.Hour
+
+	claims := &JWT{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    userID.String(),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(add)),
+		},
+		IsAccess: false,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	tokenString, err := token.SignedString(prv.privateKey)
+
+	if err != nil {
+		return "", tok.ErrorSignedToken
+	}
+
+	prv.log.Debug("created refresh token")
 
 	return tokenString, nil
 }

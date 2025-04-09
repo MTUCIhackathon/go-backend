@@ -6,6 +6,7 @@ import (
 )
 
 type Provider interface {
-	CreateTokenForUser(userID uuid.UUID, isAccess bool) (string, error)
+	CreateAccessTokenForUser(userID uuid.UUID) (string, error)
+	CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 	GetDataFromToken(token string) (*models.UserDataInToken, error)
 }
