@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"fmt"
+	tok "github.com/MTUCIhackathon/server/internal/pkg/token"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -11,6 +11,6 @@ func (prv *Provider) readKeyFunc(token *jwt.Token) (interface{}, error) {
 		prv.log.Debug("successful read key")
 		return prv.publicKey, nil
 	default:
-		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		return nil, tok.ErrorMethod
 	}
 }

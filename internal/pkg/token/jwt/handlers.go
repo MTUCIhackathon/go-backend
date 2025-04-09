@@ -1,8 +1,8 @@
 package jwt
 
 import (
-	"fmt"
 	"github.com/MTUCIhackathon/server/internal/models"
+	tok "github.com/MTUCIhackathon/server/internal/pkg/token"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"time"
@@ -35,7 +35,7 @@ func (prv *Provider) CreateTokenForUser(userID uuid.UUID, isAccess bool) (string
 	tokenString, err := token.SignedString(prv.privateKey)
 
 	if err != nil {
-		return "", err
+		return "", tok.ErrorSignedToken
 	}
 
 	prv.log.Debug("created jwt token")
@@ -49,21 +49,21 @@ func (prv *Provider) GetDataFromToken(token string) (*models.UserDataInToken, er
 	parsedToken, err := jwt.ParseWithClaims(token, &JWT{}, prv.readKeyFunc)
 
 	if err != nil {
-		return nil, err
+		return nil, tok.ErrorParsedToken
 	}
 
 	prv.log.Debug("parsed jwt token")
 
 	claims, ok := parsedToken.Claims.(*JWT)
 	if !ok {
-		return nil, fmt.Errorf("failed to parse jwt token: invalid claims")
+		return nil, tok.ErrorParsedClaims
 	}
 
 	var ParsedID uuid.UUID
 
 	ParsedID, err = uuid.Parse(claims.RegisteredClaims.Issuer)
 	if err != nil {
-		return nil, err
+		return nil, tok.ErrorParsedID
 	}
 
 	prv.log.Debug("successfully parsed userID")
