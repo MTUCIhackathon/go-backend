@@ -4,7 +4,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/controller/smtp/client"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
-	logger "github.com/MTUCIhackathon/go-backend/pkg/logger"
+	"github.com/MTUCIhackathon/go-backend/pkg/logger"
 )
 
 func main() {
