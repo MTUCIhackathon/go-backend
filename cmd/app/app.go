@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/MTUCIhackathon/server/internal/config"
+	"github.com/MTUCIhackathon/server/internal/controller/smtp/client"
 	"github.com/MTUCIhackathon/server/internal/pkg/token/jwt"
 	logger "github.com/MTUCIhackathon/server/pkg/logger"
 )
@@ -18,6 +19,11 @@ func main() {
 		panic(err)
 	}
 	_, err = jwt.NewProvider(cfg, log)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = client.New(cfg, log)
 	if err != nil {
 		panic(err)
 	}

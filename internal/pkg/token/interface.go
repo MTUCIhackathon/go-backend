@@ -8,5 +8,5 @@ import (
 type Provider interface {
 	CreateAccessTokenForUser(userID uuid.UUID) (string, error)
 	CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
-	GetDataFromToken(token string) (*models.UserDataInToken, error)
+	GetDataFromToken(jwtToken string) (*models.UserDataInToken, error)
 }
