@@ -1,8 +1,8 @@
 package jwt
 
 import (
-	"github.com/MTUCIhackathon/server/internal/models"
-	"github.com/MTUCIhackathon/server/internal/pkg/token"
+	"github.com/MTUCIhackathon/go-backend/internal/models"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"time"
@@ -13,7 +13,7 @@ func (prv *Provider) CreateAccessTokenForUser(userID uuid.UUID) (string, error) 
 
 	now := time.Now()
 
-	add := time.Duration(prv.accessLifetime) * time.Hour
+	add := time.Duration(prv.accessLifeTime) * time.Hour
 
 	claims := &JWT{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -42,7 +42,7 @@ func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 	prv.log.Debug("start creating refresh token")
 
 	now := time.Now()
-	add := time.Duration(prv.refreshLifetime) * time.Hour
+	add := time.Duration(prv.refreshLifeTime) * time.Hour
 
 	claims := &JWT{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -93,7 +93,7 @@ func (prv *Provider) GetDataFromToken(jwtToken string) (*models.UserDataInToken,
 	prv.log.Debug("successfully parsed userID")
 
 	data := &models.UserDataInToken{
-		UserId:   ParsedID,
+		UserID:   ParsedID,
 		IsAccess: claims.IsAccess,
 	}
 

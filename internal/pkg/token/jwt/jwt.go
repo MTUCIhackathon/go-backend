@@ -2,8 +2,8 @@ package jwt
 
 import (
 	"crypto/rsa"
-	"github.com/MTUCIhackathon/server/internal/config"
-	"github.com/MTUCIhackathon/server/internal/pkg/token"
+	"github.com/MTUCIhackathon/go-backend/internal/config"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 	"os"
@@ -20,8 +20,8 @@ type Provider struct {
 	log             *zap.Logger
 	publicKey       *rsa.PublicKey
 	privateKey      *rsa.PrivateKey
-	accessLifetime  int
-	refreshLifetime int
+	accessLifeTime  int
+	refreshLifeTime int
 }
 
 func NewProvider(cfg *config.Config, log *zap.Logger) (*Provider, error) {
@@ -56,8 +56,8 @@ func NewProvider(cfg *config.Config, log *zap.Logger) (*Provider, error) {
 		log:             log,
 		publicKey:       publicKey,
 		privateKey:      privateKey,
-		accessLifetime:  cfg.JWT.AccessTokenLifeTime,
-		refreshLifetime: cfg.JWT.RefreshTokenLifeTime,
+		accessLifeTime:  cfg.JWT.AccessTokenLifeTime,
+		refreshLifeTime: cfg.JWT.RefreshTokenLifeTime,
 	}
 	log.Debug("successful create new jwt provider")
 	return provider, nil

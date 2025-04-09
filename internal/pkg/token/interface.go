@@ -1,7 +1,7 @@
 package token
 
 import (
-	"github.com/MTUCIhackathon/server/internal/models"
+	"github.com/MTUCIhackathon/go-backend/internal/models"
 	"github.com/google/uuid"
 )
 

@@ -23,7 +23,7 @@ func New() (*Config, error) {
 			PrivateKeyPath:       path.Join(wd, "certs", "private_key.pem"),
 		},
 		SMTP: &SMTP{
-			Server:       "smtp.mail.ru",
+			Host:         "smtp.mail.ru",
 			Port:         587,
 			LoginPath:    path.Join(wd, "certs", "mail_login.txt"),
 			PasswordPath: path.Join(wd, "certs", "mail_password.txt"),

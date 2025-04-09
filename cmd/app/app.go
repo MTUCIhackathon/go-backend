@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/MTUCIhackathon/server/internal/config"
-	"github.com/MTUCIhackathon/server/internal/controller/smtp/client"
-	"github.com/MTUCIhackathon/server/internal/pkg/token/jwt"
-	logger "github.com/MTUCIhackathon/server/pkg/logger"
+	"github.com/MTUCIhackathon/go-backend/internal/config"
+	"github.com/MTUCIhackathon/go-backend/internal/controller/smtp/client"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
+	logger "github.com/MTUCIhackathon/go-backend/pkg/logger"
 )
 
 func main() {

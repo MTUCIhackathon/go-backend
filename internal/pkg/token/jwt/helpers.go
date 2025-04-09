@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"github.com/MTUCIhackathon/server/internal/pkg/token"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 	"github.com/golang-jwt/jwt/v5"
 )
 

@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/MTUCIhackathon/server/internal/config"
-	smtpclient "github.com/MTUCIhackathon/server/internal/controller/smtp"
+	"github.com/MTUCIhackathon/go-backend/internal/config"
+	smtpclient "github.com/MTUCIhackathon/go-backend/internal/controller/smtp"
 	"go.uber.org/zap"
 	"net/smtp"
 	"os"
@@ -26,7 +26,7 @@ func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
 
 	loginRaw, err := os.ReadFile(cfg.SMTP.LoginPath)
 	if err != nil {
-		return nil, smtpclient.ErrorReadPassword
+		return nil, smtpclient.ErrorReadLogin
 	}
 
 	login := string(loginRaw)
