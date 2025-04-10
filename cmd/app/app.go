@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
-	"github.com/MTUCIhackathon/go-backend/internal/controller/smtp/client"
+	"github.com/MTUCIhackathon/go-backend/internal/controller/smtp"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
 )
@@ -23,7 +23,7 @@ func main() {
 		panic(err)
 	}
 
-	_, err = client.New(cfg, log)
+	_, err = smtp.New(cfg, log)
 	if err != nil {
 		panic(err)
 	}

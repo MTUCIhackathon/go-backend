@@ -1,8 +1,8 @@
-package client
+package smtp
 
 import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
-	smtpclient "github.com/MTUCIhackathon/go-backend/internal/controller/smtp"
+	smtpclient "github.com/MTUCIhackathon/go-backend/internal/controller"
 	"go.uber.org/zap"
 	"net/smtp"
 	"os"
