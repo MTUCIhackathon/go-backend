@@ -1,11 +1,13 @@
 package jwt
 
 import (
-	"github.com/MTUCIhackathon/go-backend/internal/model/DTO"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"time"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 )
 
 func (prv *Provider) CreateAccessTokenForUser(userID uuid.UUID) (string, error) {
@@ -67,7 +69,7 @@ func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 	return tokenString, nil
 }
 
-func (prv *Provider) GetDataFromToken(jwtToken string) (*DTO.UserDataInToken, error) {
+func (prv *Provider) GetDataFromToken(jwtToken string) (*dto.UserDataInToken, error) {
 	prv.log.Debug("start getting data from jwt token")
 
 	parsedToken, err := jwt.ParseWithClaims(jwtToken, &JWT{}, prv.readKeyFunc)
@@ -92,7 +94,7 @@ func (prv *Provider) GetDataFromToken(jwtToken string) (*DTO.UserDataInToken, er
 
 	prv.log.Debug("successfully parsed userID")
 
-	data := &DTO.UserDataInToken{
+	data := &dto.UserDataInToken{
 		UserID:   ParsedID,
 		IsAccess: claims.IsAccess,
 	}

@@ -1,12 +1,16 @@
 package smtp
 
 import (
-	"github.com/MTUCIhackathon/go-backend/internal/config"
-	smtpclient "github.com/MTUCIhackathon/go-backend/internal/controller"
-	"go.uber.org/zap"
 	"net/smtp"
 	"os"
+
+	"go.uber.org/zap"
+
+	"github.com/MTUCIhackathon/go-backend/internal/config"
+	smtpclient "github.com/MTUCIhackathon/go-backend/internal/controller"
 )
+
+// TODO remove
 
 type SMTP struct {
 	log  *zap.Logger
@@ -15,7 +19,7 @@ type SMTP struct {
 }
 
 func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
-	passwordRaw, err := os.ReadFile(cfg.SMTP.PasswordPath)
+	passwordRaw, err := os.ReadFile(cfg.SMTP.Password)
 	if err != nil {
 		return nil, smtpclient.ErrorReadPassword
 	}
@@ -24,7 +28,7 @@ func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
 
 	log.Debug("get password")
 
-	loginRaw, err := os.ReadFile(cfg.SMTP.LoginPath)
+	loginRaw, err := os.ReadFile(cfg.SMTP.Login)
 	if err != nil {
 		return nil, smtpclient.ErrorReadLogin
 	}

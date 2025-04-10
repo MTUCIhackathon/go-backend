@@ -6,8 +6,8 @@ import (
 )
 
 type Config struct {
-	JWT  *Token
-	SMTP *SMTP
+	JWT  *Token `config:"JWT" toml:"JWT" yaml:"JWT" json:"JWT"`
+	SMTP *SMTP  `config:"SMTP" toml:"SMTP" yaml:"SMTP" json:"SMTP"`
 }
 
 func New() (*Config, error) {
@@ -15,6 +15,7 @@ func New() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &Config{
 		JWT: &Token{
 			AccessTokenLifeTime:  2,

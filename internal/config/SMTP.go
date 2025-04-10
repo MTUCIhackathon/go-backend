@@ -3,10 +3,10 @@ package config
 import "fmt"
 
 type SMTP struct {
-	Host         string `config:"smtp_host"`
-	Port         int    `config:"smtp_port"`
-	LoginPath    string `config:"smtp_login_path"`
-	PasswordPath string `config:"smtp_password_path"`
+	Host     string `config:"host" toml:"host" yaml:"host" json:"host"`
+	Port     int    `config:"port" toml:"port" yaml:"port" json:"port"`
+	Login    string `config:"login" toml:"login" yaml:"login" json:"login"`
+	Password string `config:"password" toml:"password" yaml:"password" json:"password"`
 }
 
 func (smtp SMTP) GetSMTPServerAddress() string {
