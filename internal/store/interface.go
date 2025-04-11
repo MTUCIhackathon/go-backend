@@ -1,15 +1,21 @@
 package store
 
+import (
+	"context"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+)
+
 type (
 	Interface interface {
-		Forms() FormsRepository
+		Resolved() ResolvedRepository
 		Consumers() ConsumersRepository
 	}
 
 	ConsumersRepository interface {
-		// methods
+		Create(ctx context.Context, consumer dto.Consumer) error
 	}
-	FormsRepository interface {
+	ResolvedRepository interface {
 		// methods
 	}
 )
