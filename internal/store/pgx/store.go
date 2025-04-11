@@ -13,18 +13,18 @@ type Store struct {
 	log       *zap.Logger
 	pool      *pgxpool.Pool
 	consumers *ConsumersRepository
-	forms     *FormsRepository
+	resolved  *ResolvedRepository
 }
 
-func (s *Store) Forms() store.FormsRepository {
+func (s *Store) Resolved() store.ResolvedRepository {
 	if s == nil {
-		zap.L().Named("store").Named("forms").Error(
+		zap.L().Named("store").Named("resolved").Error(
 			"got unexpectedly nil store repository",
 		)
 		return nil
 	}
 
-	return s.forms
+	return s.resolved
 }
 
 func (s *Store) Consumers() store.ConsumersRepository {
@@ -35,7 +35,7 @@ func (s *Store) Consumers() store.ConsumersRepository {
 		return nil
 	}
 
-	return s.forms
+	return s.consumers
 }
 
 func New(log *zap.Logger, pool *pgxpool.Pool) (*Store, error) {
@@ -52,8 +52,8 @@ func New(log *zap.Logger, pool *pgxpool.Pool) (*Store, error) {
 		pool: pool,
 	}
 
-	s.consumers = newConsumersRepository()
-	s.forms = newFormsRepository()
+	s.consumers = newConsumersRepository(s)
+	s.resolved = newResolvedRepository(s)
 
 	s.log.Info("store initialized successfully")
 	return nil, nil
