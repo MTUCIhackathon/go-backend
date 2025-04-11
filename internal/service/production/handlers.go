@@ -27,7 +27,7 @@ func (s *Service) CreateConsumer(e echo.Context, req dto.CreateConsumer) (*dto.T
 		res  *dto.Token
 	)
 
-	password, err := encrytpor.Interface().EncryptPassword(req.Password)
+	password, err := encrytpor.Interface().EncryptPassword()
 
 	data = &dto.Consumer{
 		ID:        uuid.New(),
