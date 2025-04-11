@@ -7,9 +7,12 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
+	"github.com/MTUCIhackathon/go-backend/internal/cache"
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 )
+
+var _ cache.Cache = (*Cache)(nil)
 
 const firstTestLength = 174
 
@@ -21,7 +24,44 @@ type Cache struct {
 	opts   []Option
 }
 
-func New(cfg *config.Cache, log *zap.Logger, opts ...Option) (*Cache, error) {
+func (c *Cache) Set(key uuid.UUID, test dto.Test) error {
+	c.mu.Lock()
+	c.data[key] = test
+	c.mu.Unlock()
+	return nil
+}
+
+func (c *Cache) Get(key uuid.UUID) (dto.Test, error) {
+	c.mu.RLock()
+	test, ok := c.data[key]
+	if !ok {
+		return dto.Test{}, ErrNotFound
+	}
+	c.mu.RUnlock()
+	return test, nil
+}
+
+func (c *Cache) GetAll() ([]dto.Test, error) {
+	c.mu.RLock()
+	tests := make([]dto.Test, 0, len(c.data))
+	for _, t := range c.data {
+		tests = append(tests, t)
+	}
+	c.mu.RUnlock()
+	return tests, nil
+}
+
+func (c *Cache) GetKeys() []uuid.UUID {
+	c.mu.RLock()
+	keys := make([]uuid.UUID, 0, len(c.data))
+	for key := range c.data {
+		keys = append(keys, key)
+	}
+	c.mu.RUnlock()
+	return keys
+}
+
+func New(cfg *config.Cache, log *zap.Logger, opts ...Option) (cache.Cache, error) {
 	if cfg == nil {
 		return nil, ErrNilConfig
 	}
