@@ -1,29 +1,26 @@
 package service
 
+import (
+	"github.com/google/uuid"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+)
+
 type Interface interface {
-	// Methods for test
+	// TODO ?
+	GetTestByName(name string) string
+	GetManyTest()
 
-	GetTestByName
-	GetManyTest
+	CreateResolved(req dto.CreateResolved) (*dto.Resolved, error)
+	GetResolvedByUserID(userID uuid.UUID) (*dto.Resolved, error)
+	GetManyResolved(userID uuid.UUID) ([]dto.Resolved, error)
 
-	// Methods for resolved
+	GetOldResolvedByID(id uuid.UUID) (*dto.Resolved, error)
 
-	CreateResolved
-
-	GetResolvedByID(id)
-	GetManyResolved
-
-	// ?
-	GetOldResolvedByID
-
-	// Methods for consumers
-
-	CreateConsumer
-	GetConsumerByID
-	UpdateConsumerPassword
-	SendResultOnEmail
-
-	// Methods for
+	CreateConsumer(req dto.CreateConsumer) (*dto.Consumer, error)
+	GetConsumerByID(id uuid.UUID) (*dto.Consumer, error)
+	UpdateConsumerPassword(req dto.UpdatePassword) (bool, error)
+	SendConsumerResult(req dto.SendConsumerResult) (bool, error)
 }
 
 // Client

@@ -3,10 +3,10 @@ package dto
 import "github.com/google/uuid"
 
 type UserDataInToken struct {
-	UserID   uuid.UUID `json:"user_id"`
-	IsAccess bool      `json:"is_access"`
+	UserID   uuid.UUID
+	IsAccess bool
 }
-type TokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+type Token struct {
+	AccessToken  string
+	RefreshToken string
 }
