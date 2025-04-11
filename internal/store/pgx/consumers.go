@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
@@ -20,7 +21,7 @@ func newConsumersRepository(log *zap.Logger, pgx *pgxpool.Pool) *ConsumersReposi
 	}
 }
 
-func (r *ConsumersRepository) CreateConsumer(ctx context.Context, req *dto.Consumer) error {
+func (r *ConsumersRepository) CreateConsumer(ctx context.Context, req dto.Consumer) error {
 	const createConsumer = `INSERT INTO consumer VALUES (id, login, password, created_at)VALUES ($1, $2, $3, $4);`
 	_, err := r.pgx.Exec(ctx, createConsumer, req.ID, req.Login, req.Password, req.CreatedAt)
 	if err != nil {
@@ -38,5 +39,19 @@ func (r *ConsumersRepository) GetConsumerByLogin(ctx context.Context, login stri
 
 		return fmt.Errorf("user with choosen login already exists")
 	}
+	return nil
+}
+
+/*func (r *ConsumersRepository) GetConsumerByID(ctx context.Context, id uuid.UUID) (*dto.Consumer, error) {
+}*/
+
+func (r *ConsumersRepository) UpdatePasswordByID(ctx context.Context, password string, id uuid.UUID) error {
+	const updatePassword = `UPDATE consumer SET password = $1 WHERE id = $2;`
+
+	_, err := r.pgx.Exec(ctx, updatePassword, password, id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
