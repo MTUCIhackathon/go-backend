@@ -21,17 +21,27 @@ var defaultConfig = &Config{
 		SigningAlgorithm:     SigningAlgorithmRS256,
 	},
 	SMTP: &SMTP{
-		Host:     "smtp.mail.ru",
-		Port:     587,
+		Host:     "smtp.default.com",
+		Port:     1111,
 		Login:    "login",
 		Password: "password",
+	},
+	Postgres: &Postgres{
+		Host:             "localhost",
+		Port:             5432,
+		User:             "postgres",
+		Password:         "postgres",
+		Database:         "postgres",
+		LogLevel:         "error",
+		VersionTableName: "versions",
 	},
 }
 
 type Config struct {
-	JWT   *Token `config:"jwt" toml:"jwt" yaml:"jwt" json:"jwt"`
-	SMTP  *SMTP  `config:"smtp" toml:"smtp" yaml:"smtp" json:"smtp"`
-	Cache *Cache `config:"cache" toml:"cache" yaml:"cache" json:"cache"`
+	JWT      *Token    `config:"jwt" toml:"jwt" yaml:"jwt" json:"jwt"`
+	SMTP     *SMTP     `config:"smtp" toml:"smtp" yaml:"smtp" json:"smtp"`
+	Cache    *Cache    `config:"cache" toml:"cache" yaml:"cache" json:"cache"`
+	Postgres *Postgres `config:"postgres" toml:"postgres" yaml:"postgres" json:"postgres"`
 }
 
 func New() (*Config, error) {
