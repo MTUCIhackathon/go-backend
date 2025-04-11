@@ -32,7 +32,6 @@ var defaultConfig = &Config{
 		User:             "postgres",
 		Password:         "postgres",
 		Database:         "postgres",
-		LogLevel:         "error",
 		VersionTableName: "versions",
 	},
 }
@@ -68,8 +67,9 @@ func New() (*Config, error) {
 
 func (c *Config) copy() *Config {
 	return &Config{
-		JWT:   c.JWT.copy(),
-		SMTP:  c.SMTP.copy(),
-		Cache: c.Cache.copy(),
+		JWT:      c.JWT.copy(),
+		SMTP:     c.SMTP.copy(),
+		Cache:    c.Cache.copy(),
+		Postgres: c.Postgres.copy(),
 	}
 }
