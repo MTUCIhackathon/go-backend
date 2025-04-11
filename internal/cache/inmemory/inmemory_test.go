@@ -24,4 +24,7 @@ func TestCache_New(t *testing.T) {
 	c, err := New(cfg, log, WithLoader())
 	require.NoError(t, err)
 	require.NotNil(t, c)
+
+	keys := c.GetKeys()
+	require.Len(t, keys, 1)
 }
