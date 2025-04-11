@@ -33,5 +33,8 @@ func (ctrl *Controller) configureMiddleware() {
 }
 
 func (ctrl *Controller) configureRoutes() {
+	api := ctrl.server.Group("/api")
+
+	api.GET("/test/:name", ctrl.GetTestByName)
 
 }

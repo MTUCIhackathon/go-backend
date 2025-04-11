@@ -6,20 +6,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type Consumer struct {
-	ID        uuid.UUID
-	Email     *string
-	Login     string
-	Password  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-type CreateConsumer struct {
-	Login    string
-	Email    *string
-	Password string
-}
+type (
+	CreateConsumer struct {
+		Login    string
+		Email    *string
+		Password string
+	}
+	Consumer struct {
+		ID        uuid.UUID
+		Login     string
+		Email     *string
+		Password  string
+		CreatedAt time.Time
+	}
+)
 
 type UpdatePassword struct {
 	UserID   uuid.UUID

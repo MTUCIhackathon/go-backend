@@ -1,9 +1,12 @@
 package model
 
 type (
-	CreateUserRequest struct {
-		Email string `json:"email"`
+	CreateConsumerRequest struct {
+		Login    string  `json:"login"`
+		Email    *string `json:"email"`
+		Password string  `json:"password"`
 	}
+
 	UpdatePasswordRequest struct {
 		Token string `json:"token"`
 	}

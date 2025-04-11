@@ -1,9 +1,10 @@
 package http
 
 import (
-	"github.com/labstack/echo/v4"
-
+	"github.com/MTUCIhackathon/go-backend/internal/controller/http/model"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 func (ctrl *Controller) GetTestByName(e echo.Context) error {
@@ -29,15 +30,37 @@ func (ctrl *Controller) GetOldResolvedByID(e echo.Context) error {
 }
 
 func (ctrl *Controller) CreateConsumer(e echo.Context) error {
-	req := new(dto.CreateConsumer)
-	
-	err := e.Bind(req)
+	var (
+		req  model.CreateConsumerRequest
+		err  error
+		DTO  dto.CreateConsumer
+		resp model.CreateConsumerResponse
+	)
+	err = e.Bind(&req)
 	if err != nil {
-		// TODO
-		return nil
+		ctrl.log.Error("failed to bind request")
+		return e.NoContent(http.StatusBadRequest)
 	}
 
-	return nil
+	DTO = dto.CreateConsumer{
+		Login:    req.Login,
+		Email:    req.Email,
+		Password: req.Password,
+	}
+
+	data, err := ctrl.srv.Consumer().CreateConsumer(e, DTO)
+	if err != nil {
+		ctrl.log.Error("failed to create consumer")
+		return e.NoContent(http.StatusInternalServerError)
+	}
+
+	resp = model.CreateConsumerResponse{
+		AccessToken:  data.AccessToken,
+		RefreshToken: data.RefreshToken,
+	}
+
+	return e.JSON(http.StatusOK, resp)
+
 }
 func (ctrl *Controller) GetConsumerByID(e echo.Context) error {
 	panic("not implemented")

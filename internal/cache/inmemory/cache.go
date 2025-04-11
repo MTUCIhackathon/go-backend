@@ -1,8 +1,6 @@
 package inmemory
 
 import (
-	"os"
-	"strings"
 	"sync"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
@@ -14,7 +12,7 @@ type Cache struct {
 	config *config.Cache
 }
 
-func New(config *config.Cache, opts ...Options) *Cache {
+/*func New(config *config.Cache, opts ...Options) *Cache {
 	readed, err := os.ReadFile("")
 
 	m := make(map[string]string)
@@ -24,4 +22,4 @@ func New(config *config.Cache, opts ...Options) *Cache {
 		data:   m,
 		config: config,
 	}
-}
+}*/

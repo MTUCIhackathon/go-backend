@@ -5,5 +5,6 @@ import (
 )
 
 var (
-	ErrNilReference = errors.New("nil reference")
+	ErrNilReference      = errors.New("nil reference")
+	ErrEncryptedPassword = errors.New("failed to encrypt password")
 )
