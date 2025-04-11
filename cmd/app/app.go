@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
-	"github.com/MTUCIhackathon/go-backend/internal/controller/smtp"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
+	"github.com/MTUCIhackathon/go-backend/internal/smtp"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
 )
 

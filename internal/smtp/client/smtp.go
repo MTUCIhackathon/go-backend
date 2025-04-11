@@ -10,8 +10,6 @@ import (
 	smtpclient "github.com/MTUCIhackathon/go-backend/internal/controller"
 )
 
-// TODO remove
-
 type SMTP struct {
 	log  *zap.Logger
 	cfg  *config.Config

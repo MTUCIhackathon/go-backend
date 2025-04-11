@@ -1,35 +1,37 @@
 package http
 
 import (
-	"github.com/MTUCIhackathon/go-backend/internal/config"
-	"github.com/MTUCIhackathon/go-backend/internal/controller"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
+
+	"github.com/MTUCIhackathon/go-backend/internal/config"
+	"github.com/MTUCIhackathon/go-backend/internal/service"
 )
 
 type Controller struct {
 	cfg    *config.Config
 	log    *zap.Logger
-	prov   *token.Provider
-	smtp   *controller.SMTPClient
+	srv    service.Interface
 	server *echo.Echo
 }
 
-func New(cfg *config.Config, log *zap.Logger, prov *token.Provider, smtp *controller.SMTPClient) (*Controller, error) {
+func New(cfg *config.Config, log *zap.Logger, service service.Interface) (*Controller, error) {
 	ctrl := &Controller{
 		cfg:    cfg,
 		log:    log,
-		prov:   prov,
-		smtp:   smtp,
+		srv:    service,
 		server: echo.New(),
 	}
+
 	ctrl.configureMiddleware()
 	ctrl.configureRoutes()
+
 	return ctrl, nil
 }
 
 func (ctrl *Controller) configureMiddleware() {
 }
 
-func (ctrl *Controller) configureRoutes() {}
+func (ctrl *Controller) configureRoutes() {
+
+}
