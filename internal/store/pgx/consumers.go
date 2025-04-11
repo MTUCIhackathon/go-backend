@@ -21,8 +21,8 @@ func newConsumersRepository(log *zap.Logger, pgx *pgxpool.Pool) *ConsumersReposi
 }
 
 func (r *ConsumersRepository) CreateConsumer(ctx context.Context, req *dto.Consumer) error {
-	const createConsumer = `INSERT INTO consumer VALUES (id, login, email, password, created_at)VALUES ($1, $2, $3, $4, $5);`
-	_, err := r.pgx.Exec(ctx, createConsumer, req.ID, req.Login, req.Password, req.Email, req.CreatedAt)
+	const createConsumer = `INSERT INTO consumer VALUES (id, login, password, created_at)VALUES ($1, $2, $3, $4);`
+	_, err := r.pgx.Exec(ctx, createConsumer, req.ID, req.Login, req.Password, req.CreatedAt)
 	if err != nil {
 		return err
 	}

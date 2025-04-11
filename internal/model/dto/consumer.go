@@ -9,7 +9,6 @@ import (
 type (
 	CreateConsumer struct {
 		Login    string
-		Email    *string
 		Password string
 	}
 	Consumer struct {

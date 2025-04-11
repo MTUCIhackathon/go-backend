@@ -44,11 +44,10 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 
 	DTO = dto.CreateConsumer{
 		Login:    req.Login,
-		Email:    req.Email,
 		Password: req.Password,
 	}
 
-	data, err := ctrl.srv.Consumer().CreateConsumer(e, DTO)
+	data, err := ctrl.srv.CreateConsumer(e, DTO)
 	if err != nil {
 		ctrl.log.Error("failed to create consumer")
 		return e.NoContent(http.StatusInternalServerError)

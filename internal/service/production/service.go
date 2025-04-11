@@ -1,7 +1,7 @@
 package production
 
 import (
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/encrytpor"
+	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"

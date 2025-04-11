@@ -1,7 +1,6 @@
 package production
 
 import (
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/encrytpor"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -27,17 +26,16 @@ func (s *Service) CreateConsumer(e echo.Context, req dto.CreateConsumer) (*dto.T
 		res  *dto.Token
 	)
 
-	password, err := encrytpor.Interface().EncryptPassword()
+	password, err := s.encrypt.EncryptPassword(req.Password)
 
 	data = &dto.Consumer{
 		ID:        uuid.New(),
 		Login:     req.Login,
-		Email:     req.Email,
 		Password:  password,
 		CreatedAt: time.Now(),
 	}
 
-	err = s.repo.Consumers().CreateConsumer(e.Request().Context(), data)
+	err = s.repo.Consumers().GetConsumerByLogin(e.Request().Context(), data.Login)
 	if err != nil {
 		return nil, service.NewError(controller.ErrInternal, err)
 	}
