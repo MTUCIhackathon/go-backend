@@ -7,7 +7,8 @@ import (
 )
 
 func handleErr(err error) error {
-	if errors.Is(err, controller.ErrorBadRequest) {
+	if errors.Is(err, controller.ErrForbidden) {
 
 	}
+	return err
 }

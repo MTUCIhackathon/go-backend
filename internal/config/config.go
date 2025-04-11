@@ -48,7 +48,7 @@ func New() (*Config, error) {
 		file.NewBackend(path.Join(wd, "config.json")),
 	)
 
-	err = l.Load(context.Background(), &cfg)
+	err = l.Load(context.Background(), cfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while loading config")
 	}

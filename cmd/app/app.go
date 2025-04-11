@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
-	"github.com/MTUCIhackathon/go-backend/internal/smtp"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
 )
 
@@ -19,11 +18,6 @@ func main() {
 		panic(err)
 	}
 	_, err = jwt.NewProvider(cfg, log)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = smtp.New(cfg, log)
 	if err != nil {
 		panic(err)
 	}
