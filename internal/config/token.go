@@ -12,16 +12,16 @@ type Token struct {
 	SigningAlgorithm     string `config:"signing_algorithm" toml:"signing_algorithm" yaml:"signing_algorithm" json:"signing_algorithm"`
 }
 
-func (t *Token) copy() *Token {
-	if t == nil {
+func (c *Token) copy() *Token {
+	if c == nil {
 		return nil
 	}
 
 	return &Token{
-		AccessTokenLifeTime:  t.AccessTokenLifeTime,
-		RefreshTokenLifeTime: t.RefreshTokenLifeTime,
-		PublicKeyPath:        t.PublicKeyPath,
-		PrivateKeyPath:       t.PrivateKeyPath,
-		SigningAlgorithm:     t.SigningAlgorithm,
+		AccessTokenLifeTime:  c.AccessTokenLifeTime,
+		RefreshTokenLifeTime: c.RefreshTokenLifeTime,
+		PublicKeyPath:        c.PublicKeyPath,
+		PrivateKeyPath:       c.PrivateKeyPath,
+		SigningAlgorithm:     c.SigningAlgorithm,
 	}
 }

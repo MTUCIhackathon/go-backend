@@ -1,29 +1,44 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
+
+const (
+	defaultLogLevel = "none"
+)
 
 type Postgres struct {
-	Host     string `config:"host" toml:"host" yaml:"host" json:"host"`
-	Port     int    `config:"port" toml:"port" yaml:"port" json:"port"`
-	User     string `config:"user" toml:"user" yaml:"user" json:"user"`
-	Password string `config:"password" toml:"password" yaml:"password" json:"password"`
-	Database string `config:"database" toml:"database" yaml:"database" json:"database"`
+	Host             string `config:"host" toml:"host" yaml:"host" json:"host"`
+	Port             int    `config:"port" yaml:"port" toml:"port" json:"port"`
+	User             string `config:"user" yaml:"user" toml:"user" json:"user"`
+	Password         string `config:"password" yaml:"password" toml:"password" json:"password"`
+	Database         string `config:"database" yaml:"database" toml:"database" json:"database"`
+	VersionTableName string `config:"versions" yaml:"versions" toml:"versions"  json:"versions"`
 }
 
-func (p Postgres) GetDNS() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		p.User, p.Password, p.Host, p.Port, p.Database)
+func (c *Postgres) GetURI() string {
+	if c == nil {
+		return ""
+	}
+
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		c.User, c.Password, c.Host, c.Port, c.Database,
+	)
 }
 
-func (p *Postgres) copy() *Postgres {
-	if p == nil {
+func (c *Postgres) copy() *Postgres {
+	if c == nil {
 		return nil
 	}
+
 	return &Postgres{
-		Host:     p.Host,
-		Port:     p.Port,
-		User:     p.User,
-		Password: p.Password,
-		Database: p.Database,
+		Host:             c.Host,
+		Port:             c.Port,
+		User:             c.User,
+		Password:         c.Password,
+		Database:         c.Database,
+		VersionTableName: c.VersionTableName,
 	}
 }

@@ -2,10 +2,12 @@ package config
 
 import (
 	"context"
-	"github.com/heetch/confita"
-	"github.com/heetch/confita/backend/file"
 	"os"
 	"path"
+
+	"github.com/heetch/confita"
+	"github.com/heetch/confita/backend/file"
+	"github.com/pkg/errors"
 )
 
 var currentDir, _ = os.Executable()
@@ -24,40 +26,53 @@ var defaultConfig = &Config{
 		Login:    "login",
 		Password: "password",
 	},
+	Cache: &Cache{
+		CachePath: "test.yaml",
+	},
 	Postgres: &Postgres{
-		Host:     "0.0.0.0",
-		Port:     5432,
-		User:     "postgres",
-		Password: "postgres",
-		Database: "system",
+		Host:             "localhost",
+		Port:             5432,
+		User:             "postgres",
+		Password:         "postgres",
+		Database:         "system",
+		VersionTableName: "versions",
+	},
+	AWS: &AWS{
+		Host:         "s3",
+		Region:       "ru",
+		AccessKey:    "access_key",
+		SecretKey:    "secret_key",
+		Bucket:       "bucket",
+		LinkLifeTime: 60 * 3,
+	},
+	Controller: &Controller{
+		Host:           "localhost",
+		Port:           8081,
+		TimeoutSeconds: 0,
 	},
 }
 
 type Config struct {
-	JWT      *Token    `config:"jwt" toml:"jwt" yaml:"jwt" json:"jwt"`
-	SMTP     *SMTP     `config:"smtp" toml:"smtp" yaml:"smtp" json:"smtp"`
-	Cache    *Cache    `config:"cache" toml:"cache" yaml:"cache" json:"cache"`
-	Postgres *Postgres `config:"postgres" toml:"postgres" yaml:"postgres" json:"postgres"`
+	JWT        *Token      `config:"jwt" toml:"jwt" yaml:"jwt" json:"jwt"`
+	SMTP       *SMTP       `config:"smtp" toml:"smtp" yaml:"smtp" json:"smtp"`
+	Cache      *Cache      `config:"cache" toml:"cache" yaml:"cache" json:"cache"`
+	Postgres   *Postgres   `config:"postgres" toml:"postgres" yaml:"postgres" json:"postgres"`
+	AWS        *AWS        `config:"aws" toml:"aws" yaml:"aws" json:"aws"`
+	Controller *Controller `config:"controller" toml:"controller" yaml:"controller" json:"controller"`
 }
 
 func New() (*Config, error) {
-	wd, err := os.Executable()
-	if err != nil {
-		return nil, err
-	}
-
 	cfg := defaultConfig.copy()
 
 	l := confita.NewLoader(
-		file.NewBackend(path.Join(wd, "config.toml")),
-		file.NewBackend(path.Join(wd, "config.yaml")),
-		file.NewBackend(path.Join(wd, "config.json")),
+		file.NewBackend(path.Join(currentDir, "config.toml")),
+		file.NewBackend(path.Join(currentDir, "config.yaml")),
+		file.NewBackend(path.Join(currentDir, "config.json")),
 	)
 
-	err = l.Load(context.Background(), cfg)
+	err := l.Load(context.Background(), cfg)
 	if err != nil {
-		return nil, err
-		//return nil, errors.Wrap(err, "error while loading config")
+		return nil, errors.Wrap(err, "error while loading config")
 	}
 
 	return cfg, nil
@@ -65,9 +80,11 @@ func New() (*Config, error) {
 
 func (c *Config) copy() *Config {
 	return &Config{
-		JWT:      c.JWT.copy(),
-		SMTP:     c.SMTP.copy(),
-		Cache:    c.Cache.copy(),
-		Postgres: c.Postgres.copy(),
+		JWT:        c.JWT.copy(),
+		SMTP:       c.SMTP.copy(),
+		Cache:      c.Cache.copy(),
+		Postgres:   c.Postgres.copy(),
+		AWS:        c.AWS.copy(),
+		Controller: c.Controller.copy(),
 	}
 }

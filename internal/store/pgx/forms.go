@@ -11,7 +11,7 @@ type ResolvedRepository struct {
 
 func newResolvedRepository(store *Store) *ResolvedRepository {
 	return &ResolvedRepository{
-		log:   store.log.Named("forms-repository"),
+		log:   store.log.Named("resolved-repository"),
 		store: store,
 	}
 }

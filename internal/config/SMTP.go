@@ -9,23 +9,23 @@ type SMTP struct {
 	Password string `config:"password" toml:"password" yaml:"password" json:"password"`
 }
 
-// Не ставь сюда указатель!!!
-func (smtp SMTP) GetSMTPServerAddress() string {
-	/*if smtp ==  {
+func (c *SMTP) GetSMTPServerAddress() string {
+	if c == nil {
 		return ""
-	}*/
-	return fmt.Sprintf("%s:%d", smtp.Host, smtp.Port)
+	}
+
+	return fmt.Sprintf("%s:%d", c.Host, c.Port)
 }
 
-func (smtp *SMTP) copy() *SMTP {
-	if smtp == nil {
+func (c *SMTP) copy() *SMTP {
+	if c == nil {
 		return nil
 	}
 
 	return &SMTP{
-		Host:     smtp.Host,
-		Port:     smtp.Port,
-		Login:    smtp.Login,
-		Password: smtp.Password,
+		Host:     c.Host,
+		Port:     c.Port,
+		Login:    c.Login,
+		Password: c.Password,
 	}
 }
