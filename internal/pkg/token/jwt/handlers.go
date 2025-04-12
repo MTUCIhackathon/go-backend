@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"go.uber.org/zap"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,13 +30,16 @@ func (prv *Provider) CreateAccessTokenForUser(userID uuid.UUID) (string, error) 
 
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
+	prv.log.Debug("created jwt with claims", zap.Any("claims", claims))
+
 	tokenString, err := t.SignedString(prv.privateKey)
 
 	if err != nil {
+		prv.log.Debug("failed to sign access token", zap.Error(err))
 		return "", token.ErrorSignedToken
 	}
 
-	prv.log.Debug("created access token")
+	prv.log.Debug("created access token", zap.String("access token", tokenString))
 
 	return tokenString, nil
 }
@@ -58,13 +62,16 @@ func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
+	prv.log.Debug("created jwt with claims", zap.Any("claims", claims))
+
 	tokenString, err := t.SignedString(prv.privateKey)
 
 	if err != nil {
+		prv.log.Debug("failed to sign refresh token", zap.Error(err))
 		return "", token.ErrorSignedToken
 	}
 
-	prv.log.Debug("created refresh token")
+	prv.log.Debug("created refresh token", zap.String("refresh token", tokenString))
 
 	return tokenString, nil
 }
@@ -75,29 +82,40 @@ func (prv *Provider) GetDataFromToken(jwtToken string) (*dto.UserDataInToken, er
 	parsedToken, err := jwt.ParseWithClaims(jwtToken, &JWT{}, prv.readKeyFunc)
 
 	if err != nil {
+		prv.log.Debug("failed to parse jwt token", zap.Error(err))
 		return nil, token.ErrorParsedToken
 	}
 
-	prv.log.Debug("parsed jwt token")
+	prv.log.Debug("parsed jwt token", zap.Any("claims", parsedToken))
 
 	claims, ok := parsedToken.Claims.(*JWT)
 	if !ok {
+		prv.log.Debug("failed to parse jwt token claims")
 		return nil, token.ErrorParsedClaims
 	}
+
+	if claims.ExpiresAt.Before(time.Now()) {
+		prv.log.Debug("expired jwt token", zap.Any("claims", claims))
+		return nil, token.ErrorTimeExpired
+	}
+
+	prv.log.Debug("parsed jwt token", zap.Any("claims", claims))
 
 	var ParsedID uuid.UUID
 
 	ParsedID, err = uuid.Parse(claims.RegisteredClaims.Issuer)
 	if err != nil {
+		prv.log.Debug("failed to parse jwt token claim", zap.Error(err))
 		return nil, token.ErrorParsedID
 	}
 
-	prv.log.Debug("successfully parsed userID")
+	prv.log.Debug("successfully parsed userID", zap.Any("id", ParsedID))
 
 	data := &dto.UserDataInToken{
-		UserID:   ParsedID,
+		ID:       ParsedID,
 		IsAccess: claims.IsAccess,
 	}
 
+	prv.log.Debug("successfully parsed data", zap.Any("data", data))
 	return data, nil
 }

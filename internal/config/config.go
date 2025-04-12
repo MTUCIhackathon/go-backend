@@ -21,8 +21,8 @@ var defaultConfig = &Config{
 		SigningAlgorithm:     SigningAlgorithmRS256,
 	},
 	SMTP: &SMTP{
-		Host:     "smtp.default.com",
-		Port:     1111,
+		Host:     "smtp.mail.ru",
+		Port:     587,
 		Login:    "login",
 		Password: "password",
 	},
@@ -34,7 +34,7 @@ var defaultConfig = &Config{
 		Port:             5432,
 		User:             "postgres",
 		Password:         "postgres",
-		Database:         "postgres",
+		Database:         "system",
 		VersionTableName: "versions",
 	},
 	AWS: &AWS{

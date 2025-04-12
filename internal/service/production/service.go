@@ -1,6 +1,8 @@
 package production
 
 import (
+	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
@@ -13,6 +15,8 @@ type Service struct {
 	repo     store.Interface
 	provider token.Provider
 	config   *config.Config
+	encrypt  encrytpor.Interface
+	valid    validator.Interface
 }
 
 func New(
@@ -20,6 +24,8 @@ func New(
 	repo store.Interface,
 	provider token.Provider,
 	config *config.Config,
+	encrypt encrytpor.Interface,
+	valid validator.Interface,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -28,7 +34,7 @@ func New(
 		)
 	}
 
-	if repo == nil || provider == nil || config == nil {
+	if repo == nil || provider == nil || config == nil || encrypt == nil {
 		log.Warn(
 			"provided nil service dependency",
 		)
@@ -42,6 +48,8 @@ func New(
 		repo:     repo,
 		provider: provider,
 		config:   config,
+		encrypt:  encrypt,
+		valid:    valid,
 	}
 
 	return s, nil

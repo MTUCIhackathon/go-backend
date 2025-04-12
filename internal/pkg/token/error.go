@@ -12,4 +12,5 @@ var (
 	ErrorParsedPublicKey  = errors.New("failed to parse public key")
 	ErrorReadPrivateKey   = errors.New("failed to read private key")
 	ErrorParsedPrivateKey = errors.New("failed to parse private key")
+	ErrorTimeExpired      = errors.New("token expired")
 )

@@ -1,11 +1,9 @@
 package model
 
 type (
-	CreateUserRequest struct {
-		Email string `json:"email"`
-	}
-	UpdatePasswordRequest struct {
-		Token string `json:"token"`
+	CreateConsumerRequest struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
 	}
 )
 
@@ -16,5 +14,19 @@ type (
 	GetManyTestRequest struct {
 		// TODO ?
 		Names []string `json:"names"`
+	}
+)
+
+type (
+	UpdatePasswordRequest struct {
+		OldPassword string `json:"old_password"`
+		NewPassword string `json:"new_password"`
+	}
+)
+
+type (
+	LoginRequest struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
 	}
 )

@@ -20,6 +20,13 @@ func (s *Store) pgErr(err error) error {
 			return ErrAlreadyExists
 		case pgerrcode.ForeignKeyViolation:
 			return ErrNotFound
+		case pgerrcode.NotNullViolation:
+			return ErrUniqueViolation
+		case pgerrcode.CheckViolation:
+			return ErrCheckViolation
+		case pgerrcode.InvalidTextRepresentation:
+			return ErrInvalidText
+
 		default:
 			s.log.Error(
 				"got unexpected error",
