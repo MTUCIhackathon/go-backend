@@ -3,21 +3,18 @@ package config
 import (
 	"context"
 	"os"
-	"path"
 
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend/file"
 	"github.com/pkg/errors"
 )
 
-var currentDir, _ = os.Executable()
-
 var defaultConfig = &Config{
 	JWT: &Token{
 		AccessTokenLifeTime:  60 * 2,
 		RefreshTokenLifeTime: 60 * 24,
-		PublicKeyPath:        path.Join(currentDir, "certs", "public_key.pem"),
-		PrivateKeyPath:       path.Join(currentDir, "certs", "private_key.pem"),
+		PublicKeyPath:        "certs/public_key.pem",
+		PrivateKeyPath:       "certs/private_key.pem",
 		SigningAlgorithm:     SigningAlgorithmRS256,
 	},
 	SMTP: &SMTP{
@@ -52,6 +49,8 @@ var defaultConfig = &Config{
 	},
 }
 
+var configPath = os.Getenv("CONFIG_FILE_PATH")
+
 type Config struct {
 	JWT        *Token      `config:"jwt" toml:"jwt" yaml:"jwt" json:"jwt"`
 	SMTP       *SMTP       `config:"smtp" toml:"smtp" yaml:"smtp" json:"smtp"`
@@ -65,9 +64,7 @@ func New() (*Config, error) {
 	cfg := defaultConfig.copy()
 
 	l := confita.NewLoader(
-		file.NewBackend(path.Join(currentDir, "config.toml")),
-		file.NewBackend(path.Join(currentDir, "config.yaml")),
-		file.NewBackend(path.Join(currentDir, "config.json")),
+		file.NewBackend(configPath),
 	)
 
 	err := l.Load(context.Background(), cfg)
