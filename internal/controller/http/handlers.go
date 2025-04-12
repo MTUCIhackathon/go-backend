@@ -36,6 +36,7 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 		DTO  dto.CreateConsumer
 		resp model.CreateConsumerResponse
 	)
+
 	err = e.Bind(&req)
 	if err != nil {
 		ctrl.log.Error("failed to bind request")
