@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
+	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 )
 
 func main() {
@@ -21,5 +24,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	ctx := context.Background()
+	_, err = s3.New(ctx, cfg.AWS)
 }

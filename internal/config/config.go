@@ -41,6 +41,7 @@ type Config struct {
 	SMTP     *SMTP     `config:"smtp" toml:"smtp" yaml:"smtp" json:"smtp"`
 	Cache    *Cache    `config:"cache" toml:"cache" yaml:"cache" json:"cache"`
 	Postgres *Postgres `config:"postgres" toml:"postgres" yaml:"postgres" json:"postgres"`
+	AWS      *AWS      `config:"aws" toml:"aws" yaml:"aws" json:"aws"`
 }
 
 func New() (*Config, error) {
@@ -71,5 +72,6 @@ func (c *Config) copy() *Config {
 		SMTP:     c.SMTP.copy(),
 		Cache:    c.Cache.copy(),
 		Postgres: c.Postgres.copy(),
+		AWS:      c.AWS.copy(),
 	}
 }
