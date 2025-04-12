@@ -9,11 +9,11 @@ type SMTP struct {
 	Password string `config:"password" toml:"password" yaml:"password" json:"password"`
 }
 
-func (smtp *SMTP) GetSMTPServerAddress() string {
-	if smtp == nil {
+// Не ставь сюда указатель!!!
+func (smtp SMTP) GetSMTPServerAddress() string {
+	/*if smtp ==  {
 		return ""
-	}
-
+	}*/
 	return fmt.Sprintf("%s:%d", smtp.Host, smtp.Port)
 }
 
