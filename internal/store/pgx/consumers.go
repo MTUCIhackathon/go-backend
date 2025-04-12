@@ -2,7 +2,6 @@ package pgx
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
@@ -49,7 +48,7 @@ func (c *ConsumersRepository) GetLoginAvailable(ctx context.Context, login strin
 	}
 
 	if count != 0 {
-		return false, fmt.Errorf("login already in db")
+		return false, ErrAlreadyExists
 	}
 	return true, nil
 }
@@ -63,7 +62,7 @@ func (c *ConsumersRepository) GetPasswordByID(ctx context.Context, id uuid.UUID)
 	}
 
 	if password == "" {
-		return "", fmt.Errorf("password not found in db")
+		return "", ErrZeroReturnedRows
 	}
 	return password, nil
 }
