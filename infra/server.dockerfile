@@ -1,4 +1,5 @@
 FROM golang:1.24.1
+
 RUN apk add --no-cache git curl
 
 WORKDIR /app

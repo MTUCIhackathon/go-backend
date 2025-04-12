@@ -1,14 +1,17 @@
 package production
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"time"
 
 	"github.com/MTUCIhackathon/go-backend/internal/controller"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 	"github.com/MTUCIhackathon/go-backend/internal/service"
+	"github.com/MTUCIhackathon/go-backend/internal/store/pgx"
 )
 
 /*func (s *Service) CreateResolved(req dto.CreateResolved) (*dto.Resolved, error) {
@@ -36,7 +39,7 @@ func (s *Service) CreateConsumer(e echo.Context, req dto.CreateConsumer) (*dto.T
 	password, err := s.encrypt.EncryptPassword(req.Password)
 	if err != nil {
 		s.log.Debug("failed to encrypt password", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
+		return nil, service.NewError(controller.ErrInternal, err)
 	}
 
 	s.log.Debug("successful encrypt password", zap.String("password", password))
@@ -48,21 +51,38 @@ func (s *Service) CreateConsumer(e echo.Context, req dto.CreateConsumer) (*dto.T
 		CreatedAt: time.Now(),
 	}
 
-	check, err := s.repo.Consumers().GetLoginAvailable(e.Request().Context(), data.Login)
+	exists, err := s.repo.Consumers().GetLoginAvailable(e.Request().Context(), data.Login)
 	if err != nil {
-		s.log.Debug("failed to fetch available consumers", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		if errors.Is(err, pgx.ErrAlreadyExists) {
+			s.log.Debug("failed to check login accessibility: login already exists", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrAlreadyExist,
+				errors.Wrap(err, "failed to check login accessibility"),
+			)
+		}
+		s.log.Debug("failed to check login accessibility", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to check login accessibility"),
+		)
 	}
 
-	if !check {
+	if !exists {
 		s.log.Debug("failed to fetch available consumers", zap.String("consumer", data.Login))
-		return nil, service.NewError(controller.ErrBadRequest, controller.ErrUnauthorized)
+		return nil, service.NewError(controller.ErrAlreadyExist, ErrAlreadyExists)
 	}
 
 	s.log.Debug("successfully fetch available consumers")
 
 	err = s.repo.Consumers().Create(e.Request().Context(), data)
 	if err != nil {
+		if errors.Is(err, pgx.ErrAlreadyExists) {
+			s.log.Debug("failed to create consumer: consumer already exists", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrAlreadyExist,
+				errors.Wrap(err, "failed to create consumer"),
+			)
+		}
 		s.log.Debug("failed to create consumer", zap.Error(err))
 		return nil, service.NewError(controller.ErrInternal, err)
 	}
@@ -151,7 +171,7 @@ func (s *Service) DeleteConsumerByID(e echo.Context) error {
 		return service.NewError(controller.ErrBadRequest, err)
 	}
 
-	s.log.Debug("successfully fetch consumer ID", zap.Any("id", id))
+	s.log.Debug("successfully fetch consumer id", zap.Any("id", id))
 
 	err = s.repo.Consumers().DeleteByID(e.Request().Context(), id)
 	if err != nil {

@@ -2,13 +2,15 @@ package store
 
 import (
 	"context"
-	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+
 	"github.com/google/uuid"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 )
 
 type (
 	Interface interface {
-		//Forms() FormsRepository
+		Resolved() ResolvedRepository
 		Consumers() ConsumersRepository
 	}
 
@@ -21,7 +23,6 @@ type (
 		GetByID(ctx context.Context, id uuid.UUID) (*dto.Consumer, error)
 		GetByLogin(ctx context.Context, login string) (*dto.Consumer, error)
 	}
-	FormsRepository interface {
-		// methods
+	ResolvedRepository interface {
 	}
 )

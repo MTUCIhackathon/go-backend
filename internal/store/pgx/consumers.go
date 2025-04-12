@@ -33,7 +33,7 @@ func (c *ConsumersRepository) Create(ctx context.Context, consumer dto.Consumer)
 		return c.store.pgErr(err)
 	}
 	if commandTag.RowsAffected() == 0 {
-		c.log.Debug("failed to insert consumer", zap.Error(err))
+		c.log.Debug("failed to insert consumer: zero rows affected", zap.Error(err))
 		return ErrZeroRowsAffected
 	}
 
@@ -42,17 +42,12 @@ func (c *ConsumersRepository) Create(ctx context.Context, consumer dto.Consumer)
 }
 
 func (c *ConsumersRepository) GetLoginAvailable(ctx context.Context, login string) (bool, error) {
-	const query = `SELECT COUNT(*) FROM consumers WHERE login = $1;`
-	var count int
-	err := c.store.pool.QueryRow(ctx, query, login).Scan(&count)
+	const query = `SELECT EXISTS(SELECT id FROM consumers WHERE login = $1);`
+	var exists bool
+	err := c.store.pool.QueryRow(ctx, query, login).Scan(&exists)
 	if err != nil {
-		c.store.log.Debug("failed to query user", zap.Error(err))
+		c.store.log.Debug("failed to check login existing", zap.Error(err))
 		return false, c.store.pgErr(err)
-	}
-
-	if count != 0 {
-		c.store.log.Debug("found user", zap.Int("count", count))
-		return false, ErrAlreadyExists
 	}
 
 	c.store.log.Debug("login is available", zap.Any("user", login))

@@ -3,7 +3,6 @@ package pgx
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
-	"unsafe"
 
 	"github.com/MTUCIhackathon/go-backend/internal/store"
 )
@@ -15,10 +14,9 @@ type Store struct {
 	pool      *pgxpool.Pool
 	consumers *ConsumersRepository
 	resolved  *ResolvedRepository
-	forms     unsafe.Pointer
 }
 
-/*func (s *Store) Resolved() store.ResolvedRepository {
+func (s *Store) Resolved() store.ResolvedRepository {
 	if s == nil {
 		zap.L().Named("store").Named("resolved").Error(
 			"got unexpectedly nil store repository",
@@ -27,7 +25,7 @@ type Store struct {
 	}
 
 	return s.resolved
-}*/
+}
 
 func (s *Store) Consumers() store.ConsumersRepository {
 	if s == nil {
