@@ -5,10 +5,6 @@ type (
 		Login    string `json:"login"`
 		Password string `json:"password"`
 	}
-
-	UpdatePasswordRequest struct {
-		Token string `json:"token"`
-	}
 )
 
 type (
@@ -18,5 +14,12 @@ type (
 	GetManyTestRequest struct {
 		// TODO ?
 		Names []string `json:"names"`
+	}
+)
+
+type (
+	UpdatePasswordRequest struct {
+		OldPassword string `json:"old_password"`
+		NewPassword string `json:"new_password"`
 	}
 )

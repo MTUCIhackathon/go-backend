@@ -59,13 +59,25 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 		RefreshToken: data.RefreshToken,
 	}
 
-	return e.JSON(http.StatusOK, resp)
+	return e.JSON(http.StatusCreated, resp)
 
 }
 func (ctrl *Controller) GetConsumerByID(e echo.Context) error {
 	panic("not implemented")
 }
 func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
+	var (
+		req model.UpdatePasswordRequest
+		err error
+		DTO dto.UpdatePassword
+	)
+
+	err = e.Bind(&req)
+	if err != nil {
+		ctrl.log.Error("failed to bind request")
+		return e.NoContent(http.StatusBadRequest)
+	}
+
 	panic("not implemented")
 }
 func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {

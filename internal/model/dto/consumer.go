@@ -21,9 +21,10 @@ type (
 )
 
 type UpdatePassword struct {
-	UserID   uuid.UUID
-	Token    string
-	Password string
+	UserID      uuid.UUID
+	Token       string
+	OldPassword string
+	NewPassword string
 }
 
 type SendConsumerResult struct {

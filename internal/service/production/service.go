@@ -2,6 +2,7 @@ package production
 
 import (
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
@@ -15,6 +16,7 @@ type Service struct {
 	provider token.Provider
 	config   *config.Config
 	encrypt  encrytpor.Interface
+	valid    validator.Interface
 }
 
 func New(
@@ -23,6 +25,7 @@ func New(
 	provider token.Provider,
 	config *config.Config,
 	encrypt encrytpor.Interface,
+	valid validator.Interface,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -46,6 +49,7 @@ func New(
 		provider: provider,
 		config:   config,
 		encrypt:  encrypt,
+		valid:    valid,
 	}
 
 	return s, nil

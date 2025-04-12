@@ -5,7 +5,17 @@ import (
 	"regexp"
 )
 
-func (v *Validator) ValidateLogin() {
+func (v *Validator) ValidatePassword(password string) error {
+	rgxp, err := regexp.Compile(`^(?=.*\d)(?=.*[a-zA-Z]).{8,}$`)
+	if err != nil {
+		return validator.ErrorRegexp
+	}
+
+	if !rgxp.MatchString(password) {
+		return validator.ErrorBadPassword
+	}
+
+	return nil
 }
 
 func (v *Validator) ValidateEmail(email string) error {
@@ -14,7 +24,7 @@ func (v *Validator) ValidateEmail(email string) error {
 		return validator.ErrorRegexp
 	}
 	if !rgxp.MatchString(email) {
-		return validator.ErrorRegexp
+		return validator.ErrorBadEmail
 	}
 
 	return nil

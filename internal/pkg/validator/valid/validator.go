@@ -7,7 +7,11 @@ type Validator struct {
 }
 
 func NewValidator(log *zap.Logger) *Validator {
+	if log == nil {
+		log = zap.NewNop()
+	}
+	log.Info("validator initialize successfully")
 	return &Validator{
-		log: log,
+		log: log.Named("validator"),
 	}
 }
