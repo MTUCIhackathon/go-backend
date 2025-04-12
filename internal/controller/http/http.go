@@ -37,4 +37,14 @@ func (ctrl *Controller) configureRoutes() {
 
 	api.GET("/test/:name", ctrl.GetTestByName)
 
+	consumer := api.Group("/consumer")
+	{
+		consumer.POST("/registration", ctrl.CreateConsumer)
+		consumer.PUT("/update", ctrl.UpdateConsumerPassword)
+		consumer.DELETE("/delete", ctrl.DeleteConsumer)
+		consumer.GET("", ctrl.GetConsumer)
+		consumer.POST("/login", ctrl.Login)
+		consumer.GET("/refresh-token", ctrl.RefreshToken)
+	}
+
 }

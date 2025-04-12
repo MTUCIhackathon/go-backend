@@ -23,3 +23,10 @@ type (
 		NewPassword string `json:"new_password"`
 	}
 )
+
+type (
+	LoginRequest struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
+	}
+)

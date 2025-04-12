@@ -22,7 +22,6 @@ type (
 
 type UpdatePassword struct {
 	UserID      uuid.UUID
-	Token       string
 	OldPassword string
 	NewPassword string
 }
@@ -30,4 +29,9 @@ type UpdatePassword struct {
 type SendConsumerResult struct {
 	UserID uuid.UUID
 	Email  *string
+}
+
+type Login struct {
+	Login    string
+	Password string
 }

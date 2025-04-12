@@ -60,3 +60,20 @@ func (s *Service) getJWTFromBearerToken(raw string) (string, error) {
 
 	return reqToken, nil
 }
+
+func (s *Service) validRefreshToken(req *http.Request) (uuid.UUID, error) {
+	var (
+		data *dto.UserDataInToken
+		err  error
+	)
+
+	data, err = s.getConsumerDataFromRequest(req)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid token")
+	}
+
+	if data.IsAccess {
+		return uuid.Nil, fmt.Errorf("token is not a refresh token")
+	}
+	return data.ID, nil
+}

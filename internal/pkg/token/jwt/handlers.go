@@ -85,6 +85,9 @@ func (prv *Provider) GetDataFromToken(jwtToken string) (*dto.UserDataInToken, er
 		return nil, token.ErrorParsedClaims
 	}
 
+	if claims.ExpiresAt.Before(time.Now()) {
+		return nil, token.ErrorTimeExpired
+	}
 	var ParsedID uuid.UUID
 
 	ParsedID, err = uuid.Parse(claims.RegisteredClaims.Issuer)
@@ -95,7 +98,7 @@ func (prv *Provider) GetDataFromToken(jwtToken string) (*dto.UserDataInToken, er
 	prv.log.Debug("successfully parsed userID")
 
 	data := &dto.UserDataInToken{
-		UserID:   ParsedID,
+		ID:       ParsedID,
 		IsAccess: claims.IsAccess,
 	}
 

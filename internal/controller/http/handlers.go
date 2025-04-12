@@ -62,8 +62,20 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 	return e.JSON(http.StatusCreated, resp)
 
 }
-func (ctrl *Controller) GetConsumerByID(e echo.Context) error {
-	panic("not implemented")
+func (ctrl *Controller) GetConsumer(e echo.Context) error {
+	data, err := ctrl.srv.GetConsumerByID(e)
+	if err != nil {
+		ctrl.log.Error("failed to get consumer by id")
+		return e.NoContent(http.StatusInternalServerError)
+	}
+
+	resp := model.GetConsumerResponse{
+		ID:        data.ID,
+		Login:     data.Login,
+		CreatedAt: data.CreatedAt,
+		UpdatedAt: data.UpdatedAt,
+	}
+	return e.JSON(http.StatusOK, resp)
 }
 func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 	var (
@@ -78,7 +90,65 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 		return e.NoContent(http.StatusBadRequest)
 	}
 
-	panic("not implemented")
+	err = ctrl.srv.UpdateConsumerPassword(e, DTO)
+	if err != nil {
+		ctrl.log.Error("failed to update consumer")
+		return e.NoContent(http.StatusInternalServerError)
+	}
+	return e.NoContent(http.StatusNoContent)
+}
+
+func (ctrl *Controller) DeleteConsumer(e echo.Context) error {
+	err := ctrl.srv.DeleteConsumerByID(e)
+	if err != nil {
+		ctrl.log.Error("failed to delete consumer")
+		return e.NoContent(http.StatusInternalServerError)
+	}
+	return e.NoContent(http.StatusNoContent)
+}
+
+func (ctrl *Controller) Login(e echo.Context) error {
+	var (
+		req model.LoginRequest
+		err error
+	)
+
+	if err = e.Bind(&req); err != nil {
+		ctrl.log.Error("failed to bind request")
+		return e.NoContent(http.StatusBadRequest)
+	}
+
+	DTO := dto.Login{
+		Login:    req.Login,
+		Password: req.Password,
+	}
+
+	data, err := ctrl.srv.Login(e, DTO)
+	if err != nil {
+		ctrl.log.Error("failed to login")
+		return e.NoContent(http.StatusInternalServerError)
+	}
+
+	resp := model.LoginResponse{
+		AccessToken:  data.AccessToken,
+		RefreshToken: data.RefreshToken,
+	}
+
+	return e.JSON(http.StatusOK, resp)
+}
+
+func (ctrl *Controller) RefreshToken(e echo.Context) error {
+	dto, err := ctrl.srv.RefreshToken(e)
+	if err != nil {
+		ctrl.log.Error("failed to refresh token")
+		return e.NoContent(http.StatusInternalServerError)
+	}
+
+	resp := model.RefreshTokenResponse{
+		AccessToken:  dto.AccessToken,
+		RefreshToken: dto.RefreshToken,
+	}
+	return e.JSON(http.StatusOK, resp)
 }
 func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {
 	panic("not implemented")

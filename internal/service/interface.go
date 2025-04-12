@@ -22,6 +22,11 @@ type Interface interface {
 	//CreateTokensForUser(token uuid.UUID) (*dto.Token, error)
 
 	CreateConsumer(e echo.Context, req dto.CreateConsumer) (*dto.Token, error)
+	UpdateConsumerPassword(e echo.Context, req dto.UpdatePassword) error
+	DeleteConsumerByID(e echo.Context) error
+	GetConsumerByID(c echo.Context) (*dto.Consumer, error)
+	Login(c echo.Context, req dto.Login) (*dto.Token, error)
+	RefreshToken(c echo.Context) (*dto.Token, error)
 }
 
 // Client
