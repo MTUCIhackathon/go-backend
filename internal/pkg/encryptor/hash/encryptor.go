@@ -27,25 +27,35 @@ func New(log *zap.Logger, opts ...Option) *Encryptor {
 		generateFromPasswordFunc:   bcrypt.GenerateFromPassword,
 		compareHashAndPasswordFunc: bcrypt.CompareHashAndPassword,
 	}
+
+	e.log.Debug("created default struct for encryptor")
+
 	for _, opt := range opts {
 		opt(e)
+		e.log.Debug("created option for encryptor", zap.Any("option", opt))
 	}
-	log.Info("encryptor initialized successfully")
+	e.log.Info("encryptor initialized successfully")
 	return e
 }
 
 func (e *Encryptor) EncryptPassword(password string) (string, error) {
+	e.log.Debug("encrypting password", zap.String("password", password))
 	hash, err := e.generateFromPasswordFunc([]byte(password), e.cost)
 	if err != nil {
+		e.log.Debug("failed to generate password", zap.Error(err))
 		return "", encrytpor.ErrorEncryptPassword
 	}
+	e.log.Debug("generated password", zap.String("hash", string(hash)))
 	return string(hash), nil
 }
 
 func (e *Encryptor) CompareHashAndPassword(hash, password string) error {
+	e.log.Debug("comparing hash and password", zap.String("hash", hash), zap.String("password", password))
 	err := e.compareHashAndPasswordFunc([]byte(hash), []byte(password))
 	if err != nil {
+		e.log.Debug("failed to compare hash and password", zap.String("hash", hash), zap.String("password", password))
 		return encrytpor.ErrorDecryptPassword
 	}
+	e.log.Debug("detected password", zap.String("hash", hash), zap.String("password", password))
 	return nil
 }

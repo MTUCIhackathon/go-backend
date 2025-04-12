@@ -2,12 +2,10 @@ package config
 
 import (
 	"context"
-	"os"
-	"path"
-
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend/file"
-	"github.com/pkg/errors"
+	"os"
+	"path"
 )
 
 var currentDir, _ = os.Executable()
@@ -27,7 +25,7 @@ var defaultConfig = &Config{
 		Password: "password",
 	},
 	Postgres: &Postgres{
-		Host:     "localhost",
+		Host:     "0.0.0.0",
 		Port:     5432,
 		User:     "postgres",
 		Password: "postgres",
@@ -43,7 +41,7 @@ type Config struct {
 }
 
 func New() (*Config, error) {
-	wd, err := os.Getwd()
+	wd, err := os.Executable()
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +56,8 @@ func New() (*Config, error) {
 
 	err = l.Load(context.Background(), cfg)
 	if err != nil {
-		return nil, errors.Wrap(err, "error while loading config")
+		return nil, err
+		//return nil, errors.Wrap(err, "error while loading config")
 	}
 
 	return cfg, nil

@@ -7,13 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type Repository struct {
-	cfg  *config.Config
-	log  *zap.Logger
-	pool *pgxpool.Pool
-}
-
-func NewRepository(log *zap.Logger, cfg *config.Config) (*Repository, error) {
+func New(log *zap.Logger, cfg *config.Config) (*pgxpool.Pool, error) {
 	if log == nil {
 		log = zap.NewNop()
 	}
@@ -30,10 +24,6 @@ func NewRepository(log *zap.Logger, cfg *config.Config) (*Repository, error) {
 		log.Fatal(err.Error())
 		return nil, err
 	}
-	repo := &Repository{
-		cfg:  cfg,
-		log:  log,
-		pool: pool,
-	}
-	return repo, nil
+
+	return pool, nil
 }

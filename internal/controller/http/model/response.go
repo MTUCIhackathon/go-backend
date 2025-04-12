@@ -14,9 +14,7 @@ type (
 	GetConsumerResponse struct {
 		ID        uuid.UUID `json:"id"`
 		Login     string    `json:"login"`
-		Password  string    `json:"password"`
 		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
 	}
 )
 

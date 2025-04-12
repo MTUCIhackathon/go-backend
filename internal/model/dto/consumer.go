@@ -16,7 +16,6 @@ type (
 		Login     string
 		Password  string
 		CreatedAt time.Time
-		UpdatedAt time.Time
 	}
 )
 

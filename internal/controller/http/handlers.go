@@ -73,7 +73,6 @@ func (ctrl *Controller) GetConsumer(e echo.Context) error {
 		ID:        data.ID,
 		Login:     data.Login,
 		CreatedAt: data.CreatedAt,
-		UpdatedAt: data.UpdatedAt,
 	}
 	return e.JSON(http.StatusOK, resp)
 }
@@ -88,6 +87,11 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 	if err != nil {
 		ctrl.log.Error("failed to bind request")
 		return e.NoContent(http.StatusBadRequest)
+	}
+
+	DTO = dto.UpdatePassword{
+		OldPassword: req.OldPassword,
+		NewPassword: req.NewPassword,
 	}
 
 	err = ctrl.srv.UpdateConsumerPassword(e, DTO)
@@ -138,15 +142,15 @@ func (ctrl *Controller) Login(e echo.Context) error {
 }
 
 func (ctrl *Controller) RefreshToken(e echo.Context) error {
-	dto, err := ctrl.srv.RefreshToken(e)
+	DTO, err := ctrl.srv.RefreshToken(e)
 	if err != nil {
 		ctrl.log.Error("failed to refresh token")
 		return e.NoContent(http.StatusInternalServerError)
 	}
 
 	resp := model.RefreshTokenResponse{
-		AccessToken:  dto.AccessToken,
-		RefreshToken: dto.RefreshToken,
+		AccessToken:  DTO.AccessToken,
+		RefreshToken: DTO.RefreshToken,
 	}
 	return e.JSON(http.StatusOK, resp)
 }

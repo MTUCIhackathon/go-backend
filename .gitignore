@@ -26,3 +26,5 @@ certs
 ignored
 
 .DS_Store
+
+migrations/tern.conf

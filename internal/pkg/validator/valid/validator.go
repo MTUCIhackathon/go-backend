@@ -10,8 +10,9 @@ func NewValidator(log *zap.Logger) *Validator {
 	if log == nil {
 		log = zap.NewNop()
 	}
+	log.Named("validator")
 	log.Info("validator initialize successfully")
 	return &Validator{
-		log: log.Named("validator"),
+		log: log,
 	}
 }

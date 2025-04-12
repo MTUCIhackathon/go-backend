@@ -18,7 +18,7 @@ type Store struct {
 	forms     unsafe.Pointer
 }
 
-func (s *Store) Resolved() store.ResolvedRepository {
+/*func (s *Store) Resolved() store.ResolvedRepository {
 	if s == nil {
 		zap.L().Named("store").Named("resolved").Error(
 			"got unexpectedly nil store repository",
@@ -27,7 +27,7 @@ func (s *Store) Resolved() store.ResolvedRepository {
 	}
 
 	return s.resolved
-}
+}*/
 
 func (s *Store) Consumers() store.ConsumersRepository {
 	if s == nil {

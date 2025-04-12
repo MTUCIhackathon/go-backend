@@ -2,8 +2,14 @@ package main
 
 import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
+	"github.com/MTUCIhackathon/go-backend/internal/controller/http"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor/hash"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token/jwt"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator/valid"
+	"github.com/MTUCIhackathon/go-backend/internal/service/production"
+	storage "github.com/MTUCIhackathon/go-backend/internal/store/pgx"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
+	"github.com/MTUCIhackathon/go-backend/pkg/pgx"
 )
 
 func main() {
@@ -17,9 +23,31 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = jwt.NewProvider(cfg, log)
+	prv, err := jwt.NewProvider(cfg, log)
+	if err != nil {
+		panic(err)
+	}
+	pool, err := pgx.New(log, cfg)
+	if err != nil {
+		panic(err)
+	}
+	store, err := storage.New(log, pool)
+	if err != nil {
+		panic(err)
+	}
+	encrypt := hash.New(log)
+	val := valid.NewValidator(log)
+	srv, err := production.New(log, store, prv, cfg, encrypt, val)
+	if err != nil {
+		panic(err)
+	}
+	server, err := http.New(cfg, log, srv)
 	if err != nil {
 		panic(err)
 	}
 
+	err = server.Start()
+	if err != nil {
+		panic(err)
+	}
 }
