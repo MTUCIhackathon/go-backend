@@ -44,6 +44,9 @@ func CreateApp() fx.Option {
 			fx.Annotate(production.New, fx.As(new(service.Interface))),
 			fx.Annotate(http.New, fx.As(new(controller.Controller))),
 		),
+		fx.Invoke(
+			controller.RunControllerFx,
+		),
 	)
 }
 

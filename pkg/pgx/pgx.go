@@ -10,7 +10,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 )
 
-func New(cfg config.Postgres, log *zap.Logger, afterConnect ...AfterConnect) (*pgxpool.Pool, error) {
+func New(cfg *config.Config, log *zap.Logger, afterConnect ...AfterConnect) (*pgxpool.Pool, error) {
 	if log == nil {
 		log = zap.L().Named("pgx")
 	}
@@ -19,7 +19,7 @@ func New(cfg config.Postgres, log *zap.Logger, afterConnect ...AfterConnect) (*p
 		afterConnect = []AfterConnect{AddUUIDSupport}
 	}
 
-	poolConfig, err := pgxpool.ParseConfig(cfg.GetURI())
+	poolConfig, err := pgxpool.ParseConfig(cfg.Postgres.GetURI())
 	if err != nil {
 		log.Error("failed to parse postgres config", zap.Error(err))
 		return nil, errParseConfig
