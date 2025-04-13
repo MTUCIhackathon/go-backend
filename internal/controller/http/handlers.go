@@ -1,6 +1,7 @@
 package http
 
 import (
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,6 +15,9 @@ func (ctrl *Controller) Ping(e echo.Context) error {
 }
 
 func (ctrl *Controller) GetTestByName(e echo.Context) error {
+	name := e.Param("name")
+	ctrl.log.Debug("get name from path", zap.Any("name", name))
+
 	panic("not implemented")
 }
 func (ctrl *Controller) GetManyTest(e echo.Context) error {
@@ -54,7 +58,7 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 		Password: req.Password,
 	}
 
-	data, err := ctrl.srv.CreateConsumer(e, DTO)
+	data, err := ctrl.srv.CreateConsumer(e.Request().Context(), DTO)
 	if err != nil {
 		ctrl.log.Error("failed to create consumer")
 		return e.NoContent(http.StatusInternalServerError)
@@ -69,7 +73,7 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 
 }
 func (ctrl *Controller) GetConsumer(e echo.Context) error {
-	data, err := ctrl.srv.GetConsumerByID(e)
+	data, err := ctrl.srv.GetConsumerByID(e.Request().Context(), e.Request())
 	if err != nil {
 		ctrl.log.Error("failed to get consumer by id")
 		return e.NoContent(http.StatusInternalServerError)
@@ -100,7 +104,7 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 		NewPassword: req.NewPassword,
 	}
 
-	err = ctrl.srv.UpdateConsumerPassword(e, DTO)
+	err = ctrl.srv.UpdateConsumerPassword(e.Request().Context(), e.Request(), DTO)
 	if err != nil {
 		ctrl.log.Error("failed to update consumer")
 		return e.NoContent(http.StatusInternalServerError)
@@ -109,7 +113,7 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 }
 
 func (ctrl *Controller) DeleteConsumer(e echo.Context) error {
-	err := ctrl.srv.DeleteConsumerByID(e)
+	err := ctrl.srv.DeleteConsumerByID(e.Request().Context(), e.Request())
 	if err != nil {
 		ctrl.log.Error("failed to delete consumer")
 		return e.NoContent(http.StatusInternalServerError)
@@ -133,7 +137,7 @@ func (ctrl *Controller) Login(e echo.Context) error {
 		Password: req.Password,
 	}
 
-	data, err := ctrl.srv.Login(e, DTO)
+	data, err := ctrl.srv.Login(e.Request().Context(), DTO)
 	if err != nil {
 		ctrl.log.Error("failed to login")
 		return e.NoContent(http.StatusInternalServerError)
@@ -148,7 +152,7 @@ func (ctrl *Controller) Login(e echo.Context) error {
 }
 
 func (ctrl *Controller) RefreshToken(e echo.Context) error {
-	DTO, err := ctrl.srv.RefreshToken(e)
+	DTO, err := ctrl.srv.RefreshToken(e.Request().Context(), e.Request())
 	if err != nil {
 		ctrl.log.Error("failed to refresh token")
 		return e.NoContent(http.StatusInternalServerError)

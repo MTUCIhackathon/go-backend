@@ -52,7 +52,7 @@ func (ctrl *Controller) configureRoutes() {
 	consumer := api.Group("/consumer")
 	{
 		consumer.POST("/registration", ctrl.CreateConsumer)
-		consumer.PUT("/update", ctrl.UpdateConsumerPassword)
+		consumer.PUT("/update_password", ctrl.UpdateConsumerPassword)
 		consumer.DELETE("/delete", ctrl.DeleteConsumer)
 		consumer.GET("", ctrl.GetConsumer)
 		consumer.POST("/login", ctrl.Login)
