@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
@@ -23,6 +25,8 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/store"
 	storage "github.com/MTUCIhackathon/go-backend/internal/store/pgx"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
+	"github.com/MTUCIhackathon/go-backend/pkg/migrator"
+	"github.com/MTUCIhackathon/go-backend/pkg/migrator/tern"
 	"github.com/MTUCIhackathon/go-backend/pkg/pgx"
 	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 )
@@ -35,6 +39,7 @@ func CreateApp() fx.Option {
 			logger.New,
 			pgx.New,
 			s3.New,
+			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),
 			fx.Annotate(jwt.NewProvider, fx.As(new(token.Provider))),
 			fx.Annotate(determinator.NewMark, fx.As(new(mark.Marker))),
@@ -46,8 +51,13 @@ func CreateApp() fx.Option {
 		),
 		fx.Invoke(
 			controller.RunControllerFx,
+			runMigrations,
 		),
 	)
+}
+
+func runMigrations(m migrator.Interface) error {
+	return m.MigrateUp(context.Background())
 }
 
 func fxLogger(log *zap.Logger) fxevent.Logger {
