@@ -26,10 +26,10 @@ services:
     container_name: db
     image: postgres
     restart: always
-    user: postgres
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
+      - POSTGRES_USER = postgres
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
