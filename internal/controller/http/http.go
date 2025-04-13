@@ -1,6 +1,8 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
@@ -33,6 +35,10 @@ func New(cfg *config.Config, log *zap.Logger, service service.Interface) (*Contr
 func (ctrl *Controller) configureMiddleware() {
 	ctrl.server.Use(
 		middleware.Logger(),
+		middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+		}),
 	)
 }
 
