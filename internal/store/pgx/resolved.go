@@ -22,7 +22,7 @@ func newResolvedRepository(store *Store) *ResolvedRepository {
 func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolved) (*dto.Resolved, error) {
 	const queryUpdateLastResolved = `UPDATE resolved SET is_active = false WHERE user_id = $1 AND resolved_type = $2`
 	const queryCreateResolved = `INSERT INTO resolved (id, user_id, resolved_type, is_active, created_at, passed_at)VALUES($1, $2, $3, $4, $5)`
-	const queryCreateResolvedQuestion = `INSERT INTO resolved_question(form_id, question_text, image_location, mark)`
+	const queryCreateResolvedQuestion = `INSERT INTO resolved_question(resolved_id, question_text, image_location, mark)`
 
 	tx, err := r.store.pool.Begin(ctx)
 	if err != nil {
@@ -55,7 +55,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 
 	for _, q := range data.Questions {
 		_, err = tx.Exec(ctx, queryCreateResolvedQuestion,
-			q.FromID,
+			q.ResolvedID,
 			q.Issue,
 			q.ImageLocation,
 			q.Mark,

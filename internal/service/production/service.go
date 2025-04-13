@@ -1,6 +1,7 @@
 package production
 
 import (
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
@@ -20,6 +21,7 @@ type Service struct {
 	encrypt  encrytpor.Interface
 	valid    validator.Interface
 	inmemory cache.Cache
+	style    kind.Type
 }
 
 func New(
@@ -30,6 +32,7 @@ func New(
 	encrypt encrytpor.Interface,
 	valid validator.Interface,
 	inmemory cache.Cache,
+	style kind.Type,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -55,6 +58,7 @@ func New(
 		encrypt:  encrypt,
 		valid:    valid,
 		inmemory: inmemory,
+		style:    style,
 	}
 
 	return s, nil
