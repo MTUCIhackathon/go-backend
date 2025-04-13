@@ -24,3 +24,7 @@ lines:
 .PHONY: build
 build:
 	go build -o app.o ./cmd/app/
+
+.PHONY: dock/run
+dock/run:
+	docker compose up --build -d
