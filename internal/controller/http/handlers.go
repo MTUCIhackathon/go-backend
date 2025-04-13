@@ -1,11 +1,17 @@
 package http
 
 import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+
 	"github.com/MTUCIhackathon/go-backend/internal/controller/http/model"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
-	"github.com/labstack/echo/v4"
-	"net/http"
 )
+
+func (ctrl *Controller) Ping(e echo.Context) error {
+	return e.String(http.StatusOK, "pong")
+}
 
 func (ctrl *Controller) GetTestByName(e echo.Context) error {
 	panic("not implemented")

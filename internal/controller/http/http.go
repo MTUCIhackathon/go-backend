@@ -1,6 +1,8 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
@@ -37,6 +39,7 @@ func (ctrl *Controller) configureMiddleware() {
 func (ctrl *Controller) configureRoutes() {
 	api := ctrl.server.Group("/api")
 
+	api.GET("/ping", ctrl.Ping)
 	api.GET("/test/:name", ctrl.GetTestByName)
 
 	consumer := api.Group("/consumer")
