@@ -1,7 +1,9 @@
 package http
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -59,7 +61,23 @@ func (ctrl *Controller) configureRoutes() {
 
 }
 
-func (ctrl *Controller) Start() error {
-	err := ctrl.server.Start(ctrl.cfg.Controller.Bind())
-	return err
+func (ctrl *Controller) Start(ctx context.Context) error {
+	ch := make(chan error, 1)
+
+	go func() {
+		ch <- ctrl.server.Start(ctrl.cfg.Controller.Bind())
+	}()
+
+	select {
+	case err := <-ch:
+		return err
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(time.Millisecond * 300):
+		return nil
+	}
+}
+
+func (ctrl *Controller) Stop(ctx context.Context) error {
+	return ctrl.server.Shutdown(ctx)
 }

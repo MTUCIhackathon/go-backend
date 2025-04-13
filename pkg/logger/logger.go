@@ -3,6 +3,8 @@ package logger
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/MTUCIhackathon/go-backend/internal/config"
 )
 
 const (
@@ -10,10 +12,10 @@ const (
 	envProd = "prod"
 )
 
-func New(env string) (*zap.Logger, error) {
+func New(conf *config.Config) (*zap.Logger, error) {
 	var level zapcore.Level
 
-	switch env {
+	switch conf.Controller.LogLevel {
 	case envDev:
 		level = zap.DebugLevel
 	case envProd:

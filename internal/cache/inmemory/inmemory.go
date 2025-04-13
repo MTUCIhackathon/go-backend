@@ -61,7 +61,7 @@ func (c *Cache) GetKeys() []uuid.UUID {
 	return keys
 }
 
-func New(cfg *config.Cache, log *zap.Logger, opts ...Option) (cache.Cache, error) {
+func New(cfg *config.Config, log *zap.Logger, opts ...Option) (*Cache, error) {
 	if cfg == nil {
 		return nil, ErrNilConfig
 	}
@@ -74,7 +74,7 @@ func New(cfg *config.Cache, log *zap.Logger, opts ...Option) (cache.Cache, error
 
 	c := &Cache{
 		mu:     sync.RWMutex{},
-		config: cfg,
+		config: cfg.Cache,
 		log:    log,
 		data:   make(map[uuid.UUID]dto.Test, 4),
 		opts:   opts,
