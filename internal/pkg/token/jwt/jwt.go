@@ -2,11 +2,13 @@ package jwt
 
 import (
 	"crypto/rsa"
-	"github.com/MTUCIhackathon/go-backend/internal/config"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
+	"os"
+
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
-	"os"
+
+	"github.com/MTUCIhackathon/go-backend/internal/config"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 )
 
 var _ token.Provider = (*Provider)(nil)
@@ -36,14 +38,14 @@ func NewProvider(cfg *config.Config, log *zap.Logger) (*Provider, error) {
 		return nil, token.ErrorReadPublicKey
 	}
 
-	log.Debug("successful read public key path", zap.Any("public_key", string(publicKeyRaw)))
+	log.Debug("successful read public key path")
 
 	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyRaw)
 	if err != nil {
 		log.Debug("failed to parse jwt public key", zap.Error(err))
 		return nil, token.ErrorParsedPublicKey
 	}
-	log.Debug("successful parse public key", zap.Any("public_key", publicKey))
+	log.Debug("successful parse public key")
 
 	privateKeyRaw, err := os.ReadFile(cfg.JWT.PrivateKeyPath)
 	if err != nil {
@@ -51,7 +53,7 @@ func NewProvider(cfg *config.Config, log *zap.Logger) (*Provider, error) {
 		return nil, token.ErrorReadPrivateKey
 	}
 
-	log.Debug("successful read private key path", zap.Any("private_key", string(privateKeyRaw)))
+	log.Debug("successful read private key path")
 
 	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyRaw)
 	if err != nil {
@@ -59,7 +61,7 @@ func NewProvider(cfg *config.Config, log *zap.Logger) (*Provider, error) {
 		return nil, token.ErrorParsedPrivateKey
 	}
 
-	log.Debug("successful parse private key", zap.Any("private_key", privateKey))
+	log.Debug("successful parse private key")
 	provider := &Provider{
 		log:             log,
 		publicKey:       publicKey,
@@ -67,6 +69,6 @@ func NewProvider(cfg *config.Config, log *zap.Logger) (*Provider, error) {
 		accessLifeTime:  cfg.JWT.AccessTokenLifeTime,
 		refreshLifeTime: cfg.JWT.RefreshTokenLifeTime,
 	}
-	log.Debug("successful create new jwt provider", zap.Any("provider", provider))
+	log.Debug("successful create new jwt provider")
 	return provider, nil
 }

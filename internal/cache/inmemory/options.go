@@ -77,7 +77,6 @@ func (l Loader) onStart(c *Cache) error {
 				Question: text,
 			})
 		}
-		c.log.Info("test", zap.Any("test", test))
 		c.data[test.ID] = test
 	}
 

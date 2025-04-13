@@ -20,3 +20,7 @@ gen-public-key:
 .PHONY: lines
 lines:
 	git ls-files | xargs wc -l
+
+.PHONY: build
+build:
+	go build -o app.o ./cmd/app/

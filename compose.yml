@@ -3,24 +3,23 @@ services:
   server:
     container_name: server
     build:
-      context: ./infra
+      context: ./
       dockerfile: server.dockerfile
-    restart: always
     ports:
       - "8081:8081"
     environment:
-      - CONFIG_FILE_PATH=/app/config.yaml
+      - CONFIG_FILE_PATH=/app/config.json
     volumes:
-      - ./config.yaml:/app/config.yaml
-      - ./test.yaml:/app/test.yaml
-      - ./certs/private.pem:/app/certs/private.pem
-      - ./certs/public.pem:/app/certs/public.pem
+      - ./config.json:/app/config.json
+      - ./tests.yaml:/app/tests.yaml
+      - ./certs/private_key.pem:/app/certs/private_key.pem
+      - ./certs/public_key.pem:/app/certs/public_key.pem
     networks:
       backend:
     depends_on:
       db:
         condition: "service_healthy"
-      mino:
+      minio:
         condition: "service_healthy"
 
   db:
@@ -67,6 +66,7 @@ services:
 volumes:
   minio-data:
   db-data:
+    driver: local
 
 networks:
   backend:

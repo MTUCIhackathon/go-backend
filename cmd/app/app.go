@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/MTUCIhackathon/go-backend/internal/cache/inmemory"
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/controller/http"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor/hash"
@@ -14,12 +15,15 @@ import (
 
 func main() {
 	log, err := logger.New("dev")
-
 	if err != nil {
 		panic(err)
 	}
-	log.Info("initialized logger")
+	log.Info("initialized config")
 	cfg, err := config.New()
+	if err != nil {
+		panic(err)
+	}
+	c, err := inmemory.New(cfg.Cache, log, inmemory.WithLoader())
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +31,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	pool, err := pgx.New(log, cfg)
+	pool, err := pgx.New(*cfg.Postgres, log)
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +41,7 @@ func main() {
 	}
 	encrypt := hash.New(log)
 	val := valid.NewValidator(log)
-	srv, err := production.New(log, store, prv, cfg, encrypt, val)
+	srv, err := production.New(log, store, prv, cfg, encrypt, val, c)
 	if err != nil {
 		panic(err)
 	}

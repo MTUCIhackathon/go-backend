@@ -7,6 +7,7 @@ import (
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend/file"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 var defaultConfig = &Config{
@@ -71,6 +72,7 @@ func New() (*Config, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error while loading config")
 	}
+	zap.L().Named("config").Info("loaded config", zap.Any("config", cfg))
 
 	return cfg, nil
 }
