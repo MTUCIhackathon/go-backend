@@ -31,13 +31,14 @@ func New(cfg *config.Config, log *zap.Logger, service service.Interface) (*Contr
 }
 
 func (ctrl *Controller) configureMiddleware() {
-	ctrl.server.Use(middleware.Logger())
+	ctrl.server.Use(
+		middleware.Logger(),
+	)
 }
 
 func (ctrl *Controller) configureRoutes() {
+	ctrl.server.GET("/ping", ctrl.Ping)
 	api := ctrl.server.Group("/api")
-
-	api.GET("/ping", ctrl.Ping)
 	api.GET("/test/:name", ctrl.GetTestByName)
 
 	consumer := api.Group("/consumer")
