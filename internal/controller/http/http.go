@@ -60,6 +60,6 @@ func (ctrl *Controller) configureRoutes() {
 }
 
 func (ctrl *Controller) Start() error {
-	err := ctrl.server.Start("localhost:8081")
+	err := ctrl.server.Start(ctrl.cfg.Controller.Bind())
 	return err
 }
