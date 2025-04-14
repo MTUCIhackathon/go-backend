@@ -67,7 +67,6 @@ type Config struct {
 }
 
 func New() (*Config, error) {
-
 	cfg := defaultConfig.copy()
 
 	l := confita.NewLoader(
@@ -79,7 +78,7 @@ func New() (*Config, error) {
 		return nil, errors.Wrap(err, "error while loading config")
 	}
 
-	zap.NewNop().Info("loaded config", zap.Any("config", cfg))
+	zap.NewNop().Named("config").Info("loaded config", zap.Any("config", cfg))
 
 	return cfg, nil
 }

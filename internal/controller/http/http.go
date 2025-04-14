@@ -23,7 +23,7 @@ type Controller struct {
 func New(cfg *config.Config, log *zap.Logger, service service.Interface) (*Controller, error) {
 	ctrl := &Controller{
 		cfg:    cfg,
-		log:    log,
+		log:    log.Named("http-controller"),
 		srv:    service,
 		server: echo.New(),
 	}
@@ -47,6 +47,7 @@ func (ctrl *Controller) configureMiddleware() {
 func (ctrl *Controller) configureRoutes() {
 	api := ctrl.server.Group("/api")
 	api.GET("/ping", ctrl.Ping)
+
 	consumer := api.Group("/consumers")
 	{
 		consumer.POST("/registration", ctrl.CreateConsumer)

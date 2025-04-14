@@ -23,24 +23,37 @@ func New(conf *config.Config) (*zap.Logger, error) {
 	}
 
 	cfg := zap.Config{
-		Level:       zap.NewAtomicLevelAt(level),
-		Encoding:    "json",
-		OutputPaths: []string{"stdout"},
+		Level:    zap.NewAtomicLevelAt(level),
+		Encoding: "json",
 		EncoderConfig: zapcore.EncoderConfig{
-			MessageKey:  "message",
-			LevelKey:    "level",
-			TimeKey:     "time",
-			EncodeTime:  zapcore.ISO8601TimeEncoder,
-			EncodeLevel: zapcore.CapitalLevelEncoder,
+			TimeKey:        "ts",
+			LevelKey:       "level",
+			NameKey:        "logger",
+			CallerKey:      "caller",
+			FunctionKey:    zapcore.OmitKey,
+			MessageKey:     "msg",
+			StacktraceKey:  "stacktrace",
+			LineEnding:     zapcore.DefaultLineEnding,
+			EncodeLevel:    zapcore.LowercaseLevelEncoder,
+			EncodeTime:     zapcore.EpochTimeEncoder,
+			EncodeDuration: zapcore.MillisDurationEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
 		},
+		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stderr"},
 	}
 
 	log, err := cfg.Build()
-
 	if err != nil {
 		return nil, err
 	}
-	defer log.Sync()
+
+	defer func() {
+		err = log.Sync()
+	}()
+
+	zap.ReplaceGlobals(log)
+	zap.RedirectStdLog(log)
+
 	return log, nil
 }

@@ -116,9 +116,9 @@ func (c *ConsumersRepository) GetByID(ctx context.Context, id uuid.UUID) (*dto.C
 }
 
 func (c *ConsumersRepository) GetByLogin(ctx context.Context, login string) (*dto.Consumer, error) {
-	const query = `SELECT * FROM consumers WHERE login = $1;`
+	const query = `SELECT id, email, login, password, created_at FROM consumers WHERE login = $1;`
 	var consumer dto.Consumer
-	err := c.store.pool.QueryRow(ctx, query, login).Scan(&consumer.ID, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
+	err := c.store.pool.QueryRow(ctx, query, login).Scan(&consumer.ID, &consumer.Email, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
 	if err != nil {
 		c.store.log.Error("failed to query user", zap.Any("user", login))
 		return nil, c.store.pgErr(err)
