@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
 )
 
@@ -23,11 +25,16 @@ var (
 )
 
 type Mark struct {
+	log      *zap.Logger
 	markList map[string]int
 }
 
-func NewMark() mark.Marker {
+func NewMark(log *zap.Logger) mark.Marker {
+	if log == nil {
+		log = zap.NewNop()
+	}
 	return &Mark{
+		log:      log.Named("mark"),
 		markList: markList,
 	}
 }
@@ -39,4 +46,22 @@ func (m *Mark) MarkResult(answer string) (int, error) {
 		return 0, ErrWrongAnswer
 	}
 	return result, nil
+}
+
+func (m *Mark) MarkDecode(answers [][]string) ([][]int, error) {
+	res := make([][]int, len(answers))
+	length := len(answers)
+	for i := 0; i < length; i++ {
+		temp := make([]int, len(answers[i]))
+		for j := 0; j < len(answers[i]); j++ {
+			num, ok := m.markList[strings.ToLower(answers[i][j])]
+			if !ok {
+				m.log.Debug("failed to convert result into a list", zap.String("answer", answers[i][j]))
+				return nil, ErrWrongAnswer
+			}
+			temp[j] = num
+		}
+		res[i] = temp
+	}
+	return res, nil
 }

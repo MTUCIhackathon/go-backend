@@ -45,18 +45,30 @@ func (ctrl *Controller) configureMiddleware() {
 }
 
 func (ctrl *Controller) configureRoutes() {
-	ctrl.server.GET("/ping", ctrl.Ping)
 	api := ctrl.server.Group("/api")
-	api.GET("/test/:name", ctrl.GetTestByName)
-
+	api.GET("/ping", ctrl.Ping)
 	consumer := api.Group("/consumer")
 	{
 		consumer.POST("/registration", ctrl.CreateConsumer)
-		consumer.PUT("/update", ctrl.UpdateConsumerPassword)
+		consumer.PUT("/update_password", ctrl.UpdateConsumerPassword)
 		consumer.DELETE("/delete", ctrl.DeleteConsumer)
 		consumer.GET("", ctrl.GetConsumer)
 		consumer.POST("/login", ctrl.Login)
 		consumer.GET("/refresh-token", ctrl.RefreshToken)
+	}
+
+	test := api.Group("/test")
+	{
+		test.GET("/all", ctrl.GetAllTest)
+		test.GET("/:test_id", ctrl.GetTestByID)
+	}
+
+	result := api.Group("/result")
+
+	{
+		result.GET("/all", nil)
+		result.GET("/:result_id", nil)
+		result.POST("/send", nil)
 	}
 
 }

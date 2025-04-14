@@ -14,6 +14,7 @@ type Store struct {
 	pool      *pgxpool.Pool
 	consumers *ConsumersRepository
 	resolved  *ResolvedRepository
+	results   *ResultsRepository
 }
 
 func (s *Store) Resolved() store.ResolvedRepository {
@@ -38,6 +39,16 @@ func (s *Store) Consumers() store.ConsumersRepository {
 	return s.consumers
 }
 
+func (s *Store) Results() store.ResultsRepository {
+	if s == nil {
+		zap.L().Named("store").Named("results").Error(
+			"got unexpectedly nil store repository",
+		)
+		return nil
+	}
+	return s.results
+}
+
 func New(log *zap.Logger, pool *pgxpool.Pool) (*Store, error) {
 	if log == nil {
 		log = zap.NewNop()
@@ -54,7 +65,7 @@ func New(log *zap.Logger, pool *pgxpool.Pool) (*Store, error) {
 
 	s.consumers = newConsumersRepository(s)
 	s.resolved = newResolvedRepository(s)
-
+	s.results = newResultsRepository(s)
 	s.log.Info("store initialized successfully")
 	return s, nil
 }

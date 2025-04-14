@@ -1,8 +1,9 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type CreateConsumerResponse struct {
@@ -26,3 +27,15 @@ type RefreshTokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
+
+type (
+	GetTestResponse struct {
+		ID        uuid.UUID      `json:"id"`
+		Name      string         `json:"name"`
+		Questions []TestQuestion `json:"questions"`
+	}
+	TestQuestion struct {
+		Order    int    `json:"order"`
+		Question string `json:"question"`
+	}
+)

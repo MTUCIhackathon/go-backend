@@ -12,6 +12,7 @@ type (
 	Interface interface {
 		Resolved() ResolvedRepository
 		Consumers() ConsumersRepository
+		Results() ResultsRepository
 	}
 
 	ConsumersRepository interface {
@@ -23,6 +24,18 @@ type (
 		GetByID(ctx context.Context, id uuid.UUID) (*dto.Consumer, error)
 		GetByLogin(ctx context.Context, login string) (*dto.Consumer, error)
 	}
+
 	ResolvedRepository interface {
+		CreateResolved(ctx context.Context, data dto.Resolved) (*dto.Resolved, error)
+		GetAllActiveResolvedByUserID(ctx context.Context, id uuid.UUID) ([]dto.Resolved, error)
+		GetResolvedByUserID(ctx context.Context, id uuid.UUID, resolved_type string, isActive bool) (*dto.Resolved, error)
+		GetResolvedByID(ctx context.Context, id uuid.UUID) (*dto.Resolved, error)
+	}
+
+	ResultsRepository interface {
+		GetLastResultByFormId(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error)
+		GetLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error)
+		DeleteResult(ctx context.Context, resultID uuid.UUID) error
+		InsertResult(ctx context.Context, result dto.Result) error
 	}
 )
