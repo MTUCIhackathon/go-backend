@@ -104,7 +104,7 @@ func (c *ConsumersRepository) DeleteByID(ctx context.Context, id uuid.UUID) erro
 func (c *ConsumersRepository) GetByID(ctx context.Context, id uuid.UUID) (*dto.Consumer, error) {
 	const query = `SELECT * FROM consumers WHERE id = $1;`
 	var consumer dto.Consumer
-	err := c.store.pool.QueryRow(ctx, query, id).Scan(&consumer.ID, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
+	err := c.store.pool.QueryRow(ctx, query, id).Scan(&consumer.ID, &consumer.Email, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
 	if err != nil {
 		c.store.log.Error("failed to query user", zap.Any("user", id))
 		return nil, c.store.pgErr(err)
