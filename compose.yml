@@ -29,7 +29,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=guidance
+      - POSTGRES_USER=guidancer
       - POSTGRES_DB=career_guidance
       - POSTGRES_PASSWORD=guidance
     ports:
