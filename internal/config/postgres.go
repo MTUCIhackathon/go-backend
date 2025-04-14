@@ -15,6 +15,7 @@ type Postgres struct {
 	Password         string `config:"password" yaml:"password" toml:"password" json:"password"`
 	Database         string `config:"database" yaml:"database" toml:"database" json:"database"`
 	VersionTableName string `config:"versions" yaml:"versions" toml:"versions"  json:"versions"`
+	RunMigrations    bool   `config:"run_migrations" yaml:"run_migrations" json:"run_migrations"`
 }
 
 func (c *Postgres) GetURI() string {
@@ -40,5 +41,6 @@ func (c *Postgres) copy() *Postgres {
 		Password:         c.Password,
 		Database:         c.Database,
 		VersionTableName: c.VersionTableName,
+		RunMigrations:    c.RunMigrations,
 	}
 }

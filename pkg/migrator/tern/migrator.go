@@ -10,7 +10,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
-	"github.com/MTUCIhackathon/go-backend/migrations"
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator"
 )
 
@@ -31,7 +30,7 @@ type tern interface {
 	LoadMigrations(migrations fs.FS) error
 }
 
-func New(cfg *config.Config, log *zap.Logger) (*Migrator, error) {
+func New(ctx context.Context, cfg *config.Config, log *zap.Logger, sqlMigrations fs.FS) (*Migrator, error) {
 	if cfg == nil {
 		return nil, errNilConfig
 	}
@@ -45,11 +44,9 @@ func New(cfg *config.Config, log *zap.Logger) (*Migrator, error) {
 	m := &Migrator{
 		cfg:        cfg,
 		log:        log,
-		migrations: migrations.Migrations,
+		migrations: sqlMigrations,
 		conn:       nil,
 	}
-
-	ctx := context.Background()
 
 	err := multierr.Combine(
 		m.initConn(ctx),
@@ -86,6 +83,14 @@ func (m *Migrator) loadMigrations() (err error) {
 		return errLoadingMigrations
 	}
 	return nil
+}
+
+func (m *Migrator) Close(ctx context.Context) {
+	if m == nil || m.conn == nil {
+		return
+	}
+
+	_ = m.conn.Close(ctx)
 }
 
 func (m *Migrator) initConn(ctx context.Context) (err error) {
