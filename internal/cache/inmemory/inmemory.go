@@ -31,6 +31,7 @@ func (c *Cache) Set(key uuid.UUID, test dto.Test) error {
 	return nil
 }
 
+// TODO think about pointer
 func (c *Cache) Get(key uuid.UUID) (dto.Test, error) {
 	c.mu.RLock()
 	test, ok := c.data[key]

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"net/http"
 
@@ -14,13 +15,42 @@ func (ctrl *Controller) Ping(e echo.Context) error {
 	return e.String(http.StatusOK, "pong")
 }
 
-func (ctrl *Controller) GetTestByName(e echo.Context) error {
-	name := e.Param("name")
-	ctrl.log.Debug("get name from path", zap.Any("name", name))
+func (ctrl *Controller) GetTestByID(e echo.Context) error {
+	var (
+		err      error
+		response model.GetTestResponse
+	)
+	testID := e.Param("test_id")
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	id, err := uuid.Parse(testID)
+	if err != nil {
+		ctrl.log.Error("failed to parse test id", zap.Error(err))
+	}
+	ctrl.log.Debug("get test_id from path", zap.Any("id", testID))
 
-	panic("not implemented")
+	resp, err := ctrl.srv.GetTestByID(e.Request().Context(), token, id)
+	if err != nil {
+		ctrl.log.Error("failed to get by test_id", zap.Any("id", id), zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get test by id")
+	}
+
+	questions := make([]model.TestQuestion, len(resp.Questions))
+	for i := 0; i < len(resp.Questions); i++ {
+		questions[i] = model.TestQuestion{
+			Order:    resp.Questions[i].Order,
+			Question: resp.Questions[i].Question,
+		}
+	}
+
+	response = model.GetTestResponse{
+		ID:        resp.ID,
+		Name:      resp.Name,
+		Questions: questions,
+	}
+
+	return e.JSON(http.StatusOK, response)
 }
-func (ctrl *Controller) GetManyTest(e echo.Context) error {
+func (ctrl *Controller) GetAllTest(e echo.Context) error {
 	panic("not implemented")
 }
 
@@ -73,7 +103,8 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 
 }
 func (ctrl *Controller) GetConsumer(e echo.Context) error {
-	data, err := ctrl.srv.GetConsumerByID(e.Request().Context(), e.Request())
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	data, err := ctrl.srv.GetConsumerByID(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to get consumer by id")
 		return e.NoContent(http.StatusInternalServerError)
@@ -99,12 +130,15 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 		return e.NoContent(http.StatusBadRequest)
 	}
 
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
 	DTO = dto.UpdatePassword{
 		OldPassword: req.OldPassword,
 		NewPassword: req.NewPassword,
+		Token:       token,
 	}
 
-	err = ctrl.srv.UpdateConsumerPassword(e.Request().Context(), e.Request(), DTO)
+	err = ctrl.srv.UpdateConsumerPassword(e.Request().Context(), DTO)
 	if err != nil {
 		ctrl.log.Error("failed to update consumer")
 		return e.NoContent(http.StatusInternalServerError)
@@ -113,7 +147,9 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 }
 
 func (ctrl *Controller) DeleteConsumer(e echo.Context) error {
-	err := ctrl.srv.DeleteConsumerByID(e.Request().Context(), e.Request())
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	err := ctrl.srv.DeleteConsumerByID(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to delete consumer")
 		return e.NoContent(http.StatusInternalServerError)
@@ -152,7 +188,9 @@ func (ctrl *Controller) Login(e echo.Context) error {
 }
 
 func (ctrl *Controller) RefreshToken(e echo.Context) error {
-	DTO, err := ctrl.srv.RefreshToken(e.Request().Context(), e.Request())
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	DTO, err := ctrl.srv.RefreshToken(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to refresh token")
 		return e.NoContent(http.StatusInternalServerError)

@@ -3,13 +3,12 @@ package service
 import (
 	"context"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
-	"net/http"
+	"github.com/google/uuid"
 )
 
 type Interface interface {
-	// TODO ?
-	//GetTestByName(name string) string
-	//GetManyTest()
+	GetAllTests(_ context.Context, token string) ([]dto.Test, error)
+	GetTestByID(_ context.Context, token string, testID uuid.UUID) (*dto.Test, error)
 
 	//CreateResolved(req dto.CreateResolved) (*dto.Resolved, error)
 	//GetResolvedByUserID(userID uuid.UUID) (*dto.Resolved, error)
@@ -23,11 +22,11 @@ type Interface interface {
 	//CreateTokensForUser(token uuid.UUID) (*dto.Token, error)
 
 	CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*dto.Token, error)
-	UpdateConsumerPassword(ctx context.Context, r *http.Request, req dto.UpdatePassword) error
-	DeleteConsumerByID(ctx context.Context, r *http.Request) error
-	GetConsumerByID(ctx context.Context, r *http.Request) (*dto.Consumer, error)
+	UpdateConsumerPassword(ctx context.Context, req dto.UpdatePassword) error
+	DeleteConsumerByID(ctx context.Context, token string) error
+	GetConsumerByID(ctx context.Context, token string) (*dto.Consumer, error)
 	Login(ctx context.Context, req dto.Login) (*dto.Token, error)
-	RefreshToken(ctx context.Context, r *http.Request) (*dto.Token, error)
+	RefreshToken(_ context.Context, token string) (*dto.Token, error)
 }
 
 // Client

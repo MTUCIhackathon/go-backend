@@ -1,12 +1,13 @@
 package dto
 
 import (
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
 	"github.com/google/uuid"
 	"time"
 )
 
 type Question struct {
-	FromID        uuid.UUID
+	ResolvedID    uuid.UUID
 	QuestionOrder uint32
 	Issue         string
 	ImageLocation *string
@@ -15,9 +16,8 @@ type Question struct {
 
 type Resolved struct {
 	ID           uuid.UUID
-	Version      uint32
 	UserID       uuid.UUID
-	ResolvedType string
+	ResolvedType kind.Type
 	IsActive     bool
 	CreatedAt    time.Time
 	PassedAt     time.Time

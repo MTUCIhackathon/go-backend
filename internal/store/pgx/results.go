@@ -19,47 +19,47 @@ func newResultsRepository(store *Store) *ResultsRepository {
 	}
 }
 
-func (r *ResultsRepository) ReturnLastResultByFormId(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error) {
-	const query = `SELECT 
-    	t.user_id, 
-    	t.form_id, 
-    	t.form_version, 
-    	t.profession,
-    	t.created_at
-		FROM test_results t JOIN resolved r ON r.id = t.form_id
-		WHERE t.user_id = $1 AND t.form_id = $2 AND r.is_active = true;`
+func (r *ResultsRepository) GetLastResultByFormId(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error) {
+	const query = `SELECT t.user_id,
+       t.resolved_id,
+       t.profession,
+       t.created_at
+FROM test_results t
+         JOIN resolved r ON r.id = t.resolved_id
+WHERE t.user_id = $1
+  AND t.resolved_id = $2
+  AND r.is_active = true;`
 
 	var data dto.Result
 	err := r.store.pool.QueryRow(ctx, query, userID, formID, true).Scan(
 		&data.UserID,
-		&data.FormID,
-		&data.FormVersion,
+		&data.ResolvedID,
 		&data.Profession,
 		&data.CreatedAt,
 	)
 	if err != nil {
-		r.log.Debug("failed to retrieve last result", zap.Error(err))
+		r.log.Error("failed to retrieve last result", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 	r.log.Debug("retrieved last result", zap.Any("data", data))
 	return &data, nil
 }
 
-func (r *ResultsRepository) ReturnLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error) {
-	const query = `SELECT 
-    	t.user_id, 
-    	t.form_id, 
-    	t.form_version, 
-    	t.profession,
-    	t.created_at
-		FROM test_results t JOIN resolved r ON r.id = t.form_id
-		WHERE t.user_id = $1 AND t.is_active = $2;`
+func (r *ResultsRepository) GetLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error) {
+	const query = `SELECT t.user_id,
+       t.resolved_id,
+       t.profession,
+       t.created_at
+FROM test_results t
+         JOIN resolved r ON r.id = t.resolved_id
+WHERE t.user_id = $1
+  AND t.is_active = $2;`
 
 	var data []dto.Result
 
 	rows, err := r.store.pool.Query(ctx, query, userID, true)
 	if err != nil {
-		r.log.Debug("failed to retrieve last result", zap.Error(err))
+		r.log.Error("failed to retrieve last result", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 	defer rows.Close()
@@ -67,13 +67,12 @@ func (r *ResultsRepository) ReturnLastResults(ctx context.Context, userID uuid.U
 		var result dto.Result
 		err = rows.Scan(
 			&result.UserID,
-			&result.FormID,
-			&result.FormVersion,
+			&result.ResolvedID,
 			&result.Profession,
 			&result.CreatedAt,
 		)
 		if err != nil {
-			r.log.Debug("failed to retrieve last result", zap.Error(err))
+			r.log.Error("failed to retrieve last result", zap.Error(err))
 			return nil, r.store.pgErr(err)
 		}
 		r.log.Debug("retrieved last result", zap.Any("result", result))
@@ -82,7 +81,7 @@ func (r *ResultsRepository) ReturnLastResults(ctx context.Context, userID uuid.U
 	}
 
 	if err := rows.Err(); err != nil {
-		r.log.Debug("failed to retrieve last result", zap.Error(err))
+		r.log.Error("failed to retrieve last result", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
@@ -94,32 +93,31 @@ func (r *ResultsRepository) DeleteResult(ctx context.Context, resultID uuid.UUID
 	const query = `DELETE FROM test_results WHERE id = $1;`
 	result, err := r.store.pool.Exec(ctx, query, resultID)
 	if err != nil {
-		r.log.Debug("failed to delete last result", zap.Error(err))
+		r.log.Error("failed to delete last result", zap.Error(err))
 		return r.store.pgErr(err)
 	}
 
 	if result.RowsAffected() != 1 {
-		r.log.Debug("failed to delete last result", zap.Any("result", result))
+		r.log.Error("failed to delete last result", zap.Any("result", result))
 		return r.store.pgErr(err)
 	}
 	return nil
 }
 
 func (r *ResultsRepository) InsertResult(ctx context.Context, result dto.Result) error {
-	const query = `INSERT INTO test_results (user_id, form_id, form_version, profession, created_at) VALUES ($1, $2, $3, $4);`
+	const query = `INSERT INTO test_results (user_id, resolved_id, profession, created_at) VALUES ($1, $2, $3, $4);`
 	commandTag, err := r.store.pool.Exec(ctx, query,
 		result.UserID,
-		result.FormID,
-		result.FormVersion,
+		result.ResolvedID,
 		result.Profession,
 		result.CreatedAt,
 	)
 	if err != nil {
-		r.log.Debug("failed to insert last result", zap.Error(err))
+		r.log.Error("failed to insert last result", zap.Error(err))
 		return r.store.pgErr(err)
 	}
 	if commandTag.RowsAffected() != 1 {
-		r.log.Debug("failed to insert last result", zap.Any("result", result))
+		r.log.Error("failed to insert last result", zap.Any("result", result))
 		return r.store.pgErr(err)
 	}
 	r.log.Debug("inserted last result", zap.Any("result", result))
