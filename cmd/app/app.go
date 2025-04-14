@@ -35,8 +35,8 @@ func CreateApp() fx.Option {
 	return fx.Options(
 		fx.WithLogger(fxLogger),
 		fx.Provide(
-			config.New,
 			logger.New,
+			config.New,
 			pgx.New,
 			s3.New,
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
