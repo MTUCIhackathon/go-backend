@@ -101,6 +101,7 @@ func (m *Migrator) initConn(ctx context.Context) (err error) {
 func (m *Migrator) initMigrator(ctx context.Context) (err error) {
 	m.migrator, err = migrate.NewMigrator(ctx, m.conn, m.cfg.Postgres.VersionTableName)
 	if err != nil {
+		m.log.Error("failed to initialize migrator", zap.Error(err))
 		return errCreationMigrator
 	}
 	return nil
