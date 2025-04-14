@@ -7,7 +7,7 @@ CREATE TABLE consumers
     login      VARCHAR UNIQUE NOT NULL,
     password   VARCHAR        NOT NULL,
     created_at TIMESTAMP      NOT NULL,
-    CONSTRAINT consumers PRIMARY KEY (id)
+    CONSTRAINT consumers_pk PRIMARY KEY (id)
 );
 
 CREATE TABLE resolved
