@@ -23,44 +23,49 @@ import (
 
 func (s *Service) CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*dto.Token, error) {
 	var (
-		data dto.Consumer
-		err  error
-		res  *dto.Token
+		consumer dto.Consumer
+		err      error
 	)
 
 	err = s.valid.ValidatePassword(req.Password)
 	if err != nil {
-		s.log.Debug("failed to validate password", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
-	}
+		s.log.Error(
+			"failed to validate password",
+			zap.Error(err),
+		)
 
-	s.log.Debug("successful validate password")
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "password does not match the standard"))
+	}
 
 	password, err := s.encrypt.EncryptPassword(req.Password)
 	if err != nil {
-		s.log.Debug("failed to encrypt password", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to encrypt password",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to encrypt password"),
+		)
 	}
 
-	s.log.Debug("successful encrypt password", zap.String("password", password))
-
-	data = dto.Consumer{
+	consumer = dto.Consumer{
 		ID:        uuid.New(),
 		Login:     req.Login,
 		Password:  password,
 		CreatedAt: time.Now(),
 	}
 
-	exists, err := s.repo.Consumers().GetLoginAvailable(ctx, data.Login)
+	exists, err := s.repo.Consumers().GetLoginAvailable(ctx, consumer.Login)
 	if err != nil {
-		if errors.Is(err, pgx.ErrAlreadyExists) {
-			s.log.Debug("failed to check login accessibility: login already exists", zap.Error(err))
-			return nil, service.NewError(
-				controller.ErrAlreadyExist,
-				errors.Wrap(err, "failed to check login accessibility"),
-			)
-		}
-		s.log.Debug("failed to check login accessibility", zap.Error(err))
+		s.log.Error(
+			"failed to check login accessibility",
+			zap.Error(err),
+		)
+
 		return nil, service.NewError(
 			controller.ErrInternal,
 			errors.Wrap(err, "failed to check login accessibility"),
@@ -68,259 +73,395 @@ func (s *Service) CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*
 	}
 
 	if !exists {
-		s.log.Debug("failed to fetch available consumers", zap.String("consumer", data.Login))
-		return nil, service.NewError(controller.ErrAlreadyExist, ErrAlreadyExists)
+		s.log.Error(
+			"login already exists",
+			zap.String("login", consumer.Login),
+		)
+
+		return nil, service.NewError(
+			controller.ErrAlreadyExist,
+			ErrAlreadyExists,
+		)
 	}
 
-	s.log.Debug("successfully fetch available consumers")
-
-	err = s.repo.Consumers().Create(ctx, data)
+	err = s.repo.Consumers().Create(ctx, consumer)
 	if err != nil {
 		if errors.Is(err, pgx.ErrAlreadyExists) {
-			s.log.Debug("failed to create consumer: consumer already exists", zap.Error(err))
+			s.log.Error(
+				"failed to create consumer: consumer already exists",
+				zap.Error(err),
+			)
+
 			return nil, service.NewError(
 				controller.ErrAlreadyExist,
 				errors.Wrap(err, "failed to create consumer"),
 			)
 		}
-		s.log.Debug("failed to create consumer", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to create consumer",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create consumer"),
+		)
 	}
 
-	s.log.Debug("successfully create consumer", zap.Any("consumer", data))
-
-	access, err := s.provider.CreateAccessTokenForUser(data.ID)
+	access, refresh, err := s.provider.CreateAccessAndRefreshTokenForUser(consumer.ID)
 	if err != nil {
-		s.log.Debug("failed to create access token", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to create a couples of tokens",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create a couples of tokens"),
+		)
 	}
 
-	s.log.Debug("successfully create access token", zap.Any("access", access))
-	refresh, err := s.provider.CreateRefreshTokenForUser(data.ID)
-	if err != nil {
-		s.log.Debug("failed to create refresh token", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
-	}
-	s.log.Debug("successfully create refresh token", zap.Any("refresh", refresh))
-	res = &dto.Token{
+	s.log.Debug("successfully create consumer", zap.String("consumer_id", consumer.ID.String()))
+
+	return &dto.Token{
 		AccessToken:  access,
 		RefreshToken: refresh,
-	}
-	s.log.Debug("successfully create tokens", zap.Any("tokens", res))
-	return res, nil
+	}, nil
 }
 
 func (s *Service) UpdateConsumerPassword(ctx context.Context, req dto.UpdatePassword) error {
-	var err error
 	data, err := s.provider.GetDataFromToken(req.Token)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
-		return service.NewError(controller.ErrBadRequest, err)
-	}
+		s.log.Error(
+			"failed to get consumer data from token",
+			zap.Error(err),
+		)
 
-	if !data.IsAccess {
-		s.log.Debug("not is access", zap.Any("data", data))
+		return service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to get consumer data from token"),
+		)
 	}
-
-	id := data.ID
-	s.log.Debug("successfully fetch consumer ID", zap.Any("id", id))
 
 	err = s.valid.ValidatePassword(req.NewPassword)
 	if err != nil {
-		s.log.Debug("failed to validate password", zap.Error(err))
-		return service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to validate password",
+			zap.Error(err),
+		)
+
+		return service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "password does not match the standard"),
+		)
 	}
 
-	s.log.Debug("successfully validate password", zap.Any("password", req.NewPassword))
-
-	oldPassword, err := s.repo.Consumers().GetPasswordByID(ctx, id)
+	oldPassword, err := s.repo.Consumers().GetPasswordByID(ctx, data.ID)
 	if err != nil {
-		s.log.Debug("failed to fetch old password", zap.Error(err))
-		return service.NewError(controller.ErrInternal, err)
-	}
+		if errors.Is(pgx.ErrNotFound, err) {
+			s.log.Error(
+				"failed to fetch old password: not found",
+				zap.Error(err),
+			)
 
-	s.log.Debug("successfully fetch old password", zap.Any("oldPassword", oldPassword))
+			return service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to fetch old password"),
+			)
+		}
+		s.log.Debug(
+			"failed to fetch old password",
+			zap.Error(err),
+		)
+
+		return service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to fetch old password"),
+		)
+	}
 
 	err = s.encrypt.CompareHashAndPassword(oldPassword, req.OldPassword)
 	if err != nil {
-		s.log.Debug("failed to compare old password", zap.Error(err))
-		return service.NewError(controller.ErrBadRequest, err)
-	}
+		s.log.Error(
+			"failed to compare old passwords",
+			zap.Error(err),
+		)
 
-	s.log.Debug("successfully compare old password", zap.Any("oldPassword", oldPassword))
+		return service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to compare old passwords"),
+		)
+	}
 
 	newPassword, err := s.encrypt.EncryptPassword(req.NewPassword)
 	if err != nil {
-		s.log.Debug("failed to encrypt password", zap.Error(err))
-		return service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to encrypt password",
+			zap.Error(err),
+		)
+
+		return service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to encrypt password"),
+		)
 	}
 
-	s.log.Debug("successfully encrypt password", zap.Any("newPassword", newPassword))
-
-	err = s.repo.Consumers().UpdatePasswordByID(ctx, id, newPassword)
+	err = s.repo.Consumers().UpdatePasswordByID(ctx, data.ID, newPassword)
 	if err != nil {
-		s.log.Debug("failed to update password", zap.Error(err))
-		return service.NewError(controller.ErrInternal, err)
+		if errors.Is(pgx.ErrNotFound, err) {
+			s.log.Error(
+				"failed to update password: not found",
+				zap.Error(err),
+			)
+
+			return service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to update password"),
+			)
+		}
+		s.log.Error(
+			"failed to update password",
+			zap.Error(err),
+		)
+
+		return service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to update password"),
+		)
 	}
 
-	s.log.Debug("successfully update password", zap.Any("oldPassword", oldPassword))
+	s.log.Debug("successfully update password for consumer", zap.String("consumer_id", data.ID.String()))
+
 	return nil
 }
 
 func (s *Service) DeleteConsumerByID(ctx context.Context, token string) error {
 	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
-		return service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to get consumer data from token",
+			zap.Error(err),
+		)
+		return service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to get consumer data from token"),
+		)
 	}
 
-	if !data.IsAccess {
-		s.log.Debug("not is access", zap.Any("data", data))
-		return service.NewError(controller.ErrInternal, err)
-	}
-
-	id := data.ID
-
-	s.log.Debug("successfully fetch consumer id", zap.Any("id", id))
-
-	err = s.repo.Consumers().DeleteByID(ctx, id)
+	err = s.repo.Consumers().DeleteByID(ctx, data.ID)
 	if err != nil {
-		s.log.Debug("failed to delete consumer", zap.Error(err))
-		return service.NewError(controller.ErrInternal, err)
+		if errors.Is(pgx.ErrNotFound, err) {
+			s.log.Error(
+				"failed to delete consumer by id: not found",
+				zap.Error(err),
+			)
+
+			return service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to delete consumer by id"),
+			)
+		}
+		s.log.Error(
+			"failed to delete consumer by id",
+			zap.Error(err),
+		)
+
+		return service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to delete consumer by id"),
+		)
 	}
 
-	s.log.Debug("successfully delete consumer", zap.Any("consumer", id))
+	s.log.Debug("successfully delete consumer", zap.String("consumer_id", data.ID.String()))
+
 	return nil
 }
 
 func (s *Service) GetConsumerByID(ctx context.Context, token string) (*dto.Consumer, error) {
 	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to get consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to get consumer data from token"),
+		)
 	}
 
-	if !data.IsAccess {
-		s.log.Debug("not is access", zap.Any("data", data))
-		return nil, service.NewError(controller.ErrInternal, err)
-	}
-
-	id := data.ID
-	s.log.Debug("successfully fetch consumer ID", zap.Any("id", id))
-
-	consumer, err := s.repo.Consumers().GetByID(ctx, id)
+	consumer, err := s.repo.Consumers().GetByID(ctx, data.ID)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		if errors.Is(pgx.ErrNotFound, err) {
+			s.log.Error(
+				"failed to get consumer by id: not found",
+				zap.Error(err),
+			)
+
+			return nil, service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to get consumer"),
+			)
+		}
+		s.log.Error(
+			"failed to get consumer by id",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get consumer"),
+		)
 	}
 
-	s.log.Debug("successfully fetch consumer", zap.Any("consumer", consumer))
+	s.log.Debug("successfully got consumer by id", zap.String("consumer_id", consumer.ID.String()))
 
 	return consumer, nil
-
 }
 
 func (s *Service) Login(ctx context.Context, req dto.Login) (*dto.Token, error) {
-	data, err := s.repo.Consumers().GetByLogin(ctx, req.Login)
+	consumer, err := s.repo.Consumers().GetByLogin(ctx, req.Login)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		if errors.Is(pgx.ErrNotFound, err) {
+			s.log.Error(
+				"failed to get consumer by login: not found",
+				zap.Error(err),
+			)
+
+			return nil, service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to get consumer by login"),
+			)
+		}
+		s.log.Error(
+			"failed to get consumer by login",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get consumer by login"),
+		)
 	}
 
-	s.log.Debug("successfully fetch consumer", zap.Any("consumer", data))
-
-	err = s.encrypt.CompareHashAndPassword(data.Password, req.Password)
+	err = s.encrypt.CompareHashAndPassword(consumer.Password, req.Password)
 	if err != nil {
-		s.log.Debug("failed to compare password", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to compare password",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to compare old passwords"),
+		)
 	}
 
-	s.log.Debug("successfully compare password", zap.Any("password", data.Password))
-
-	access, err := s.provider.CreateAccessTokenForUser(data.ID)
+	access, refresh, err := s.provider.CreateAccessAndRefreshTokenForUser(consumer.ID)
 	if err != nil {
-		s.log.Debug("failed to create access token", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to create a couples of tokens",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create a couples of tokens"),
+		)
 	}
 
-	s.log.Debug("successfully create access token", zap.Any("access", access))
+	s.log.Debug("successfully logged in", zap.String("consumer_id", consumer.ID.String()))
 
-	refresh, err := s.provider.CreateRefreshTokenForUser(data.ID)
-	if err != nil {
-		s.log.Debug("failed to create refresh token", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
-	}
-
-	s.log.Debug("successfully create refresh token", zap.Any("refresh", refresh))
-
-	res := &dto.Token{
+	return &dto.Token{
 		AccessToken:  access,
 		RefreshToken: refresh,
-	}
-
-	s.log.Debug("successfully create tokens", zap.Any("tokens", res))
-
-	return res, nil
+	}, nil
 }
 
 func (s *Service) RefreshToken(_ context.Context, token string) (*dto.Token, error) {
 	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch refresh token", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to get consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to get consumer data from token"),
+		)
 	}
+
 	if data.IsAccess {
-		s.log.Debug("not is refresh", zap.Any("data", data))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"not acceptable token",
+			zap.Bool("is_access", data.IsAccess),
+		)
+
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			ErrTokenNotAcceptable,
+		)
 	}
-	id := data.ID
 
-	s.log.Debug("successfully validate refresh token", zap.Any("id", id))
-
-	access, err := s.provider.CreateAccessTokenForUser(id)
+	access, refresh, err := s.provider.CreateAccessAndRefreshTokenForUser(data.ID)
 	if err != nil {
-		s.log.Debug("failed to create access token", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to create a couples of tokens",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create a couples of tokens"),
+		)
 	}
 
-	s.log.Debug("successfully create access token", zap.Any("access", access))
+	s.log.Debug("successfully refresh tokens for consumer", zap.Any("consumer_id", data.ID.String()))
 
-	refresh, err := s.provider.CreateRefreshTokenForUser(id)
-	if err != nil {
-		s.log.Debug("failed to create refresh token", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
-	}
-
-	s.log.Debug("successfully create refresh token", zap.Any("refresh", refresh))
-
-	res := &dto.Token{
+	return &dto.Token{
 		AccessToken:  access,
 		RefreshToken: refresh,
-	}
-
-	s.log.Debug("successfully create tokens", zap.Any("tokens", res))
-	return res, nil
+	}, nil
 }
 
 func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, error) {
 	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch test data", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
+		s.log.Error(
+			"failed to get consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to get consumer data from token"),
+		)
 	}
 
-	if !data.IsAccess {
-		s.log.Debug("not is access", zap.Any("data", data))
-		return nil, service.NewError(controller.ErrInternal, err)
-	}
+	s.log.Debug(
+		"successfully fetch consumer data from token",
+		zap.String("consumer_id", data.ID.String()),
+	)
 
 	tests, err := s.inmemory.GetAll()
 	if err != nil {
-		s.log.Debug("failed to fetch test list", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to fetch test list",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to fetch test list"),
+		)
 	}
 
-	s.log.Debug("successfully fetch test list", zap.Any("tests", tests))
+	s.log.Debug(
+		"successfully fetch test for consumer",
+		zap.String("consumer_id", data.ID.String()),
+	)
 
 	return tests, nil
 }
@@ -328,23 +469,40 @@ func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, erro
 func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID) (*dto.Test, error) {
 	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch test data", zap.Error(err))
-		return nil, service.NewError(controller.ErrBadRequest, err)
-	}
-	if !data.IsAccess {
-		s.log.Debug("not is access", zap.Any("data", data))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to fetch consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"),
+		)
 	}
 
-	s.log.Debug("successfully fetch test ID", zap.Any("consumer", testID))
+	s.log.Debug(
+		"successfully fetch consumer data from token",
+		zap.String("consumer_id", data.ID.String()),
+	)
 
 	test, err := s.inmemory.Get(testID)
 	if err != nil {
-		s.log.Debug("failed to fetch test", zap.Error(err))
-		return nil, service.NewError(controller.ErrInternal, err)
+		s.log.Error(
+			"failed to fetch test by id",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to fetch test by id"),
+		)
 	}
 
-	s.log.Debug("successfully fetch test", zap.Any("test", test))
+	s.log.Debug(
+		"successfully fetch test for consumer",
+		zap.String("test_id", test.ID.String()),
+		zap.String("consumer_id", test.ID.String()),
+	)
 
 	return test, nil
 }

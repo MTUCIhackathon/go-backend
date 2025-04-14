@@ -12,6 +12,20 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 )
 
+func (prv *Provider) CreateAccessAndRefreshTokenForUser(userID uuid.UUID) (string, string, error) {
+	access, err := prv.CreateAccessTokenForUser(userID)
+	if err != nil {
+		return "", "", err
+	}
+
+	refresh, err := prv.CreateRefreshTokenForUser(userID)
+	if err != nil {
+		return "", "", err
+	}
+
+	return access, refresh, nil
+}
+
 func (prv *Provider) CreateAccessTokenForUser(userID uuid.UUID) (string, error) {
 	prv.log.Debug("start creating access token")
 
