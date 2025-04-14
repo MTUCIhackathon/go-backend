@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 )
 
@@ -21,54 +22,68 @@ func newResolvedRepository(store *Store) *ResolvedRepository {
 
 func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolved) (*dto.Resolved, error) {
 	const queryUpdateLastResolved = `UPDATE resolved SET is_active = false WHERE user_id = $1 AND resolved_type = $2`
-	const queryCreateResolved = `INSERT INTO resolved (id, user_id, resolved_type, is_active, created_at, passed_at)VALUES($1, $2, $3, $4, $5)`
-	const queryCreateResolvedQuestion = `INSERT INTO resolved_question(resolved_id, question_text, image_location, mark)`
+	const queryCreateResolved = `
+        INSERT INTO resolved 
+            (id, user_id, resolved_type, is_active, created_at, passed_at)
+        VALUES($1, $2, $3, $4, $5, $6)`
+	const queryCreateResolvedQuestion = `
+        INSERT INTO resolved_question 
+            (resolved_id, question_text, image_location, mark)
+        VALUES($1, $2, $3, $4)`
 
 	tx, err := r.store.pool.Begin(ctx)
 	if err != nil {
-		r.log.Error("failed to begin transaction", zap.Error(err))
+		r.log.Debug("failed to begin transaction", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, queryUpdateLastResolved,
+	if _, err = tx.Exec(ctx, queryUpdateLastResolved,
 		data.UserID,
 		data.ResolvedType,
-	)
-	if err != nil {
-		r.log.Error("failed to update last resolved question", zap.Error(err))
+	); err != nil {
+		r.log.Debug("failed to update last resolved", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
-	_, err = tx.Exec(ctx, queryCreateResolved,
+	if _, err = tx.Exec(ctx, queryCreateResolved,
 		data.ID,
 		data.UserID,
 		data.ResolvedType,
 		data.IsActive,
 		data.CreatedAt,
 		data.PassedAt,
-	)
-	if err != nil {
-		r.log.Error("failed to update last resolved question", zap.Error(err))
+	); err != nil {
+		r.log.Debug("failed to create resolved", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
+	batch := &pgx.Batch{}
 	for _, q := range data.Questions {
-		_, err = tx.Exec(ctx, queryCreateResolvedQuestion,
-			q.ResolvedID,
+		batch.Queue(queryCreateResolvedQuestion,
+			data.ID,
+			q.QuestionOrder,
 			q.Issue,
 			q.ImageLocation,
 			q.Mark,
 		)
-		if err != nil {
-			r.log.Error("failed to update last resolved question", zap.Error(err))
+	}
+
+	br := tx.SendBatch(ctx, batch)
+	defer br.Close()
+
+	for i := 0; i < batch.Len(); i++ {
+		if _, err = br.Exec(); err != nil {
+			r.log.Debug("failed to insert resolved question",
+				zap.Int("question_index", i),
+				zap.Error(err),
+			)
 			return nil, r.store.pgErr(err)
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		r.log.Error("failed to commit transaction", zap.Error(err))
+	if err = tx.Commit(ctx); err != nil {
+		r.log.Debug("failed to commit transaction", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 

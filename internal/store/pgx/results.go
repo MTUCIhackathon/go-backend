@@ -20,14 +20,16 @@ func newResultsRepository(store *Store) *ResultsRepository {
 }
 
 func (r *ResultsRepository) GetLastResultByFormId(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error) {
-	const query = `SELECT 
-    	t.user_id, 
-    	t.resolved_id, 
-    	t.resolved_version, 
-    	t.profession,
-    	t.created_at
-		FROM test_results t JOIN resolved r ON r.id = t.resolved_id
-		WHERE t.user_id = $1 AND t.resolved_id = $2 AND r.is_active = true;`
+	const query = `SELECT t.user_id,
+       t.resolved_id,
+       t.resolved_version,
+       t.profession,
+       t.created_at
+FROM test_results t
+         JOIN resolved r ON r.id = t.resolved_id
+WHERE t.user_id = $1
+  AND t.resolved_id = $2
+  AND r.is_active = true;`
 
 	var data dto.Result
 	err := r.store.pool.QueryRow(ctx, query, userID, formID, true).Scan(
@@ -46,14 +48,15 @@ func (r *ResultsRepository) GetLastResultByFormId(ctx context.Context, userID uu
 }
 
 func (r *ResultsRepository) GetLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error) {
-	const query = `SELECT 
-    	t.user_id, 
-    	t.resolved_id, 
-    	t.resolved_version, 
-    	t.profession,
-    	t.created_at
-		FROM test_results t JOIN resolved r ON r.id = t.resolved_id
-		WHERE t.user_id = $1 AND t.is_active = $2;`
+	const query = `SELECT t.user_id,
+       t.resolved_id,
+       t.resolved_version,
+       t.profession,
+       t.created_at
+FROM test_results t
+         JOIN resolved r ON r.id = t.resolved_id
+WHERE t.user_id = $1
+  AND t.is_active = $2;`
 
 	var data []dto.Result
 
@@ -106,7 +109,7 @@ func (r *ResultsRepository) DeleteResult(ctx context.Context, resultID uuid.UUID
 }
 
 func (r *ResultsRepository) InsertResult(ctx context.Context, result dto.Result) error {
-	const query = `INSERT INTO test_results (user_id, resolved_id, resolved_version, profession, created_at) VALUES ($1, $2, $3, $4);`
+	const query = `INSERT INTO test_results (user_id, resolved_id, resolved_version, profession, created_at) VALUES ($1, $2, $3, $4, $5);`
 	commandTag, err := r.store.pool.Exec(ctx, query,
 		result.UserID,
 		result.ResolvedID,

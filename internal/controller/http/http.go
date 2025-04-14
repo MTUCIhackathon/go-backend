@@ -47,7 +47,6 @@ func (ctrl *Controller) configureMiddleware() {
 func (ctrl *Controller) configureRoutes() {
 	ctrl.server.GET("/ping", ctrl.Ping)
 	api := ctrl.server.Group("/api")
-	api.GET("/test/:name", ctrl.GetTestByName)
 
 	consumer := api.Group("/consumer")
 	{
@@ -57,6 +56,20 @@ func (ctrl *Controller) configureRoutes() {
 		consumer.GET("", ctrl.GetConsumer)
 		consumer.POST("/login", ctrl.Login)
 		consumer.GET("/refresh-token", ctrl.RefreshToken)
+	}
+
+	test := api.Group("/test")
+	{
+		test.GET("/all", ctrl.GetAllTest)
+		test.GET("/:test_id", ctrl.GetTestByID)
+	}
+
+	result := api.Group("/result")
+
+	{
+		result.GET("/all", nil)
+		result.GET("/:result_id", nil)
+		result.POST("/send", nil)
 	}
 
 }
