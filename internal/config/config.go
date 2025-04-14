@@ -66,7 +66,15 @@ type Config struct {
 	ML         *ML         `config:"ml" toml:"ml" yaml:"ml" json:"ml"`
 }
 
-func New() (*Config, error) {
+func New(log *zap.Logger) (*Config, error) {
+	if log == nil {
+		log = zap.NewNop()
+		log.Named("config")
+		log.Warn("provided nil logger: creating with global logger")
+	} else {
+		log.Named("config")
+	}
+
 	cfg := defaultConfig.copy()
 
 	l := confita.NewLoader(
@@ -77,7 +85,8 @@ func New() (*Config, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error while loading config")
 	}
-	zap.L().Named("config").Info("loaded config", zap.Any("config", cfg))
+
+	log.Info("loaded config", zap.Any("config", cfg))
 
 	return cfg, nil
 }
