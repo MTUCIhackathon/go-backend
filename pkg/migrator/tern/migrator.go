@@ -100,7 +100,7 @@ func (m *Migrator) initConn(ctx context.Context) (err error) {
 		m.log.Error("failed to create connection to database", zap.Error(err))
 		return errFailedToConnect
 	}
-	m.log.Debug("connected to database")
+	m.log.Debug("connected to database", zap.Any("uri", m.cfg.Postgres.GetURI()))
 	return nil
 }
 
