@@ -11,6 +11,11 @@ import (
 )
 
 func Migrate(cfg *config.Config, log *zap.Logger) error {
+	if log == nil {
+		log = zap.NewNop()
+	}
+	log.Named("migrate").Info("migrating")
+
 	if !cfg.Postgres.RunMigrations {
 		return nil
 	}
@@ -20,5 +25,13 @@ func Migrate(cfg *config.Config, log *zap.Logger) error {
 		return err
 	}
 	defer m.Close(ctx)
+
+	v, err := m.GetVersion(ctx)
+	if err != nil {
+		return err
+	}
+
+	log.Info("current version", zap.Int32("version", v))
+
 	return m.MigrateUp(ctx)
 }

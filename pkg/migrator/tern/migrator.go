@@ -79,9 +79,10 @@ func (m *Migrator) GetVersion(ctx context.Context) (int32, error) {
 func (m *Migrator) loadMigrations() (err error) {
 	err = m.migrator.LoadMigrations(m.migrations)
 	if err != nil {
-		m.log.Error("migrator failed to load migrations", zap.Error(err))
+		m.log.Error("failed to load migrations", zap.Error(err))
 		return errLoadingMigrations
 	}
+	m.log.Debug("successfully loaded migrations", zap.Error(err))
 	return nil
 }
 
@@ -109,5 +110,6 @@ func (m *Migrator) initMigrator(ctx context.Context) (err error) {
 		m.log.Error("failed to initialize migrator", zap.Error(err))
 		return errCreationMigrator
 	}
+	m.log.Debug("successfully initialized migrator")
 	return nil
 }
