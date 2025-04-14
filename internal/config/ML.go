@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"time"
 )
 
 type ML struct {
@@ -10,25 +9,17 @@ type ML struct {
 	Port int    `config:"port" toml:"port" yaml:"port" json:"port" `
 }
 
-func (c *Controller) Bind() string {
+func (c *ML) Bind() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.Port)
 }
 
-func (c *Controller) Timeout() time.Duration {
-	if c == nil {
-		return 0
-	}
-	return time.Duration(c.TimeoutSeconds) * time.Second
-}
-
-func (c *Controller) copy() *Controller {
+func (c *ML) copy() *ML {
 	if c == nil {
 		return nil
 	}
 
-	return &Controller{
-		Host:           c.Host,
-		Port:           c.Port,
-		TimeoutSeconds: c.TimeoutSeconds,
+	return &ML{
+		Host: c.Host,
+		Port: c.Port,
 	}
 }

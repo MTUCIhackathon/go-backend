@@ -48,6 +48,10 @@ var defaultConfig = &Config{
 		Port:           8081,
 		TimeoutSeconds: 0,
 	},
+	ML: &ML{
+		Host: "localhost",
+		Port: 8000,
+	},
 }
 
 var configPath = os.Getenv("CONFIG_FILE_PATH")
@@ -59,6 +63,7 @@ type Config struct {
 	Postgres   *Postgres   `config:"postgres" toml:"postgres" yaml:"postgres" json:"postgres"`
 	AWS        *AWS        `config:"aws" toml:"aws" yaml:"aws" json:"aws"`
 	Controller *Controller `config:"controller" toml:"controller" yaml:"controller" json:"controller"`
+	ML         *ML         `config:"ml" toml:"ml" yaml:"ml" json:"ml"`
 }
 
 func New() (*Config, error) {
@@ -85,5 +90,6 @@ func (c *Config) copy() *Config {
 		Postgres:   c.Postgres.copy(),
 		AWS:        c.AWS.copy(),
 		Controller: c.Controller.copy(),
+		ML:         c.ML.copy(),
 	}
 }

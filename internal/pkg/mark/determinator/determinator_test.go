@@ -4,10 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 func TestMark_New(t *testing.T) {
-	marker := NewMark()
+	marker := NewMark(zap.L())
 	tt := []struct {
 		name   string
 		answer string

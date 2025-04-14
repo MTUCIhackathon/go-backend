@@ -1,8 +1,6 @@
 package ml
 
 import (
-	"time"
-
 	"go.uber.org/zap"
 	"gopkg.in/resty.v1"
 
@@ -36,5 +34,3 @@ func New(cfg *config.Config, log *zap.Logger) (*PythonClient, error) {
 
 	return c, nil
 }
-
-func (c *PythonClient) () time.Duration {}
