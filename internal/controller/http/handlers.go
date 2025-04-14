@@ -17,38 +17,38 @@ func (ctrl *Controller) Ping(e echo.Context) error {
 
 func (ctrl *Controller) GetTestByID(e echo.Context) error {
 	var (
-		err  error
-		resp model.GetTestResponse
+		err      error
+		response model.GetTestResponse
 	)
-	id := e.Param("test_id")
-	userID := e.Request().Header.Get(echo.HeaderAuthorization)
-	ctrl.log.Debug("get test_id from path", zap.Any("id", id))
-	testID, err := uuid.Parse(id)
+	testID := e.Param("test_id")
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	id, err := uuid.Parse(testID)
 	if err != nil {
-		ctrl.log.Error("failed to parse test id", zap.String("id", id), zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse test id")
+		ctrl.log.Error("failed to parse test id", zap.Error(err))
 	}
-	data, err := ctrl.srv.GetTestByID(e.Request().Context(), userID, testID)
+	ctrl.log.Debug("get test_id from path", zap.Any("id", testID))
+
+	resp, err := ctrl.srv.GetTestByID(e.Request().Context(), token, id)
 	if err != nil {
-		ctrl.log.Error("failed to get by test_id", zap.String("id", id), zap.Error(err))
+		ctrl.log.Error("failed to get by test_id", zap.Any("id", id), zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get test by id")
 	}
 
-	question := make([]model.TestQuestion, len(data.Questions))
-	for i := 0; i < len(data.Questions); i++ {
-		question[i] = model.TestQuestion{
-			Order:    data.Questions[i].Order,
-			Question: data.Questions[i].Question,
+	questions := make([]model.TestQuestion, len(resp.Questions))
+	for i := 0; i < len(resp.Questions); i++ {
+		questions[i] = model.TestQuestion{
+			Order:    resp.Questions[i].Order,
+			Question: resp.Questions[i].Question,
 		}
 	}
 
-	resp = model.GetTestResponse{
-		ID:        data.ID,
-		Name:      data.Name,
-		Questions: question,
+	response = model.GetTestResponse{
+		ID:        resp.ID,
+		Name:      resp.Name,
+		Questions: questions,
 	}
 
-	return e.JSON(http.StatusOK, resp)
+	return e.JSON(http.StatusOK, response)
 }
 func (ctrl *Controller) GetAllTest(e echo.Context) error {
 	panic("not implemented")
@@ -130,14 +130,15 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 		return e.NoContent(http.StatusBadRequest)
 	}
 
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
 	DTO = dto.UpdatePassword{
 		OldPassword: req.OldPassword,
 		NewPassword: req.NewPassword,
+		Token:       token,
 	}
 
-	token := e.Request().Header.Get(echo.HeaderAuthorization)
-
-	err = ctrl.srv.UpdateConsumerPassword(e.Request().Context(), token, DTO)
+	err = ctrl.srv.UpdateConsumerPassword(e.Request().Context(), DTO)
 	if err != nil {
 		ctrl.log.Error("failed to update consumer")
 		return e.NoContent(http.StatusInternalServerError)

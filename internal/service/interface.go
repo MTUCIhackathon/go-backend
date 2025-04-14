@@ -8,7 +8,7 @@ import (
 
 type Interface interface {
 	GetAllTests(_ context.Context, token string) ([]dto.Test, error)
-	GetTestByID(ctx context.Context, token string, testID uuid.UUID) (*dto.Test, error)
+	GetTestByID(_ context.Context, token string, testID uuid.UUID) (*dto.Test, error)
 
 	//CreateResolved(req dto.CreateResolved) (*dto.Resolved, error)
 	//GetResolvedByUserID(userID uuid.UUID) (*dto.Resolved, error)
@@ -22,7 +22,7 @@ type Interface interface {
 	//CreateTokensForUser(token uuid.UUID) (*dto.Token, error)
 
 	CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*dto.Token, error)
-	UpdateConsumerPassword(ctx context.Context, token string, req dto.UpdatePassword) error
+	UpdateConsumerPassword(ctx context.Context, req dto.UpdatePassword) error
 	DeleteConsumerByID(ctx context.Context, token string) error
 	GetConsumerByID(ctx context.Context, token string) (*dto.Consumer, error)
 	Login(ctx context.Context, req dto.Login) (*dto.Token, error)

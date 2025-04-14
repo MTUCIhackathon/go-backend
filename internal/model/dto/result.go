@@ -6,9 +6,8 @@ import (
 )
 
 type Result struct {
-	UserID          uuid.UUID
-	ResolvedID      uuid.UUID
-	ResolvedVersion uuid.UUID
-	Profession      []string
-	CreatedAt       time.Time
+	UserID     uuid.UUID
+	ResolvedID uuid.UUID
+	Profession []string
+	CreatedAt  time.Time
 }

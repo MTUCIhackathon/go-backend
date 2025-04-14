@@ -110,14 +110,19 @@ func (s *Service) CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*
 	return res, nil
 }
 
-func (s *Service) UpdateConsumerPassword(ctx context.Context, token string, req dto.UpdatePassword) error {
+func (s *Service) UpdateConsumerPassword(ctx context.Context, req dto.UpdatePassword) error {
 	var err error
-	id, err := s.provider.GetConsumerIDFromRequest(token)
+	data, err := s.provider.GetDataFromToken(req.Token)
 	if err != nil {
 		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
 		return service.NewError(controller.ErrBadRequest, err)
 	}
 
+	if !data.IsAccess {
+		s.log.Debug("not is access", zap.Any("data", data))
+	}
+
+	id := data.ID
 	s.log.Debug("successfully fetch consumer ID", zap.Any("id", id))
 
 	err = s.valid.ValidatePassword(req.NewPassword)
@@ -163,11 +168,18 @@ func (s *Service) UpdateConsumerPassword(ctx context.Context, token string, req 
 }
 
 func (s *Service) DeleteConsumerByID(ctx context.Context, token string) error {
-	id, err := s.provider.GetConsumerIDFromRequest(token)
+	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
 		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
 		return service.NewError(controller.ErrBadRequest, err)
 	}
+
+	if !data.IsAccess {
+		s.log.Debug("not is access", zap.Any("data", data))
+		return service.NewError(controller.ErrInternal, err)
+	}
+
+	id := data.ID
 
 	s.log.Debug("successfully fetch consumer id", zap.Any("id", id))
 
@@ -182,23 +194,29 @@ func (s *Service) DeleteConsumerByID(ctx context.Context, token string) error {
 }
 
 func (s *Service) GetConsumerByID(ctx context.Context, token string) (*dto.Consumer, error) {
-	id, err := s.provider.GetConsumerIDFromRequest(token)
+	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
 		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
 		return nil, service.NewError(controller.ErrBadRequest, err)
 	}
 
+	if !data.IsAccess {
+		s.log.Debug("not is access", zap.Any("data", data))
+		return nil, service.NewError(controller.ErrInternal, err)
+	}
+
+	id := data.ID
 	s.log.Debug("successfully fetch consumer ID", zap.Any("id", id))
 
-	data, err := s.repo.Consumers().GetByID(ctx, id)
+	consumer, err := s.repo.Consumers().GetByID(ctx, id)
 	if err != nil {
 		s.log.Debug("failed to fetch consumer", zap.Error(err))
 		return nil, service.NewError(controller.ErrInternal, err)
 	}
 
-	s.log.Debug("successfully fetch consumer", zap.Any("consumer", data))
+	s.log.Debug("successfully fetch consumer", zap.Any("consumer", consumer))
 
-	return data, nil
+	return consumer, nil
 
 }
 
@@ -246,11 +264,16 @@ func (s *Service) Login(ctx context.Context, req dto.Login) (*dto.Token, error) 
 }
 
 func (s *Service) RefreshToken(_ context.Context, token string) (*dto.Token, error) {
-	id, err := s.provider.ValidRefreshToken(token)
+	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to validate refresh token", zap.Error(err))
+		s.log.Debug("failed to fetch refresh token", zap.Error(err))
 		return nil, service.NewError(controller.ErrBadRequest, err)
 	}
+	if data.IsAccess {
+		s.log.Debug("not is refresh", zap.Any("data", data))
+		return nil, service.NewError(controller.ErrInternal, err)
+	}
+	id := data.ID
 
 	s.log.Debug("successfully validate refresh token", zap.Any("id", id))
 
@@ -280,13 +303,16 @@ func (s *Service) RefreshToken(_ context.Context, token string) (*dto.Token, err
 }
 
 func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, error) {
-	_, err := s.provider.GetConsumerIDFromRequest(token)
+	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
+		s.log.Debug("failed to fetch test data", zap.Error(err))
 		return nil, service.NewError(controller.ErrBadRequest, err)
 	}
 
-	s.log.Debug("successfully fetch consumer ID", zap.Any("consumer", token))
+	if !data.IsAccess {
+		s.log.Debug("not is access", zap.Any("data", data))
+		return nil, service.NewError(controller.ErrInternal, err)
+	}
 
 	tests, err := s.inmemory.GetAll()
 	if err != nil {
@@ -299,11 +325,15 @@ func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, erro
 	return tests, nil
 }
 
-func (s *Service) GetTestByID(ctx context.Context, token string, testID uuid.UUID) (*dto.Test, error) {
-	_, err := s.provider.GetConsumerIDFromRequest(token)
+func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID) (*dto.Test, error) {
+	data, err := s.provider.GetDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer ID", zap.Error(err))
+		s.log.Debug("failed to fetch test data", zap.Error(err))
 		return nil, service.NewError(controller.ErrBadRequest, err)
+	}
+	if !data.IsAccess {
+		s.log.Debug("not is access", zap.Any("data", data))
+		return nil, service.NewError(controller.ErrInternal, err)
 	}
 
 	s.log.Debug("successfully fetch test ID", zap.Any("consumer", testID))

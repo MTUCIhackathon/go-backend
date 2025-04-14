@@ -16,7 +16,6 @@ type Question struct {
 
 type Resolved struct {
 	ID           uuid.UUID
-	Version      uint32
 	UserID       uuid.UUID
 	ResolvedType kind.Type
 	IsActive     bool

@@ -29,11 +29,11 @@ func (c *ConsumersRepository) Create(ctx context.Context, consumer dto.Consumer)
 		consumer.CreatedAt,
 	)
 	if err != nil {
-		c.log.Debug("failed to create consumer", zap.Error(err))
+		c.log.Error("failed to create consumer", zap.Error(err))
 		return c.store.pgErr(err)
 	}
 	if commandTag.RowsAffected() == 0 {
-		c.log.Debug("failed to insert consumer: zero rows affected", zap.Error(err))
+		c.log.Error("failed to insert consumer: zero rows affected", zap.Error(err))
 		return ErrZeroRowsAffected
 	}
 
@@ -46,7 +46,7 @@ func (c *ConsumersRepository) GetLoginAvailable(ctx context.Context, login strin
 	var exists bool
 	err := c.store.pool.QueryRow(ctx, query, login).Scan(&exists)
 	if err != nil {
-		c.store.log.Debug("failed to check login existing", zap.Error(err))
+		c.store.log.Error("failed to check login existing", zap.Error(err))
 		return false, c.store.pgErr(err)
 	}
 
@@ -60,12 +60,12 @@ func (c *ConsumersRepository) GetPasswordByID(ctx context.Context, id uuid.UUID)
 	var password string
 	err := c.store.pool.QueryRow(ctx, query, id).Scan(&password)
 	if err != nil {
-		c.store.log.Debug("failed to query user", zap.Error(err))
+		c.store.log.Error("failed to query user", zap.Error(err))
 		return "", c.store.pgErr(err)
 	}
 
 	if password == "" {
-		c.store.log.Debug("user not found", zap.Any("user", id))
+		c.store.log.Error("user not found", zap.Any("user", id))
 		return "", ErrZeroReturnedRows
 	}
 
@@ -78,7 +78,7 @@ func (c *ConsumersRepository) UpdatePasswordByID(ctx context.Context, id uuid.UU
 	const query = `UPDATE consumers SET password = $1 WHERE id = $2;`
 	_, err := c.store.pool.Exec(ctx, query, password, id)
 	if err != nil {
-		c.store.log.Debug("failed to update user", zap.Any("user", id))
+		c.store.log.Error("failed to update user", zap.Any("user", id))
 		return c.store.pgErr(err)
 	}
 
@@ -91,7 +91,7 @@ func (c *ConsumersRepository) DeleteByID(ctx context.Context, id uuid.UUID) erro
 	const query = `DELETE FROM consumers WHERE id = $1;`
 	_, err := c.store.pool.Exec(ctx, query, id)
 	if err != nil {
-		c.store.log.Debug("failed to delete user", zap.Any("user", id))
+		c.store.log.Error("failed to delete user", zap.Any("user", id))
 		return c.store.pgErr(err)
 	}
 
@@ -105,7 +105,7 @@ func (c *ConsumersRepository) GetByID(ctx context.Context, id uuid.UUID) (*dto.C
 	var consumer dto.Consumer
 	err := c.store.pool.QueryRow(ctx, query, id).Scan(&consumer.ID, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
 	if err != nil {
-		c.store.log.Debug("failed to query user", zap.Any("user", id))
+		c.store.log.Error("failed to query user", zap.Any("user", id))
 		return nil, c.store.pgErr(err)
 	}
 
@@ -119,7 +119,7 @@ func (c *ConsumersRepository) GetByLogin(ctx context.Context, login string) (*dt
 	var consumer dto.Consumer
 	err := c.store.pool.QueryRow(ctx, query, login).Scan(&consumer.ID, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
 	if err != nil {
-		c.store.log.Debug("failed to query user", zap.Any("user", login))
+		c.store.log.Error("failed to query user", zap.Any("user", login))
 		return nil, c.store.pgErr(err)
 	}
 

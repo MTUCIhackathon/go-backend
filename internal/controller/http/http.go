@@ -47,7 +47,7 @@ func (ctrl *Controller) configureMiddleware() {
 func (ctrl *Controller) configureRoutes() {
 	ctrl.server.GET("/ping", ctrl.Ping)
 	api := ctrl.server.Group("/api")
-
+	//TODO ты просил
 	consumer := api.Group("/consumer")
 	{
 		consumer.POST("/registration", ctrl.CreateConsumer)

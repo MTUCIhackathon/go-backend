@@ -5,6 +5,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +34,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 
 	tx, err := r.store.pool.Begin(ctx)
 	if err != nil {
-		r.log.Debug("failed to begin transaction", zap.Error(err))
+		r.log.Error("failed to begin transaction", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 	defer tx.Rollback(ctx)
@@ -42,7 +43,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 		data.UserID,
 		data.ResolvedType,
 	); err != nil {
-		r.log.Debug("failed to update last resolved", zap.Error(err))
+		r.log.Error("failed to update last resolved", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
@@ -54,7 +55,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 		data.CreatedAt,
 		data.PassedAt,
 	); err != nil {
-		r.log.Debug("failed to create resolved", zap.Error(err))
+		r.log.Error("failed to create resolved", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
@@ -72,18 +73,14 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 	br := tx.SendBatch(ctx, batch)
 	defer br.Close()
 
-	for i := 0; i < batch.Len(); i++ {
-		if _, err = br.Exec(); err != nil {
-			r.log.Debug("failed to insert resolved question",
-				zap.Int("question_index", i),
-				zap.Error(err),
-			)
-			return nil, r.store.pgErr(err)
-		}
+	err = multierr.Combine(br.Close())
+	if err != nil {
+		r.log.Error("failed to update last resolved question", zap.Error(err))
+		return nil, r.store.pgErr(err)
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		r.log.Debug("failed to commit transaction", zap.Error(err))
+		r.log.Error("failed to commit transaction", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
@@ -114,7 +111,6 @@ func (r *ResolvedRepository) GetAllActiveResolvedByUserID(ctx context.Context, i
 		var resolved dto.Resolved
 		err = rows.Scan(
 			&resolved.ID,
-			&resolved.Version,
 			&resolved.UserID,
 			&resolved.IsActive,
 			&resolved.CreatedAt,
@@ -122,13 +118,13 @@ func (r *ResolvedRepository) GetAllActiveResolvedByUserID(ctx context.Context, i
 			&resolved.Questions,
 		)
 		if err != nil {
-			r.log.Debug("failed to retrieve resolved questions", zap.Error(err))
+			r.log.Error("failed to retrieve resolved questions", zap.Error(err))
 			return nil, r.store.pgErr(err)
 		}
 		res = append(res, resolved)
 	}
 	if err := rows.Err(); err != nil {
-		r.log.Debug("failed to retrieve resolved questions", zap.Error(err))
+		r.log.Error("failed to retrieve resolved questions", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 
@@ -152,7 +148,6 @@ func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UU
 
 	err := r.store.pool.QueryRow(ctx, query, id, isActive, resolved_type).Scan(
 		&res.ID,
-		&res.Version,
 		&res.UserID,
 		&res.ResolvedType,
 		&res.IsActive,
@@ -162,7 +157,7 @@ func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UU
 	)
 
 	if err != nil {
-		r.log.Debug("failed to retrieve resolved questions", zap.Error(err))
+		r.log.Error("failed to retrieve resolved questions", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 	return &res, nil
@@ -173,7 +168,6 @@ func (r *ResolvedRepository) GetResolvedByID(ctx context.Context, id uuid.UUID) 
 	var res dto.Resolved
 	err := r.store.pool.QueryRow(ctx, query, id).Scan(
 		&res.ID,
-		&res.Version,
 		&res.UserID,
 		&res.ResolvedType,
 		&res.IsActive,
@@ -182,7 +176,7 @@ func (r *ResolvedRepository) GetResolvedByID(ctx context.Context, id uuid.UUID) 
 		&res.Questions)
 
 	if err != nil {
-		r.log.Debug("failed to retrieve resolved questions", zap.Error(err))
+		r.log.Error("failed to retrieve resolved questions", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
 

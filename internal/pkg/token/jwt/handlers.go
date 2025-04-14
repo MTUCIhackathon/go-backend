@@ -76,9 +76,14 @@ func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 	return tokenString, nil
 }
 
-func (prv *Provider) GetDataFromToken(jwtToken string) (*dto.UserDataInToken, error) {
+func (prv *Provider) GetDataFromToken(raw string) (*dto.UserDataInToken, error) {
 	prv.log.Debug("start getting data from jwt token")
 
+	jwtToken, err := prv.getJWTFromBearerToken(raw)
+	if err != nil {
+		prv.log.Debug("failed to parse jwt token", zap.Error(err))
+		return nil, err
+	}
 	parsedToken, err := jwt.ParseWithClaims(jwtToken, &JWT{}, prv.readKeyFunc)
 
 	if err != nil {
