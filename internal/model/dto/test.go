@@ -5,9 +5,10 @@ import (
 )
 
 type Test struct {
-	ID        uuid.UUID
-	Name      string
-	Questions []TestQuestion
+	ID          uuid.UUID
+	Name        string
+	Description string
+	Questions   []TestQuestion
 }
 
 type TestQuestion struct {

@@ -2,10 +2,12 @@ package jwt
 
 import (
 	"fmt"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
+	"strings"
+
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
-	"strings"
+
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 )
 
 func (prv *Provider) readKeyFunc(t *jwt.Token) (interface{}, error) {

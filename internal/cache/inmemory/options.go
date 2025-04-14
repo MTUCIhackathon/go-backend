@@ -52,7 +52,7 @@ func (l Loader) onStart(c *Cache) error {
 		return ErrReadingFile
 	}
 
-	m := make(map[string]map[int]string, firstTestLength)
+	m := make(map[string]map[int]string, testsLength)
 
 	err = yaml.Unmarshal(data, &m)
 	if err != nil {
@@ -64,11 +64,14 @@ func (l Loader) onStart(c *Cache) error {
 	}
 
 	for k, v := range m {
-		var test dto.Test
+		var (
+			test dto.Test
+		)
 
 		test.Questions = make([]dto.TestQuestion, 0, len(v))
-		test.ID = uuid.New()
 		test.Name = k
+		test.Description = v[0]
+		test.ID = uuid.New()
 
 		for i := 1; i <= len(v); i++ {
 			text, _ := v[i]

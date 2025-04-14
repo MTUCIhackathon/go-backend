@@ -11,11 +11,13 @@ import (
 )
 
 func TestCache_New(t *testing.T) {
-	cfg := &config.Cache{
-		CachePath: os.Getenv("CACHE_PATH"),
+	cfg := &config.Config{
+		Cache: &config.Cache{
+			CachePath: os.Getenv("CACHE_PATH"),
+		},
 	}
 
-	if cfg.CachePath == "" {
+	if cfg.Cache.CachePath == "" {
 		t.Skip("cache path env not set")
 	}
 
@@ -26,5 +28,7 @@ func TestCache_New(t *testing.T) {
 	require.NotNil(t, c)
 
 	keys := c.GetKeys()
-	require.Len(t, keys, 1)
+	t.Log(c.Get(keys[0]))
+	t.Log(c.Get(keys[1]))
+	require.Len(t, keys, 2)
 }

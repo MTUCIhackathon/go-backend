@@ -2,11 +2,13 @@ package pgx
 
 import (
 	"context"
-	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 )
 
 type ResolvedRepository struct {

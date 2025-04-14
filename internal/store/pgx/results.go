@@ -2,9 +2,11 @@ package pgx
 
 import (
 	"context"
-	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 )
 
 type ResultsRepository struct {

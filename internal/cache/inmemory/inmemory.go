@@ -14,7 +14,7 @@ import (
 
 var _ cache.Cache = (*Cache)(nil)
 
-const firstTestLength = 174
+const testsLength = 218
 
 type Cache struct {
 	mu     sync.RWMutex
@@ -31,15 +31,14 @@ func (c *Cache) Set(key uuid.UUID, test dto.Test) error {
 	return nil
 }
 
-// TODO think about pointer
-func (c *Cache) Get(key uuid.UUID) (dto.Test, error) {
+func (c *Cache) Get(key uuid.UUID) (*dto.Test, error) {
 	c.mu.RLock()
 	test, ok := c.data[key]
 	if !ok {
-		return dto.Test{}, ErrNotFound
+		return nil, ErrNotFound
 	}
 	c.mu.RUnlock()
-	return test, nil
+	return &test, nil
 }
 
 func (c *Cache) GetAll() ([]dto.Test, error) {

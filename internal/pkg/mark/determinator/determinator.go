@@ -3,8 +3,9 @@ package determinator
 import (
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
 )

@@ -1,9 +1,10 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 

@@ -13,7 +13,6 @@ type (
 	}
 	Consumer struct {
 		ID        uuid.UUID
-		Email     *string
 		Login     string
 		Password  string
 		CreatedAt time.Time

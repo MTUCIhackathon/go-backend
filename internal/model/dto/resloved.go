@@ -1,9 +1,11 @@
 package dto
 
 import (
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
 )
 
 type Question struct {

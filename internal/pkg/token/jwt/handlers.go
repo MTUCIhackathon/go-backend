@@ -1,8 +1,9 @@
 package jwt
 
 import (
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

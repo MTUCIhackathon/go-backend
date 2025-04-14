@@ -346,6 +346,5 @@ func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID)
 
 	s.log.Debug("successfully fetch test", zap.Any("test", test))
 
-	return &test, nil
-
+	return test, nil
 }
