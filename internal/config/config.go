@@ -66,14 +66,7 @@ type Config struct {
 	ML         *ML         `config:"ml" toml:"ml" yaml:"ml" json:"ml"`
 }
 
-func New(log *zap.Logger) (*Config, error) {
-	if log == nil {
-		log = zap.NewNop()
-		log.Named("config")
-		log.Warn("provided nil logger: creating with global logger")
-	} else {
-		log.Named("config")
-	}
+func New() (*Config, error) {
 
 	cfg := defaultConfig.copy()
 
@@ -86,7 +79,7 @@ func New(log *zap.Logger) (*Config, error) {
 		return nil, errors.Wrap(err, "error while loading config")
 	}
 
-	log.Info("loaded config", zap.Any("config", cfg))
+	zap.NewNop().Info("loaded config", zap.Any("config", cfg))
 
 	return cfg, nil
 }
