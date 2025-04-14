@@ -105,6 +105,7 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 }
 func (ctrl *Controller) GetConsumer(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
 	data, err := ctrl.srv.GetConsumerByID(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to get consumer by id")
