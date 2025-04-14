@@ -102,7 +102,7 @@ func (c *ConsumersRepository) DeleteByID(ctx context.Context, id uuid.UUID) erro
 }
 
 func (c *ConsumersRepository) GetByID(ctx context.Context, id uuid.UUID) (*dto.Consumer, error) {
-	const query = `SELECT * FROM consumers WHERE id = $1;`
+	const query = `SELECT id, email, login, password, created_at FROM consumers WHERE id = $1;`
 	var consumer dto.Consumer
 	err := c.store.pool.QueryRow(ctx, query, id).Scan(&consumer.ID, &consumer.Email, &consumer.Login, &consumer.Password, &consumer.CreatedAt)
 	if err != nil {
