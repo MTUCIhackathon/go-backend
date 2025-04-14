@@ -6,12 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateConsumerResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
 type (
+	CreateConsumerResponse struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+	}
 	GetConsumerResponse struct {
 		ID        uuid.UUID `json:"id"`
 		Login     string    `json:"login"`
@@ -37,5 +36,9 @@ type (
 	TestQuestion struct {
 		Order    int    `json:"order"`
 		Question string `json:"question"`
+	}
+
+	GetAllTestResponse struct {
+		GetTestResponse []GetTestResponse `json:"tests"`
 	}
 )

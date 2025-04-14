@@ -18,21 +18,33 @@ func (ctrl *Controller) Ping(e echo.Context) error {
 
 func (ctrl *Controller) GetTestByID(e echo.Context) error {
 	var (
-		err      error
 		response model.GetTestResponse
 	)
+
 	testID := e.Param("test_id")
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
 	id, err := uuid.Parse(testID)
 	if err != nil {
-		ctrl.log.Error("failed to parse test id", zap.Error(err))
+		ctrl.log.Error(
+			"failed to parse test id",
+			zap.Error(err),
+		)
+
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-	ctrl.log.Debug("get test_id from path", zap.Any("id", testID))
+
+	ctrl.log.Debug("get test id from path", zap.Any("id", testID))
 
 	resp, err := ctrl.srv.GetTestByID(e.Request().Context(), token, id)
 	if err != nil {
-		ctrl.log.Error("failed to get by test_id", zap.Any("id", id), zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get test by id")
+		ctrl.log.Error(
+			"failed to get test by id",
+			zap.String("id", id.String()),
+			zap.Error(err),
+		)
+
+		return handleErr(err)
 	}
 
 	questions := make([]model.TestQuestion, len(resp.Questions))
@@ -49,75 +61,93 @@ func (ctrl *Controller) GetTestByID(e echo.Context) error {
 		Questions: questions,
 	}
 
+	ctrl.log.Debug("successfully handle get test by id")
+
 	return e.JSON(http.StatusOK, response)
 }
+
 func (ctrl *Controller) GetAllTest(e echo.Context) error {
-	panic("not implemented")
-}
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
 
-func (ctrl *Controller) CreateResolved(e echo.Context) error {
-	panic("not implemented")
-}
+	resp, err := ctrl.srv.GetAllTests(e.Request().Context(), token)
+	if err != nil {
+		ctrl.log.Error(
+			"failed to get all tests",
+			zap.Error(err),
+		)
 
-func (ctrl *Controller) GetResolvedByID(e echo.Context) error {
-	panic("not implemented")
-}
-func (ctrl *Controller) GetManyResolved(e echo.Context) error {
-	panic("not implemented")
-}
+		return handleErr(err)
+	}
 
-func (ctrl *Controller) GetOldResolvedByID(e echo.Context) error {
-	panic("not implemented")
+	var tests []model.GetTestResponse
+
+	for _, t := range resp {
+		test := model.GetTestResponse{
+			ID:        t.ID,
+			Name:      t.Name,
+			Questions: make([]model.TestQuestion, len(resp)),
+		}
+
+		for i := 0; i < len(t.Questions); i++ {
+			test.Questions[i] = model.TestQuestion{
+				Order:    t.Questions[i].Order,
+				Question: t.Questions[i].Question,
+			}
+		}
+		tests = append(tests, test)
+	}
+
+	ctrl.log.Debug("successfully handle get all tests")
+
+	return e.JSON(http.StatusOK, model.GetAllTestResponse{
+		GetTestResponse: tests,
+	})
 }
 
 func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 	var (
-		req  model.CreateConsumerRequest
-		err  error
-		DTO  dto.CreateConsumer
-		resp model.CreateConsumerResponse
+		req model.CreateConsumerRequest
 	)
 
-	err = e.Bind(&req)
+	err := e.Bind(&req)
 	if err != nil {
 		ctrl.log.Error("failed to bind request")
-		return e.NoContent(http.StatusBadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	DTO = dto.CreateConsumer{
+	resp, err := ctrl.srv.CreateConsumer(e.Request().Context(), dto.CreateConsumer{
 		Login:    req.Login,
 		Password: req.Password,
-	}
-
-	data, err := ctrl.srv.CreateConsumer(e.Request().Context(), DTO)
+	})
 	if err != nil {
 		ctrl.log.Error("failed to create consumer")
-		return e.NoContent(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 
-	resp = model.CreateConsumerResponse{
-		AccessToken:  data.AccessToken,
-		RefreshToken: data.RefreshToken,
-	}
+	ctrl.log.Debug("successfully handle create consumer")
 
-	return e.JSON(http.StatusCreated, resp)
+	return e.JSON(http.StatusCreated, model.CreateConsumerResponse{
+		AccessToken:  resp.AccessToken,
+		RefreshToken: resp.RefreshToken,
+	})
 
 }
 func (ctrl *Controller) GetConsumer(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
 
-	data, err := ctrl.srv.GetConsumerByID(e.Request().Context(), token)
+	resp, err := ctrl.srv.GetConsumerByID(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to get consumer by id")
-		return e.NoContent(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 
-	resp := model.GetConsumerResponse{
-		ID:        data.ID,
-		Login:     data.Login,
-		CreatedAt: data.CreatedAt,
-	}
-	return e.JSON(http.StatusOK, resp)
+	ctrl.log.Debug("successfully handle get consumer")
+
+	return e.JSON(http.StatusOK, model.GetConsumerResponse{
+		ID:        resp.ID,
+		Login:     resp.Login,
+		CreatedAt: resp.CreatedAt,
+	})
 }
 func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 	var (
@@ -145,6 +175,9 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 		ctrl.log.Error("failed to update consumer")
 		return e.NoContent(http.StatusInternalServerError)
 	}
+
+	ctrl.log.Debug("successfully handle get consumer")
+
 	return e.NoContent(http.StatusNoContent)
 }
 
@@ -204,6 +237,23 @@ func (ctrl *Controller) RefreshToken(e echo.Context) error {
 	}
 	return e.JSON(http.StatusOK, resp)
 }
+
 func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {
+	panic("not implemented")
+}
+
+func (ctrl *Controller) CreateResolved(e echo.Context) error {
+	panic("not implemented")
+}
+
+func (ctrl *Controller) GetResolvedByID(e echo.Context) error {
+	panic("not implemented")
+}
+
+func (ctrl *Controller) GetManyResolved(e echo.Context) error {
+	panic("not implemented")
+}
+
+func (ctrl *Controller) GetOldResolvedByID(e echo.Context) error {
 	panic("not implemented")
 }

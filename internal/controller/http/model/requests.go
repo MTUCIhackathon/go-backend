@@ -11,10 +11,6 @@ type (
 	GetTestRequest struct {
 		Name string `json:"name"`
 	}
-	GetManyTestRequest struct {
-		// TODO ?
-		Names []string `json:"names"`
-	}
 )
 
 type (
