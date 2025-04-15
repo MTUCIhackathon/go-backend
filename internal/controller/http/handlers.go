@@ -132,7 +132,7 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 	})
 
 }
-func (ctrl *Controller) GetConsumer(e echo.Context) error {
+func (ctrl *Controller) GetMe(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
 
 	resp, err := ctrl.srv.GetConsumerByID(e.Request().Context(), token)

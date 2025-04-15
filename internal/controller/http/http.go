@@ -53,7 +53,7 @@ func (ctrl *Controller) configureRoutes() {
 		consumer.POST("/registration", ctrl.CreateConsumer)
 		consumer.PUT("/update_password", ctrl.UpdateConsumerPassword)
 		consumer.DELETE("/delete", ctrl.DeleteConsumer)
-		consumer.GET("", ctrl.GetConsumer)
+		consumer.GET("/get_me", ctrl.GetMe)
 		consumer.POST("/login", ctrl.Login)
 		consumer.GET("/refresh-token", ctrl.RefreshToken)
 	}
