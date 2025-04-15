@@ -27,6 +27,7 @@ type Resolved struct {
 	Questions    []Question
 }
 
+// TODO we should discuss about nil pointer
 type QuestionRequest struct {
 	ResolvedID     uuid.UUID
 	QuestionOrder  uint32

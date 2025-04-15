@@ -51,3 +51,10 @@ func (s *Service) GetConsumerDataFromToken(token string) (*dto.ConsumerDataInTok
 		return data, nil
 	}
 }
+
+func (s *Service) unmarshalPointer(str *string) (string, error) {
+	if str == nil {
+		return "", nil
+	}
+	return *str, nil
+}

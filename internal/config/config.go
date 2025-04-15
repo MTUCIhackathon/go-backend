@@ -52,6 +52,12 @@ var defaultConfig = &Config{
 		Host: "localhost",
 		Port: 8000,
 	},
+	Route: &Route{
+		FirstRoute:     "test1",
+		SecondRoute:    "test2",
+		ThirdRoute:     "test3",
+		SummarizeRoute: "summarize",
+	},
 }
 
 var configPath = os.Getenv("CONFIG_FILE_PATH")
@@ -64,6 +70,7 @@ type Config struct {
 	AWS        *AWS        `config:"aws" toml:"aws" yaml:"aws" json:"aws"`
 	Controller *Controller `config:"controller" toml:"controller" yaml:"controller" json:"controller"`
 	ML         *ML         `config:"ml" toml:"ml" yaml:"ml" json:"ml"`
+	Route      *Route      `config:"route" toml:"route" yaml:"route" json:"route"`
 }
 
 func New() (*Config, error) {

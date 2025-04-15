@@ -1,4 +1,4 @@
-package first
+package study
 
 import (
 	"errors"
@@ -53,7 +53,7 @@ type First struct {
 	areaList map[uint32]string
 }
 
-func New(log *zap.Logger) *First {
+func NewFirst(log *zap.Logger) *First {
 	if log == nil {
 		log = zap.NewNop()
 		log.Warn("logger for first assay was initialized by nil logger")
@@ -70,7 +70,7 @@ func (f *First) GetAreas(marks []dto.Mark) ([]dto.Area, error) {
 
 	sortMarks := f.sortMark(sum)
 
-	priorityAreas := make([]dto.Area, 3)
+	priorityAreas := make([]dto.Area, 5)
 
 	for i := 0; i < 3; i++ {
 		area, err := f.getArea(sortMarks[i].Order)
@@ -107,7 +107,7 @@ func (f *First) sumMark(marks []dto.Mark) [29]dto.Mark {
 	return res
 }
 
-func (f *First) sortMark(marks [29]dto.Mark) [3]dto.Mark {
+func (f *First) sortMark(marks [29]dto.Mark) [5]dto.Mark {
 	for i := 1; i < len(marks); i++ {
 		temp := marks[i]
 		j := i - 1
@@ -118,6 +118,7 @@ func (f *First) sortMark(marks [29]dto.Mark) [3]dto.Mark {
 		marks[j+1] = temp
 	}
 
-	res := [3]dto.Mark{marks[len(marks)-1], marks[len(marks)-2], marks[len(marks)-3]}
+	res := [5]dto.Mark{marks[len(marks)-1], marks[len(marks)-2], marks[len(marks)-3], marks[len(marks)-4], marks[len(marks)-5]}
+
 	return res
 }

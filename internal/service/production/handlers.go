@@ -559,13 +559,14 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 	switch req.ResolvedType {
 	case kind.FirstOrder:
 		areas, err = s.study.First().GetAreas(topMarks)
-
 		if err != nil {
 			s.log.Debug("failed to get marks", zap.Error(err))
 			return nil, service.NewError(
 				controller.ErrInternal,
 				errors.Wrap(err, "failed to add data into resolved"))
 		}
+
+		profession, err = s.ml.HandlerSendResultsForFirstTest(areas)
 
 	case kind.SecondOrder:
 		//TODO add logic for second test
