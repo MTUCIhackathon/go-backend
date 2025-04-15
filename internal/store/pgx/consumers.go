@@ -22,9 +22,10 @@ func newConsumersRepository(store *Store) *ConsumersRepository {
 }
 
 func (c *ConsumersRepository) Create(ctx context.Context, consumer dto.Consumer) error {
-	const query = `INSERT INTO consumers(id, login, password, created_at) VALUES ($1, $2, $3, $4);`
+	const query = `INSERT INTO consumers(id, email, login, password, created_at) VALUES ($1, $2, $3, $4, $5);`
 	commandTag, err := c.store.pool.Exec(ctx, query,
 		consumer.ID,
+		consumer.Email,
 		consumer.Login,
 		consumer.Password,
 		consumer.CreatedAt,

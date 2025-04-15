@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	markList = map[string]int{
+	markList = map[string]int8{
 		"да":         2,
 		"скорее да":  1,
 		"возможно":   0,
@@ -26,7 +26,7 @@ var (
 
 type Mark struct {
 	log      *zap.Logger
-	markList map[string]int
+	markList map[string]int8
 }
 
 func NewMark(log *zap.Logger) mark.Marker {
@@ -39,7 +39,7 @@ func NewMark(log *zap.Logger) mark.Marker {
 	}
 }
 
-func (m *Mark) MarkResult(answer string) (int, error) {
+func (m *Mark) MarkResult(answer string) (int8, error) {
 	result, ok := m.markList[strings.ToLower(answer)]
 	fmt.Println(strings.ToLower(answer))
 	if !ok {
@@ -48,11 +48,11 @@ func (m *Mark) MarkResult(answer string) (int, error) {
 	return result, nil
 }
 
-func (m *Mark) MarkDecode(answers [][]string) ([][]int, error) {
-	res := make([][]int, len(answers))
+func (m *Mark) MarkDecode(answers [][]string) ([][]int8, error) {
+	res := make([][]int8, len(answers))
 	length := len(answers)
 	for i := 0; i < length; i++ {
-		temp := make([]int, len(answers[i]))
+		temp := make([]int8, len(answers[i]))
 		for j := 0; j < len(answers[i]); j++ {
 			num, ok := m.markList[strings.ToLower(answers[i][j])]
 			if !ok {

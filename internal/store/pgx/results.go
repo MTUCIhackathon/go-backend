@@ -22,8 +22,11 @@ func newResultsRepository(store *Store) *ResultsRepository {
 }
 
 func (r *ResultsRepository) GetLastResultByFormId(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error) {
-	const query = `SELECT t.user_id,
+	const query = `SELECT
+       t.id,
+       t.user_id,
        t.resolved_id,
+       t.image_location,
        t.profession,
        t.created_at
 FROM test_results t
@@ -34,8 +37,10 @@ WHERE t.user_id = $1
 
 	var data dto.Result
 	err := r.store.pool.QueryRow(ctx, query, userID, formID, true).Scan(
+		&data.ID,
 		&data.UserID,
 		&data.ResolvedID,
+		&data.ImageLocation,
 		&data.Profession,
 		&data.CreatedAt,
 	)
@@ -48,8 +53,11 @@ WHERE t.user_id = $1
 }
 
 func (r *ResultsRepository) GetLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error) {
-	const query = `SELECT t.user_id,
+	const query = `SELECT
+       t.id,
+       t.user_id,
        t.resolved_id,
+       t.image_location,
        t.profession,
        t.created_at
 FROM test_results t
@@ -68,8 +76,10 @@ WHERE t.user_id = $1
 	for rows.Next() {
 		var result dto.Result
 		err = rows.Scan(
+			&result.ID,
 			&result.UserID,
 			&result.ResolvedID,
+			&result.ImageLocation,
 			&result.Profession,
 			&result.CreatedAt,
 		)
@@ -107,10 +117,12 @@ func (r *ResultsRepository) DeleteResult(ctx context.Context, resultID uuid.UUID
 }
 
 func (r *ResultsRepository) InsertResult(ctx context.Context, result dto.Result) error {
-	const query = `INSERT INTO test_results (user_id, resolved_id, profession, created_at) VALUES ($1, $2, $3, $4);`
+	const query = `INSERT INTO test_results (id, user_id, resolved_id, image_location, profession, created_at) VALUES ($1, $2, $3, $4, $5, $6);`
 	commandTag, err := r.store.pool.Exec(ctx, query,
+		result.ID,
 		result.UserID,
 		result.ResolvedID,
+		result.ImageLocation,
 		result.Profession,
 		result.CreatedAt,
 	)

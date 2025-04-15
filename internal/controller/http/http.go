@@ -36,6 +36,8 @@ func New(cfg *config.Config, log *zap.Logger, service service.Interface) (*Contr
 
 func (ctrl *Controller) configureMiddleware() {
 	ctrl.server.Use(
+		middleware.RequestID(),
+		middleware.Recover(),
 		middleware.Logger(),
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: []string{"*"},

@@ -21,6 +21,7 @@ require (
 	go.uber.org/multierr v1.10.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.31.0
+	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -45,7 +46,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
