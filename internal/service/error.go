@@ -13,10 +13,10 @@ func NewError(controllerErr error, serviceErr error) *Error {
 }
 
 func (e Error) Error() string {
-	if e.ControllerErr == nil {
+	if e.ServiceErr == nil {
 		return ""
 	}
-	return e.ControllerErr.Error()
+	return e.ServiceErr.Error()
 }
 
 func (e Error) Unwrap() []error {
