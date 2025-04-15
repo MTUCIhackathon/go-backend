@@ -3,6 +3,7 @@ package study
 import (
 	"go.uber.org/zap"
 
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay/study/first"
 )
 
@@ -18,14 +19,14 @@ func New(log *zap.Logger) *Study {
 	}
 	log.Named("study")
 
-	first := first.New(log)
+	firstTest := first.New(log)
 
 	return &Study{
 		log:   log,
-		first: first,
+		first: firstTest,
 	}
 }
 
-func (s *Study) First() *first.First {
+func (s *Study) First() assay.First {
 	return s.first
 }
