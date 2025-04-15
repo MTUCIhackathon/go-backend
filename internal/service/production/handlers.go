@@ -500,7 +500,6 @@ func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID)
 
 func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Result, error) {
 	var (
-		err        error
 		resp       dto.Resolved
 		areas      []dto.Area
 		profession []string
@@ -523,7 +522,6 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 	questions := make([]dto.Question, len(req.Questions))
 	topMarks := make([]dto.Mark, len(req.Questions))
 	for i := 0; i < len(req.Questions); i++ {
-
 		question := req.Questions[i]
 
 		mark, err := s.determinator.MarkResult(question.QuestionAnswer)
@@ -563,7 +561,6 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 
 	switch req.ResolvedType {
 	case kind.FirstOrder:
-
 		areas, err = s.study.First().GetAreas(topMarks)
 
 		if err != nil {
