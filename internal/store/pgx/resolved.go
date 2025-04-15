@@ -23,7 +23,7 @@ func newResolvedRepository(store *Store) *ResolvedRepository {
 	}
 }
 
-func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolved) (*dto.Resolved, error) {
+func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolved) error {
 	const queryUpdateLastResolved = `UPDATE resolved SET is_active = false WHERE user_id = $1 AND resolved_type = $2`
 	const queryCreateResolved = `
         INSERT INTO resolved 
@@ -31,13 +31,13 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
         VALUES($1, $2, $3, $4, $5, $6)`
 	const queryCreateResolvedQuestion = `
         INSERT INTO resolved_question 
-            (resolved_id, question_text, image_location, mark)
-        VALUES($1, $2, $3, $4)`
+            (resolved_id, question_order, question_text, question_answer, image_location, mark)
+        VALUES($1, $2, $3, $4, $5, $6)`
 
 	tx, err := r.store.pool.Begin(ctx)
 	if err != nil {
 		r.log.Error("failed to begin transaction", zap.Error(err))
-		return nil, r.store.pgErr(err)
+		return r.store.pgErr(err)
 	}
 	defer tx.Rollback(ctx)
 
@@ -46,7 +46,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 		data.ResolvedType,
 	); err != nil {
 		r.log.Error("failed to update last resolved", zap.Error(err))
-		return nil, r.store.pgErr(err)
+		return r.store.pgErr(err)
 	}
 
 	if _, err = tx.Exec(ctx, queryCreateResolved,
@@ -58,7 +58,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 		data.PassedAt,
 	); err != nil {
 		r.log.Error("failed to create resolved", zap.Error(err))
-		return nil, r.store.pgErr(err)
+		return r.store.pgErr(err)
 	}
 
 	batch := &pgx.Batch{}
@@ -67,6 +67,7 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 			data.ID,
 			q.QuestionOrder,
 			q.Issue,
+			q.QuestionAnswer,
 			q.ImageLocation,
 			q.Mark,
 		)
@@ -78,21 +79,22 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 	err = multierr.Combine(br.Close())
 	if err != nil {
 		r.log.Error("failed to update last resolved question", zap.Error(err))
-		return nil, r.store.pgErr(err)
+		return r.store.pgErr(err)
 	}
 
 	if err = tx.Commit(ctx); err != nil {
 		r.log.Error("failed to commit transaction", zap.Error(err))
-		return nil, r.store.pgErr(err)
+		return r.store.pgErr(err)
 	}
 
-	return &data, nil
+	r.log.Debug("successfully updated last resolved question and added new")
+	return nil
 }
 
 func (r *ResolvedRepository) GetAllActiveResolvedByUserID(ctx context.Context, id uuid.UUID) ([]dto.Resolved, error) {
 	const query = `SELECT 
-   		 r.*, 
-    	rq.*
+        r.id, r.user_id, r.resolved_type, r.is_active, r.created_at, r.passed_at, 
+    	rq.resolved_id, rq.question_order, rq.question_text, rq.answer, rq.image_location, rq.mark
 		FROM 
     	resolved r
 		LEFT JOIN 
@@ -130,13 +132,14 @@ func (r *ResolvedRepository) GetAllActiveResolvedByUserID(ctx context.Context, i
 		return nil, r.store.pgErr(err)
 	}
 
+	r.log.Debug("successfully retrieved all active resolved questions")
 	return res, nil
 }
 
 func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UUID, resolved_type string, isActive bool) (*dto.Resolved, error) {
 	const query = `SELECT 
-   		 r.*, 
-    	rq.*
+   		r.id, r.user_id, r.resolved_type, r.is_active, r.created_at, r.passed_at, 
+    	rq.resolved_id, rq.question_order, rq.question_text, rq.answer, rq.image_location, rq.mark
 		FROM 
     	resolved r
 		LEFT JOIN 
@@ -162,6 +165,8 @@ func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UU
 		r.log.Error("failed to retrieve resolved questions", zap.Error(err))
 		return nil, r.store.pgErr(err)
 	}
+
+	r.log.Debug("successfully retrieved resolved by user", zap.Any("data", res))
 	return &res, nil
 }
 

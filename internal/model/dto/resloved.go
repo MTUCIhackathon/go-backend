@@ -9,11 +9,12 @@ import (
 )
 
 type Question struct {
-	ResolvedID    uuid.UUID
-	QuestionOrder uint32
-	Issue         string
-	ImageLocation *string
-	Mark          int8
+	ResolvedID     uuid.UUID
+	QuestionOrder  uint32
+	Issue          string
+	QuestionAnswer string
+	ImageLocation  *string
+	Mark           int8
 }
 
 type Resolved struct {
@@ -24,4 +25,22 @@ type Resolved struct {
 	CreatedAt    time.Time
 	PassedAt     time.Time
 	Questions    []Question
+}
+
+type QuestionRequest struct {
+	ResolvedID     uuid.UUID
+	QuestionOrder  uint32
+	Issue          string
+	QuestionAnswer string
+	ImageLocation  *string
+}
+
+type ResolvedRequest struct {
+	ID           uuid.UUID
+	UserID       uuid.UUID
+	ResolvedType kind.Type
+	IsActive     bool
+	CreatedAt    time.Time
+	PassedAt     time.Time
+	Questions    []QuestionRequest
 }

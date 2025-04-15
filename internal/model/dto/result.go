@@ -7,8 +7,10 @@ import (
 )
 
 type Result struct {
-	UserID     uuid.UUID
-	ResolvedID uuid.UUID
-	Profession []string
-	CreatedAt  time.Time
+	ID            uuid.UUID
+	UserID        uuid.UUID
+	ResolvedID    uuid.UUID
+	ImageLocation *string
+	Profession    []string
+	CreatedAt     time.Time
 }

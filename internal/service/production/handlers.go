@@ -10,16 +10,10 @@ import (
 
 	"github.com/MTUCIhackathon/go-backend/internal/controller"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
 	"github.com/MTUCIhackathon/go-backend/internal/service"
 	"github.com/MTUCIhackathon/go-backend/internal/store/pgx"
 )
-
-/*func (s *Service) CreateResolved(req dto.CreateResolved) (*dto.Resolved, error) {
-	return nil, service.NewError(
-		controller.ErrInternal,
-		errors.Wrap(nil, "some err"),
-	)
-}*/
 
 func (s *Service) CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*dto.Token, error) {
 	var (
@@ -143,6 +137,13 @@ func (s *Service) UpdateConsumerPassword(ctx context.Context, req dto.UpdatePass
 		)
 	}
 
+	if !data.IsAccess {
+		return service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "token is not an access token"),
+		)
+	}
+
 	err = s.valid.ValidatePassword(req.NewPassword)
 	if err != nil {
 		s.log.Error(
@@ -248,6 +249,13 @@ func (s *Service) DeleteConsumerByID(ctx context.Context, token string) error {
 		)
 	}
 
+	if !data.IsAccess {
+		return service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "token is not an access token"),
+		)
+	}
+
 	err = s.repo.Consumers().DeleteByID(ctx, data.ID)
 	if err != nil {
 		if errors.Is(pgx.ErrNotFound, err) {
@@ -288,6 +296,13 @@ func (s *Service) GetConsumerByID(ctx context.Context, token string) (*dto.Consu
 		return nil, service.NewError(
 			controller.ErrUnauthorized,
 			errors.Wrap(err, "failed to get consumer data from token"),
+		)
+	}
+
+	if !data.IsAccess {
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "token is not an access token"),
 		)
 	}
 
@@ -440,6 +455,13 @@ func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, erro
 		)
 	}
 
+	if !data.IsAccess {
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "token is not an access token"),
+		)
+	}
+
 	s.log.Debug(
 		"successfully fetch consumer data from token",
 		zap.String("consumer_id", data.ID.String()),
@@ -480,6 +502,13 @@ func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID)
 		)
 	}
 
+	if !data.IsAccess {
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "token is not an access token"),
+		)
+	}
+
 	s.log.Debug(
 		"successfully fetch consumer data from token",
 		zap.String("consumer_id", data.ID.String()),
@@ -505,4 +534,130 @@ func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID)
 	)
 
 	return test, nil
+}
+
+func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Result, error) {
+	var (
+		err        error
+		resp       dto.Resolved
+		areas      []dto.Area
+		profession []string
+	)
+	data, err := s.provider.GetDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, err
+	}
+
+	if !data.IsAccess {
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"),
+		)
+	}
+
+	s.log.Debug("successfully fetch consumer data from token", zap.String("consumer_id", data.ID.String()))
+
+	questions := make([]dto.Question, len(req.Questions))
+	topMarks := make([]dto.Mark, len(req.Questions))
+	for i := 0; i < len(req.Questions); i++ {
+
+		question := req.Questions[i]
+
+		mark, err := s.determinator.MarkResult(question.QuestionAnswer)
+		if err != nil {
+			s.log.Debug("failed to determinate result", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrUnauthorized,
+				errors.Wrap(err, "failed to fetch consumer data from token"),
+			)
+		}
+
+		questions[i] = dto.Question{
+			ResolvedID:     question.ResolvedID,
+			QuestionOrder:  question.QuestionOrder,
+			Issue:          question.Issue,
+			QuestionAnswer: question.QuestionAnswer,
+			ImageLocation:  question.ImageLocation,
+			Mark:           mark,
+		}
+
+		topMarks[i] = dto.Mark{
+			Order: question.QuestionOrder,
+			Mark:  mark,
+		}
+
+	}
+
+	resp = dto.Resolved{
+		ID:           req.ID,
+		UserID:       req.UserID,
+		ResolvedType: req.ResolvedType,
+		IsActive:     req.IsActive,
+		CreatedAt:    req.CreatedAt,
+		PassedAt:     req.PassedAt,
+		Questions:    questions,
+	}
+
+	switch req.ResolvedType {
+	case kind.FirstOrder:
+
+		areas, err = s.study.First().GetAreas(topMarks)
+
+		if err != nil {
+			s.log.Debug("failed to get marks", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrInternal,
+				errors.Wrap(err, "failed to add data into resolved"))
+		}
+
+	case kind.SecondOrder:
+		//TODO add logic for second test
+		s.log.Debug("successfully fetch resolved data from token", zap.String("consumer_id", data.ID.String()))
+	case kind.ThirdOrder:
+		//TODO add logic for third logic
+		s.log.Debug("successfully fetch resolved data from token", zap.String("consumer_id", data.ID.String()))
+	default:
+		s.log.Debug("failed to determinate test type", zap.Any("test type", req.ResolvedType))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to determinate test type"))
+	}
+
+	s.log.Debug("successfully get priority fields", zap.Any("result", areas))
+
+	//TODO add logic for ml model
+
+	s.log.Debug("successfully get professions from ml", zap.Any("profession", profession))
+
+	//TODO ImageLocation
+	res := dto.Result{
+		ID:            uuid.New(),
+		UserID:        data.ID,
+		ResolvedID:    req.ID,
+		ImageLocation: nil,
+		Profession:    profession,
+		CreatedAt:     req.CreatedAt,
+	}
+
+	err = s.repo.Resolved().CreateResolved(ctx, resp)
+	if err != nil {
+		s.log.Debug("failed to create resolved", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to determinate test type"))
+
+	}
+
+	err = s.repo.Results().InsertResult(ctx, res)
+	if err != nil {
+		s.log.Debug("failed to insert result", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to determinate test type"))
+
+	}
+
+	return &res, nil
+
 }

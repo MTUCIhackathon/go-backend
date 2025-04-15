@@ -4,7 +4,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark/determinator"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
@@ -13,13 +15,15 @@ import (
 )
 
 type Service struct {
-	log      *zap.Logger
-	repo     store.Interface
-	provider token.Provider
-	config   *config.Config
-	encrypt  encrytpor.Interface
-	valid    validator.Interface
-	inmemory cache.Cache
+	log          *zap.Logger
+	repo         store.Interface
+	provider     token.Provider
+	config       *config.Config
+	encrypt      encrytpor.Interface
+	valid        validator.Interface
+	inmemory     cache.Cache
+	determinator determinator.Mark
+	study        assay.Interface
 }
 
 func New(
@@ -30,6 +34,8 @@ func New(
 	encrypt encrytpor.Interface,
 	valid validator.Interface,
 	inmemory cache.Cache,
+	determinator determinator.Mark,
+	study assay.Interface,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -48,13 +54,15 @@ func New(
 	}
 
 	s := &Service{
-		log:      log,
-		repo:     repo,
-		provider: provider,
-		config:   config,
-		encrypt:  encrypt,
-		valid:    valid,
-		inmemory: inmemory,
+		log:          log,
+		repo:         repo,
+		provider:     provider,
+		config:       config,
+		encrypt:      encrypt,
+		valid:        valid,
+		inmemory:     inmemory,
+		determinator: determinator,
+		study:        study,
 	}
 
 	return s, nil
