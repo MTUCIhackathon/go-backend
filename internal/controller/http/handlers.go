@@ -173,7 +173,7 @@ func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 	err = ctrl.srv.UpdateConsumerPassword(e.Request().Context(), DTO)
 	if err != nil {
 		ctrl.log.Error("failed to update consumer")
-		return e.NoContent(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 
 	ctrl.log.Debug("successfully handle get consumer")
@@ -187,7 +187,7 @@ func (ctrl *Controller) DeleteConsumer(e echo.Context) error {
 	err := ctrl.srv.DeleteConsumerByID(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to delete consumer")
-		return e.NoContent(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 	return e.NoContent(http.StatusNoContent)
 }
@@ -228,7 +228,7 @@ func (ctrl *Controller) RefreshToken(e echo.Context) error {
 	DTO, err := ctrl.srv.RefreshToken(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to refresh token")
-		return e.NoContent(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 
 	resp := model.RefreshTokenResponse{

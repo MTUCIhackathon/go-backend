@@ -29,8 +29,9 @@ type RefreshTokenResponse struct {
 
 type (
 	GetTestResponse struct {
-		ID        uuid.UUID      `json:"id"`
-		Name      string         `json:"name"`
+		ID   uuid.UUID `json:"id"`
+		Name string    `json:"name"`
+		// todo add descr
 		Questions []TestQuestion `json:"questions"`
 	}
 	TestQuestion struct {
