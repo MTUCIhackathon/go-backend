@@ -1,8 +1,8 @@
-package s3
+package webcloud
 
 import (
+	"bytes"
 	"context"
-	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
@@ -61,13 +61,12 @@ func (c *Client) ListObjects(ctx context.Context, bucket string) ([]string, erro
 	return result, nil
 }
 
-func (c *Client) PutObject(ctx context.Context, bucket string, key string, data io.Reader) error {
+func (c *Client) PutObject(ctx context.Context, bucket string, key string, data []byte) error {
 	_, err := c.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
-		Body:   data,
+		Body:   bytes.NewReader(bytes.NewBuffer(data).Bytes()),
 	})
-
 	return err
 }
 

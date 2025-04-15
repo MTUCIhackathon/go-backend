@@ -26,7 +26,11 @@ type Interface interface {
 	Login(ctx context.Context, req dto.Login) (*dto.Token, error)
 	RefreshToken(_ context.Context, token string) (*dto.Token, error)
 
-	PassTest(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Result, error)
+	PassTest(ctx context.Context, token string, req dto.ResolvedCreation) (*dto.Result, error)
+
+	SaveResult(ctx context.Context, token string, req dto.ResultCreation) error
+	GetResultByResolvedID(ctx context.Context, token string, resultID uuid.UUID) (*dto.Result, error)
+	GetResultsByUserID(ctx context.Context, token string) ([]dto.Result, error)
 }
 
 // Client

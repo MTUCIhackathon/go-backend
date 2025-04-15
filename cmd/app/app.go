@@ -30,6 +30,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator/tern"
 	"github.com/MTUCIhackathon/go-backend/pkg/pgx"
 	"github.com/MTUCIhackathon/go-backend/pkg/s3"
+	"github.com/MTUCIhackathon/go-backend/pkg/s3/webcloud"
 )
 
 func CreateApp() fx.Option {
@@ -39,7 +40,7 @@ func CreateApp() fx.Option {
 			logger.New,
 			config.New,
 			pgx.New,
-			s3.New,
+			fx.Annotate(webcloud.New, fx.As(new(s3.Interface))),
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),
 			fx.Annotate(jwt.NewProvider, fx.As(new(token.Provider))),

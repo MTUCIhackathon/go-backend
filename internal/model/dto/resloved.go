@@ -27,7 +27,7 @@ type Resolved struct {
 	Questions    []Question
 }
 
-type QuestionRequest struct {
+type QuestionInResolvedCreation struct {
 	ResolvedID     uuid.UUID
 	QuestionOrder  uint32
 	Issue          string
@@ -35,12 +35,12 @@ type QuestionRequest struct {
 	ImageLocation  *string
 }
 
-type ResolvedRequest struct {
+type ResolvedCreation struct {
 	ID           uuid.UUID
 	UserID       uuid.UUID
 	ResolvedType kind.Type
 	IsActive     bool
 	CreatedAt    time.Time
 	PassedAt     time.Time
-	Questions    []QuestionRequest
+	Questions    []QuestionInResolvedCreation
 }

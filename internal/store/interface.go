@@ -33,8 +33,8 @@ type (
 	}
 
 	ResultsRepository interface {
-		GetLastResultByFormId(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error)
-		GetLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error)
+		GetResultByResolvedIDAndUserID(ctx context.Context, userID uuid.UUID, resultID uuid.UUID) (*dto.Result, error)
+		GetResultByUserID(ctx context.Context, userID uuid.UUID) ([]dto.Result, error)
 		DeleteResult(ctx context.Context, resultID uuid.UUID) error
 		InsertResult(ctx context.Context, result dto.Result) error
 	}

@@ -134,6 +134,7 @@ func (ctrl *Controller) CreateConsumer(e echo.Context) error {
 	})
 
 }
+
 func (ctrl *Controller) GetMe(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
 
@@ -151,6 +152,7 @@ func (ctrl *Controller) GetMe(e echo.Context) error {
 		CreatedAt: resp.CreatedAt,
 	})
 }
+
 func (ctrl *Controller) UpdateConsumerPassword(e echo.Context) error {
 	var (
 		req model.UpdatePasswordRequest
@@ -258,4 +260,91 @@ func (ctrl *Controller) GetManyResolved(e echo.Context) error {
 
 func (ctrl *Controller) GetOldResolvedByID(e echo.Context) error {
 	panic("not implemented")
+}
+
+func (ctrl *Controller) GetMyResultByResolvedID(e echo.Context) error {
+	panic("not implemented")
+}
+
+func (ctrl *Controller) GetMyResults(e echo.Context) error {
+	panic("not implemented")
+}
+
+func (ctrl *Controller) SaveResult(e echo.Context) error {
+	var (
+		req model.CreateResultRequest
+	)
+
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	err := e.Bind(&req)
+	if err != nil {
+		ctrl.log.Error("failed to bind request")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	err = ctrl.srv.SaveResult(e.Request().Context(), token, dto.ResultCreation{
+		ResolveID:     req.ResolvedID,
+		ImageLocation: req.ImageLocation,
+		Professions:   req.Professions,
+	})
+	if err != nil {
+		ctrl.log.Error("failed to save result")
+		return handleErr(err)
+	}
+
+	return e.NoContent(http.StatusOK)
+}
+
+func (ctrl *Controller) GetResultByResolvedID(e echo.Context) error {
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	resultID := e.Param("resolved_id")
+
+	parsed, err := uuid.Parse(resultID)
+	if err != nil {
+		ctrl.log.Error("failed to parse resolved id")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	resp, err := ctrl.srv.GetResultByResolvedID(e.Request().Context(), token, parsed)
+	if err != nil {
+		ctrl.log.Error("failed to save result")
+		return handleErr(err)
+	}
+
+	return e.JSON(http.StatusOK, model.GetResultResponse{
+		ID:            resp.ID,
+		UserID:        resp.UserID,
+		ResolvedID:    resp.ResolvedID,
+		ImageLocation: resp.ImageLocation,
+		Professions:   resp.Profession,
+		CreatedAt:     resp.CreatedAt,
+	})
+}
+
+func (ctrl *Controller) GetMyResult(e echo.Context) error {
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	resp, err := ctrl.srv.GetResultsByUserID(e.Request().Context(), token)
+	if err != nil {
+		ctrl.log.Error("failed to save result")
+		return handleErr(err)
+	}
+
+	response := make([]model.GetResultResponse, 0, len(resp))
+
+	for _, r := range resp {
+		response = append(response, model.GetResultResponse{
+			ID:            r.ID,
+			UserID:        r.UserID,
+			ResolvedID:    r.ResolvedID,
+			ImageLocation: r.ImageLocation,
+			Professions:   r.Profession,
+			CreatedAt:     r.CreatedAt,
+		})
+	}
+
+	return e.JSON(http.StatusOK, model.GetResultsByUserIDResponse{
+		Results: response,
+	})
 }
