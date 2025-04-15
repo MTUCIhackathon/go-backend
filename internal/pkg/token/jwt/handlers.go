@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -92,13 +93,12 @@ func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 }
 
 func (prv *Provider) GetDataFromToken(raw string) (*dto.ConsumerDataInToken, error) {
-	jwtToken, err := prv.getJWTFromBearerToken(raw)
-	if err != nil {
-		prv.log.Debug("failed to parse jwt token", zap.Error(err))
-		return nil, err
+	splitToken := strings.Split(raw, "Bearer")
+	if len(splitToken) != 2 {
+		return nil, token.ErrorParsedToken
 	}
 
-	parsedToken, err := jwt.ParseWithClaims(jwtToken, &JWT{}, prv.readKeyFunc)
+	parsedToken, err := jwt.ParseWithClaims(strings.TrimSpace(splitToken[1]), &JWT{}, prv.readKeyFunc)
 	if err != nil {
 		prv.log.Debug("failed to parse jwt token", zap.Error(err))
 		return nil, token.ErrorParsedToken
@@ -131,4 +131,15 @@ func (prv *Provider) GetDataFromToken(raw string) (*dto.ConsumerDataInToken, err
 
 	prv.log.Debug("successfully parsed data", zap.Any("data", data))
 	return data, nil
+}
+
+func (prv *Provider) readKeyFunc(t *jwt.Token) (interface{}, error) {
+	switch t.Method.(type) {
+	case *jwt.SigningMethodRSA:
+		prv.log.Debug("successful read key")
+		return prv.publicKey, nil
+	default:
+		prv.log.Debug("unsupported signing method")
+		return nil, token.ErrorMethod
+	}
 }
