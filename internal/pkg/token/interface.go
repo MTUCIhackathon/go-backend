@@ -9,6 +9,6 @@ import (
 type Provider interface {
 	CreateAccessTokenForUser(userID uuid.UUID) (string, error)
 	CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
-	GetDataFromToken(raw string) (*dto.UserDataInToken, error)
+	GetDataFromToken(raw string) (*dto.ConsumerDataInToken, error)
 	CreateAccessAndRefreshTokenForUser(userID uuid.UUID) (string, string, error)
 }

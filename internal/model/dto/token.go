@@ -1,11 +1,19 @@
 package dto
 
-import "github.com/google/uuid"
+import (
+	"time"
 
-type UserDataInToken struct {
-	ID       uuid.UUID `json:"id"`
-	IsAccess bool      `json:"is_access"`
+	"github.com/google/uuid"
+)
+
+type ConsumerDataInToken struct {
+	ID        uuid.UUID
+	IsAccess  bool
+	ExpiresAt time.Time
+	NotBefore time.Time
+	IssuedAt  time.Time
 }
+
 type Token struct {
 	AccessToken  string
 	RefreshToken string

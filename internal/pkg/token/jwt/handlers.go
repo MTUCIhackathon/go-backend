@@ -91,22 +91,18 @@ func (prv *Provider) CreateRefreshTokenForUser(userID uuid.UUID) (string, error)
 	return tokenString, nil
 }
 
-func (prv *Provider) GetDataFromToken(raw string) (*dto.UserDataInToken, error) {
-	prv.log.Debug("start getting data from jwt token")
-
+func (prv *Provider) GetDataFromToken(raw string) (*dto.ConsumerDataInToken, error) {
 	jwtToken, err := prv.getJWTFromBearerToken(raw)
 	if err != nil {
 		prv.log.Debug("failed to parse jwt token", zap.Error(err))
 		return nil, err
 	}
-	parsedToken, err := jwt.ParseWithClaims(jwtToken, &JWT{}, prv.readKeyFunc)
 
+	parsedToken, err := jwt.ParseWithClaims(jwtToken, &JWT{}, prv.readKeyFunc)
 	if err != nil {
 		prv.log.Debug("failed to parse jwt token", zap.Error(err))
 		return nil, token.ErrorParsedToken
 	}
-
-	prv.log.Debug("parsed jwt token", zap.Any("claims", parsedToken))
 
 	claims, ok := parsedToken.Claims.(*JWT)
 	if !ok {
@@ -119,21 +115,18 @@ func (prv *Provider) GetDataFromToken(raw string) (*dto.UserDataInToken, error) 
 		return nil, token.ErrorTimeExpired
 	}
 
-	prv.log.Debug("parsed jwt token", zap.Any("claims", claims))
-
-	var ParsedID uuid.UUID
-
-	ParsedID, err = uuid.Parse(claims.RegisteredClaims.Issuer)
+	parsedID, err := uuid.Parse(claims.RegisteredClaims.Issuer)
 	if err != nil {
 		prv.log.Debug("failed to parse jwt token claim", zap.Error(err))
 		return nil, token.ErrorParsedID
 	}
 
-	prv.log.Debug("successfully parsed userID", zap.Any("id", ParsedID))
-
-	data := &dto.UserDataInToken{
-		ID:       ParsedID,
-		IsAccess: claims.IsAccess,
+	data := &dto.ConsumerDataInToken{
+		ID:        parsedID,
+		IsAccess:  claims.IsAccess,
+		ExpiresAt: claims.ExpiresAt.Time,
+		NotBefore: claims.NotBefore.Time,
+		IssuedAt:  claims.IssuedAt.Time,
 	}
 
 	prv.log.Debug("successfully parsed data", zap.Any("data", data))

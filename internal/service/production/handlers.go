@@ -121,7 +121,7 @@ func (s *Service) CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*
 		)
 	}
 
-	s.log.Debug("successfully create consumer", zap.String("consumer_id", consumer.ID.String()))
+	s.log.Debug("successfully created consumer", zap.String("consumer_id", consumer.ID.String()))
 
 	return &dto.Token{
 		AccessToken:  access,
@@ -130,17 +130,14 @@ func (s *Service) CreateConsumer(ctx context.Context, req dto.CreateConsumer) (*
 }
 
 func (s *Service) UpdateConsumerPassword(ctx context.Context, req dto.UpdatePassword) error {
-	data, err := s.provider.GetDataFromToken(req.Token)
+	data, err := s.GetConsumerDataFromToken(req.Token)
 	if err != nil {
 		s.log.Error(
 			"failed to get consumer data from token",
 			zap.Error(err),
 		)
 
-		return service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to get consumer data from token"),
-		)
+		return err
 	}
 
 	err = s.valid.ValidatePassword(req.NewPassword)
@@ -188,7 +185,7 @@ func (s *Service) UpdateConsumerPassword(ctx context.Context, req dto.UpdatePass
 		)
 
 		return service.NewError(
-			controller.ErrBadRequest,
+			controller.ErrForbidden,
 			errors.Wrap(err, "failed to compare old passwords"),
 		)
 	}
@@ -230,22 +227,20 @@ func (s *Service) UpdateConsumerPassword(ctx context.Context, req dto.UpdatePass
 		)
 	}
 
-	s.log.Debug("successfully update password for consumer", zap.String("consumer_id", data.ID.String()))
+	s.log.Debug("successfully updated password for consumer", zap.String("consumer_id", data.ID.String()))
 
 	return nil
 }
 
 func (s *Service) DeleteConsumerByID(ctx context.Context, token string) error {
-	data, err := s.provider.GetDataFromToken(token)
+	data, err := s.GetConsumerDataFromToken(token)
 	if err != nil {
 		s.log.Error(
 			"failed to get consumer data from token",
 			zap.Error(err),
 		)
-		return service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to get consumer data from token"),
-		)
+
+		return err
 	}
 
 	err = s.repo.Consumers().DeleteByID(ctx, data.ID)
@@ -272,23 +267,20 @@ func (s *Service) DeleteConsumerByID(ctx context.Context, token string) error {
 		)
 	}
 
-	s.log.Debug("successfully delete consumer", zap.String("consumer_id", data.ID.String()))
+	s.log.Debug("successfully deleted consumer", zap.String("consumer_id", data.ID.String()))
 
 	return nil
 }
 
 func (s *Service) GetConsumerByID(ctx context.Context, token string) (*dto.Consumer, error) {
-	data, err := s.provider.GetDataFromToken(token)
+	data, err := s.GetConsumerDataFromToken(token)
 	if err != nil {
 		s.log.Error(
 			"failed to get consumer data from token",
 			zap.Error(err),
 		)
 
-		return nil, service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to get consumer data from token"),
-		)
+		return nil, err
 	}
 
 	consumer, err := s.repo.Consumers().GetByID(ctx, data.ID)
@@ -353,7 +345,7 @@ func (s *Service) Login(ctx context.Context, req dto.Login) (*dto.Token, error) 
 		)
 
 		return nil, service.NewError(
-			controller.ErrBadRequest,
+			controller.ErrForbidden,
 			errors.Wrap(err, "failed to compare old passwords"),
 		)
 	}
@@ -400,7 +392,7 @@ func (s *Service) RefreshToken(_ context.Context, token string) (*dto.Token, err
 		)
 
 		return nil, service.NewError(
-			controller.ErrBadRequest,
+			controller.ErrForbidden,
 			ErrTokenNotAcceptable,
 		)
 	}
@@ -418,7 +410,7 @@ func (s *Service) RefreshToken(_ context.Context, token string) (*dto.Token, err
 		)
 	}
 
-	s.log.Debug("successfully refresh tokens for consumer", zap.Any("consumer_id", data.ID.String()))
+	s.log.Debug("successfully refreshed tokens for consumer", zap.Any("consumer_id", data.ID.String()))
 
 	return &dto.Token{
 		AccessToken:  access,
@@ -427,39 +419,31 @@ func (s *Service) RefreshToken(_ context.Context, token string) (*dto.Token, err
 }
 
 func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, error) {
-	data, err := s.provider.GetDataFromToken(token)
+	data, err := s.GetConsumerDataFromToken(token)
 	if err != nil {
 		s.log.Error(
 			"failed to get consumer data from token",
 			zap.Error(err),
 		)
 
-		return nil, service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to get consumer data from token"),
-		)
+		return nil, err
 	}
-
-	s.log.Debug(
-		"successfully fetch consumer data from token",
-		zap.String("consumer_id", data.ID.String()),
-	)
 
 	tests, err := s.inmemory.GetAll()
 	if err != nil {
 		s.log.Error(
-			"failed to fetch test list",
+			"failed to get test list",
 			zap.Error(err),
 		)
 
 		return nil, service.NewError(
 			controller.ErrInternal,
-			errors.Wrap(err, "failed to fetch test list"),
+			errors.Wrap(err, "failed to get test list"),
 		)
 	}
 
 	s.log.Debug(
-		"successfully fetch test for consumer",
+		"successfully got tests for consumer",
 		zap.String("consumer_id", data.ID.String()),
 	)
 
@@ -467,41 +451,33 @@ func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, erro
 }
 
 func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID) (*dto.Test, error) {
-	data, err := s.provider.GetDataFromToken(token)
+	data, err := s.GetConsumerDataFromToken(token)
 	if err != nil {
 		s.log.Error(
 			"failed to fetch consumer data from token",
 			zap.Error(err),
 		)
 
-		return nil, service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to fetch consumer data from token"),
-		)
+		return nil, err
 	}
-
-	s.log.Debug(
-		"successfully fetch consumer data from token",
-		zap.String("consumer_id", data.ID.String()),
-	)
 
 	test, err := s.inmemory.Get(testID)
 	if err != nil {
 		s.log.Error(
-			"failed to fetch test by id",
+			"failed to get test by id",
 			zap.Error(err),
 		)
 
 		return nil, service.NewError(
 			controller.ErrInternal,
-			errors.Wrap(err, "failed to fetch test by id"),
+			errors.Wrap(err, "failed to get test by id"),
 		)
 	}
 
 	s.log.Debug(
-		"successfully fetch test for consumer",
+		"successfully got test for consumer",
 		zap.String("test_id", test.ID.String()),
-		zap.String("consumer_id", test.ID.String()),
+		zap.String("consumer_id", data.ID.String()),
 	)
 
 	return test, nil
