@@ -6,7 +6,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark/determinator"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
@@ -22,7 +22,7 @@ type Service struct {
 	encrypt      encrytpor.Interface
 	valid        validator.Interface
 	inmemory     cache.Cache
-	determinator determinator.Mark
+	determinator mark.Marker
 	study        assay.Interface
 }
 
@@ -34,7 +34,7 @@ func New(
 	encrypt encrytpor.Interface,
 	valid validator.Interface,
 	inmemory cache.Cache,
-	determinator determinator.Mark,
+	determinator mark.Marker,
 	study assay.Interface,
 ) (*Service, error) {
 	if log == nil {
