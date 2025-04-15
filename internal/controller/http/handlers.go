@@ -85,7 +85,7 @@ func (ctrl *Controller) GetAllTest(e echo.Context) error {
 		test := model.GetTestResponse{
 			ID:        t.ID,
 			Name:      t.Name,
-			Questions: make([]model.TestQuestion, len(resp)),
+			Questions: make([]model.TestQuestion, len(t.Questions)),
 		}
 
 		for i := 0; i < len(t.Questions); i++ {
