@@ -3,7 +3,7 @@ CREATE TYPE test_type AS ENUM ('first_order_test', 'second_order_test', 'third_o
 CREATE TABLE consumers
 (
     id         UUID           NOT NULL,
-    email      VARCHAR UNIQUE NULLS NOT DISTINCT,
+    email      VARCHAR UNIQUE NULLS DISTINCT,
     login      VARCHAR UNIQUE NOT NULL,
     password   VARCHAR        NOT NULL,
     created_at TIMESTAMP      NOT NULL,

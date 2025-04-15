@@ -504,17 +504,14 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 		areas      []dto.Area
 		profession []string
 	)
-	data, err := s.provider.GetDataFromToken(token)
+	data, err := s.GetConsumerDataFromToken(token)
 	if err != nil {
-		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
-		return nil, err
-	}
-
-	if !data.IsAccess {
-		return nil, service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to fetch consumer data from token"),
+		s.log.Debug(
+			"failed to fetch consumer data from token",
+			zap.Error(err),
 		)
+
+		return nil, err
 	}
 
 	s.log.Debug("successfully fetch consumer data from token", zap.String("consumer_id", data.ID.String()))

@@ -9,7 +9,8 @@ type Controller struct {
 	Host           string `config:"host" toml:"host" yaml:"host" json:"host" `
 	Port           int    `config:"port" toml:"port" yaml:"port" json:"port" `
 	TimeoutSeconds int    `config:"timeout_seconds" toml:"timeout_seconds" yaml:"timeout_seconds" json:"timeout_seconds" `
-	LogLevel       string `config:"log_level" toml:"log_level" yaml:"log_level" json:"log_level" `
+	LogLevel       string `config:"log_level" toml:"log_level" yaml:"log_level" json:"log_level"`
+	ServerAddress  string `config:"server_address" toml:"server_address" yaml:"server_address" json:"server_address"`
 }
 
 func (c *Controller) Bind() string {
@@ -32,5 +33,7 @@ func (c *Controller) copy() *Controller {
 		Host:           c.Host,
 		Port:           c.Port,
 		TimeoutSeconds: c.TimeoutSeconds,
+		LogLevel:       c.LogLevel,
+		ServerAddress:  c.ServerAddress,
 	}
 }
