@@ -44,7 +44,7 @@ func New(
 		)
 	}
 
-	if repo == nil || provider == nil || config == nil || encrypt == nil || inmemory == nil {
+	if repo == nil || provider == nil || config == nil || encrypt == nil || inmemory == nil || valid == nil || study == nil {
 		log.Warn(
 			"provided nil service dependency",
 		)

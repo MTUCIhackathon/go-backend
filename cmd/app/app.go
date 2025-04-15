@@ -10,6 +10,8 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/controller"
 	"github.com/MTUCIhackathon/go-backend/internal/controller/http"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay/study"
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor/hash"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
@@ -47,6 +49,7 @@ func CreateApp() fx.Option {
 			fx.Annotate(hash.New, fx.As(new(encrytpor.Interface))),
 			fx.Annotate(production.New, fx.As(new(service.Interface))),
 			fx.Annotate(http.New, fx.As(new(controller.Controller))),
+			fx.Annotate(study.New, fx.As(new(assay.Interface))),
 		),
 		fx.Invoke(
 			controller.RunControllerFx,
