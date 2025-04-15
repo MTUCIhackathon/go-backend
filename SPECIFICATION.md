@@ -223,6 +223,7 @@ Content-Type application/json
     {
       "id": "<id>",
       "name": "<name>",
+      "description": "<description",
       "questions": [
         {
           "order": "<order>",
@@ -258,6 +259,7 @@ Content-Type application/json
 {
   "id": "<id>",
   "name": "<name>",
+  "description": "<description",
   "questions": [
     {
       "order": "<order>",

@@ -29,10 +29,10 @@ type RefreshTokenResponse struct {
 
 type (
 	GetTestResponse struct {
-		ID   uuid.UUID `json:"id"`
-		Name string    `json:"name"`
-		// todo add descr
-		Questions []TestQuestion `json:"questions"`
+		ID          uuid.UUID      `json:"id"`
+		Name        string         `json:"name"`
+		Description string         `json:"description"`
+		Questions   []TestQuestion `json:"questions"`
 	}
 	TestQuestion struct {
 		Order    int    `json:"order"`

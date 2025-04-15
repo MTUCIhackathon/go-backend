@@ -56,9 +56,10 @@ func (ctrl *Controller) GetTestByID(e echo.Context) error {
 	}
 
 	response = model.GetTestResponse{
-		ID:        resp.ID,
-		Name:      resp.Name,
-		Questions: questions,
+		ID:          resp.ID,
+		Name:        resp.Name,
+		Description: resp.Description,
+		Questions:   questions,
 	}
 
 	ctrl.log.Debug("successfully handle get test by id")
@@ -83,9 +84,10 @@ func (ctrl *Controller) GetAllTest(e echo.Context) error {
 
 	for _, t := range resp {
 		test := model.GetTestResponse{
-			ID:        t.ID,
-			Name:      t.Name,
-			Questions: make([]model.TestQuestion, len(t.Questions)),
+			ID:          t.ID,
+			Name:        t.Name,
+			Description: t.Description,
+			Questions:   make([]model.TestQuestion, len(t.Questions)),
 		}
 
 		for i := 0; i < len(t.Questions); i++ {
