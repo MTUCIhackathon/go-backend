@@ -24,15 +24,16 @@ func newResolvedRepository(store *Store) *ResolvedRepository {
 }
 
 func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolved) error {
-	const queryUpdateLastResolved = `UPDATE resolved SET is_active = false WHERE user_id = $1 AND resolved_type = $2`
-	const queryCreateResolved = `
-        INSERT INTO resolved 
-            (id, user_id, resolved_type, is_active, created_at, passed_at)
-        VALUES($1, $2, $3, $4, $5, $6)`
-	const queryCreateResolvedQuestion = `
-        INSERT INTO resolved_question 
-            (resolved_id, question_order, question_text, question_answer, image_location, mark)
-        VALUES($1, $2, $3, $4, $5, $6)`
+	const queryUpdateLastResolved = `UPDATE resolved
+SET is_active = false
+WHERE user_id = $1
+  AND resolved_type = $2`
+	const queryCreateResolved = `INSERT INTO resolved
+    (id, user_id, resolved_type, is_active, created_at, passed_at)
+VALUES ($1, $2, $3, $4, $5, $6)`
+	const queryCreateResolvedQuestion = `INSERT INTO resolved_questions
+(resolved_id, question_order, question_text, question_answer, image_location, mark)
+VALUES ($1, $2, $3, $4, $5, $6)`
 
 	tx, err := r.store.pool.Begin(ctx)
 	if err != nil {
@@ -92,16 +93,23 @@ func (r *ResolvedRepository) CreateResolved(ctx context.Context, data dto.Resolv
 }
 
 func (r *ResolvedRepository) GetAllActiveResolvedByUserID(ctx context.Context, id uuid.UUID) ([]dto.Resolved, error) {
-	const query = `SELECT 
-        r.id, r.user_id, r.resolved_type, r.is_active, r.created_at, r.passed_at, 
-    	rq.resolved_id, rq.question_order, rq.question_text, rq.answer, rq.image_location, rq.mark
-		FROM 
-    	resolved r
-		LEFT JOIN 
-    	resolved_question rq ON r.id = rq.form_id
-		WHERE 
-    	r.user_id = $1 
-    	AND r.is_active = TRUE; `
+	const query = `SELECT r.id,
+       r.user_id,
+       r.resolved_type,
+       r.is_active,
+       r.created_at,
+       r.passed_at,
+       rq.resolved_id,
+       rq.question_order,
+       rq.question_text,
+       rq.question_answer,
+       rq.image_location,
+       rq.mark
+FROM resolved r
+         LEFT JOIN
+     resolved_questions rq ON r.id = rq.form_id
+WHERE r.user_id = $1
+  AND r.is_active = TRUE;`
 
 	var res []dto.Resolved
 	rows, err := r.store.pool.Query(ctx, query, id)
