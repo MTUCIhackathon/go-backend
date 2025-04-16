@@ -4,6 +4,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
+	"github.com/MTUCIhackathon/go-backend/internal/ml"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
@@ -24,6 +25,7 @@ type Service struct {
 	inmemory     cache.Cache
 	determinator mark.Marker
 	study        assay.Interface
+	ml           ml.Interface
 }
 
 func New(
@@ -36,6 +38,7 @@ func New(
 	inmemory cache.Cache,
 	determinator mark.Marker,
 	study assay.Interface,
+	ml ml.Interface,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -44,7 +47,7 @@ func New(
 		)
 	}
 
-	if repo == nil || provider == nil || config == nil || encrypt == nil || inmemory == nil || valid == nil || study == nil {
+	if repo == nil || provider == nil || config == nil || encrypt == nil || inmemory == nil || valid == nil || study == nil || ml == nil {
 		log.Warn(
 			"provided nil service dependency",
 		)
@@ -63,6 +66,7 @@ func New(
 		inmemory:     inmemory,
 		determinator: determinator,
 		study:        study,
+		ml:           ml,
 	}
 
 	return s, nil

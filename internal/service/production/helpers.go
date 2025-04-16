@@ -40,6 +40,7 @@ func (s *Service) GetConsumerDataFromToken(token string) (*dto.ConsumerDataInTok
 			controller.ErrForbidden,
 			errors.New("failed to get consumer data from token: should be access"),
 		)
+	//TODO: delete this case, cuz this case already in pkg provider
 	case data.ExpiresAt.Before(time.Now()):
 		s.log.Error("failed to get consumer data from token: token expired")
 
@@ -50,4 +51,11 @@ func (s *Service) GetConsumerDataFromToken(token string) (*dto.ConsumerDataInTok
 	default:
 		return data, nil
 	}
+}
+
+func (s *Service) unmarshalPointer(str *string) (string, error) {
+	if str == nil {
+		return "", nil
+	}
+	return *str, nil
 }

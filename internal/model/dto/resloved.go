@@ -27,6 +27,7 @@ type Resolved struct {
 	Questions    []Question
 }
 
+// TODO we should discuss about nil pointer
 type QuestionRequest struct {
 	ResolvedID     uuid.UUID
 	QuestionOrder  uint32
@@ -37,7 +38,6 @@ type QuestionRequest struct {
 
 type ResolvedRequest struct {
 	ID           uuid.UUID
-	UserID       uuid.UUID
 	ResolvedType kind.Type
 	IsActive     bool
 	CreatedAt    time.Time
