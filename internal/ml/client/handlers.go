@@ -27,6 +27,9 @@ func (cli *PythonClient) HandlerSendResultsForFirstTest(areas []dto.Area) ([]str
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
 	}
+
+	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
+
 	return resp.Professions, nil
 }
 
