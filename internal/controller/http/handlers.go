@@ -270,9 +270,9 @@ func (ctrl *Controller) CreateResolved(e echo.Context) error {
 	for i := 0; i < len(request.Questions); i++ {
 		request.Questions[i] = dto.QuestionRequest{
 			ResolvedID:     request.ID,
-			QuestionOrder:  request.Questions[i].QuestionOrder,
-			Issue:          request.Questions[i].Issue,
-			QuestionAnswer: request.Questions[i].QuestionAnswer,
+			QuestionOrder:  req.Questions[i].QuestionOrder,
+			Issue:          req.Questions[i].Question,
+			QuestionAnswer: req.Questions[i].QuestionAnswer,
 			ImageLocation:  nil,
 		}
 	}
