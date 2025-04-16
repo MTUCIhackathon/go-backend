@@ -40,7 +40,7 @@ func (ctrl *Controller) configureMiddleware() {
 		middleware.Recover(),
 		middleware.Logger(),
 		middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     []string{ctrl.cfg.Controller.ServerAddress},
+			AllowOrigins:     []string{ctrl.cfg.Controller.ServerAddress, ctrl.cfg.Controller.TestAddress},
 			AllowMethods:     []string{http.MethodOptions, http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 			AllowCredentials: true,
@@ -80,6 +80,7 @@ func (ctrl *Controller) configureRoutes() {
 	resolved := api.Group("/resolved")
 	{
 		resolved.POST("/create", ctrl.CreateResolved)
+		resolved.GET("/:resolved_id", ctrl.GetResolvedByID)
 	}
 }
 

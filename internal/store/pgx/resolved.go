@@ -143,7 +143,7 @@ WHERE r.user_id = $1
 	return res, nil
 }
 
-func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UUID, resolved_type string, isActive bool) (*dto.Resolved, error) {
+func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UUID) (*dto.Resolved, error) {
 	const query = `SELECT 
    		r.id, r.user_id, r.resolved_type, r.is_active, r.created_at, r.passed_at, 
     	rq.resolved_id, rq.question_order, rq.question_text, rq.question_answer, rq.image_location, rq.mark
@@ -153,12 +153,11 @@ func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UU
     	resolved_questions rq ON r.id = rq.resolved_id
 		WHERE 
     	r.user_id = $1 
-    	AND r.is_active = $2
-		AND r.resolved_type = $3;`
+    	AND r.is_active = TRUE`
 
 	var res dto.Resolved
 
-	err := r.store.pool.QueryRow(ctx, query, id, isActive, resolved_type).Scan(
+	err := r.store.pool.QueryRow(ctx, query, id).Scan(
 		&res.ID,
 		&res.UserID,
 		&res.ResolvedType,

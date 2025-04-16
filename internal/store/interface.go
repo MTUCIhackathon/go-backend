@@ -28,7 +28,7 @@ type (
 	ResolvedRepository interface {
 		CreateResolved(ctx context.Context, data dto.Resolved) error
 		GetAllActiveResolvedByUserID(ctx context.Context, id uuid.UUID) ([]dto.Resolved, error)
-		GetResolvedByUserID(ctx context.Context, id uuid.UUID, resolved_type string, isActive bool) (*dto.Resolved, error)
+		GetResolvedByUserID(ctx context.Context, id uuid.UUID) (*dto.Resolved, error)
 		GetResolvedByID(ctx context.Context, id uuid.UUID) (*dto.Resolved, error)
 	}
 

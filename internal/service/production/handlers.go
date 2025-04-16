@@ -809,3 +809,41 @@ func (s *Service) GetResultsByUserID(ctx context.Context, token string) ([]dto.R
 
 	return results, nil
 }
+
+func (s *Service) GetResolvedByID(ctx context.Context, token string, resolvedID uuid.UUID) (*dto.Resolved, error) {
+	_, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Error(
+			"failed to fetch consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, err
+	}
+
+	resolved, err := s.repo.Resolved().GetResolvedByUserID(ctx, resolvedID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNotFound) {
+			s.log.Error(
+				"failed to get resolved by user id and result id: not found",
+				zap.Error(err),
+			)
+
+			return nil, service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to get resolved by user id and result id"),
+			)
+		}
+		s.log.Error(
+			"failed to get resolved by user id and result id",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get resolved by user id and result id"),
+		)
+	}
+
+	return resolved, nil
+}

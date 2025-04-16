@@ -8,6 +8,7 @@ import (
 type Controller struct {
 	Host           string `config:"host" toml:"host" yaml:"host" json:"host" `
 	Port           int    `config:"port" toml:"port" yaml:"port" json:"port" `
+	TestAddress    string `config:"test_address" toml:"test_address" yaml:"test_address" json:"test_address" `
 	TimeoutSeconds int    `config:"timeout_seconds" toml:"timeout_seconds" yaml:"timeout_seconds" json:"timeout_seconds" `
 	LogLevel       string `config:"log_level" toml:"log_level" yaml:"log_level" json:"log_level"`
 	ServerAddress  string `config:"server_address" toml:"server_address" yaml:"server_address" json:"server_address"`
@@ -32,6 +33,7 @@ func (c *Controller) copy() *Controller {
 	return &Controller{
 		Host:           c.Host,
 		Port:           c.Port,
+		TestAddress:    c.TestAddress,
 		TimeoutSeconds: c.TimeoutSeconds,
 		LogLevel:       c.LogLevel,
 		ServerAddress:  c.ServerAddress,

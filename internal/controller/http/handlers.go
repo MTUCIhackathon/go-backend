@@ -301,7 +301,43 @@ func (ctrl *Controller) CreateResolved(e echo.Context) error {
 }
 
 func (ctrl *Controller) GetResolvedByID(e echo.Context) error {
-	panic("not implemented")
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	resolvedID := e.Param("resolved_id")
+
+	parsedID, err := uuid.Parse(resolvedID)
+	if err != nil {
+		ctrl.log.Error("failed to parse resolved id")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	resp, err := ctrl.srv.GetResolvedByID(e.Request().Context(), token, parsedID)
+	if err != nil {
+		ctrl.log.Error("failed to create resolved request")
+		return handleErr(err)
+	}
+
+	response := model.GetResolvedResponse{
+		ID:           resp.ID,
+		UserID:       resp.UserID,
+		ResolvedType: resp.ResolvedType,
+		IsActive:     resp.IsActive,
+		PassedAt:     resp.PassedAt,
+		Questions:    make([]model.QuestionResponse, len(resp.Questions)),
+	}
+
+	for i := 0; i < len(resp.Questions); i++ {
+		response.Questions[i] = model.QuestionResponse{
+			ResolvedID:     resp.ID,
+			QuestionOrder:  resp.Questions[i].QuestionOrder,
+			Issue:          resp.Questions[i].Issue,
+			QuestionAnswer: resp.Questions[i].QuestionAnswer,
+			ImageLocation:  nil,
+			Mark:           resp.Questions[i].Mark,
+		}
+	}
+
+	return e.JSON(http.StatusOK, response)
+
 }
 
 func (ctrl *Controller) GetManyResolved(e echo.Context) error {
@@ -316,11 +352,16 @@ func (ctrl *Controller) GetMyResultByResolvedID(e echo.Context) error {
 	panic("not implemented")
 }
 
-func (ctrl *Controller) GetMyResults(e echo.Context) error {
-	panic("not implemented")
-}
-
-// todo delete
+//func (ctrl *Controller) GetMyResults(e echo.Context) error {
+//	token := e.Request().Header.Get(echo.HeaderAuthorization)
+//
+//	resp, err := ctrl.srv.Get(e.Request().Context(), token, parsed)
+//	if err != nil {
+//		ctrl.log.Error("failed to save result")
+//		return handleErr(err)
+//	}
+//
+//}
 
 func (ctrl *Controller) GetResultByResolvedID(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
