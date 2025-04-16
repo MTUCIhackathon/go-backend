@@ -42,7 +42,7 @@ func (ctrl *Controller) configureMiddleware() {
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins:     []string{ctrl.cfg.Controller.ServerAddress, ctrl.cfg.Controller.TestAddress},
 			AllowMethods:     []string{http.MethodOptions, http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
-			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 			AllowCredentials: true,
 		}),
 	)
