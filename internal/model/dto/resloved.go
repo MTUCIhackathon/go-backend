@@ -38,7 +38,6 @@ type QuestionRequest struct {
 
 type ResolvedRequest struct {
 	ID           uuid.UUID
-	UserID       uuid.UUID
 	ResolvedType kind.Type
 	IsActive     bool
 	CreatedAt    time.Time

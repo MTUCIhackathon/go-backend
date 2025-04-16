@@ -498,26 +498,21 @@ func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID)
 	return test, nil
 }
 
-func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Result, error) {
+func (s *Service) CreateResolved(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Resolved, error) {
 	var (
-		resp       dto.Resolved
-		areas      []dto.Area
-		profession []string
+		err  error
+		resp dto.Resolved
 	)
-	data, err := s.GetConsumerDataFromToken(token)
-	if err != nil {
-		s.log.Debug(
-			"failed to fetch consumer data from token",
-			zap.Error(err),
-		)
 
-		return nil, err
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
 	}
 
-	s.log.Debug("successfully fetch consumer data from token", zap.String("consumer_id", data.ID.String()))
-
 	questions := make([]dto.Question, len(req.Questions))
-	topMarks := make([]dto.Mark, len(req.Questions))
 	for i := 0; i < len(req.Questions); i++ {
 		question := req.Questions[i]
 
@@ -525,7 +520,7 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 		if err != nil {
 			s.log.Debug("failed to determinate result", zap.Error(err))
 			return nil, service.NewError(
-				controller.ErrUnauthorized,
+				controller.ErrInternal,
 				errors.Wrap(err, "failed to fetch consumer data from token"),
 			)
 		}
@@ -538,63 +533,16 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 			ImageLocation:  question.ImageLocation,
 			Mark:           mark,
 		}
-
-		topMarks[i] = dto.Mark{
-			Order: question.QuestionOrder,
-			Mark:  mark,
-		}
-
 	}
 
 	resp = dto.Resolved{
 		ID:           req.ID,
-		UserID:       req.UserID,
+		UserID:       userData.ID,
 		ResolvedType: req.ResolvedType,
 		IsActive:     req.IsActive,
 		CreatedAt:    req.CreatedAt,
 		PassedAt:     req.PassedAt,
 		Questions:    questions,
-	}
-
-	switch req.ResolvedType {
-	case kind.FirstOrder:
-		areas, err = s.study.First().GetAreas(topMarks)
-		if err != nil {
-			s.log.Debug("failed to get marks", zap.Error(err))
-			return nil, service.NewError(
-				controller.ErrInternal,
-				errors.Wrap(err, "failed to add data into resolved"))
-		}
-
-		profession, err = s.ml.HandlerSendResultsForFirstTest(areas)
-
-	case kind.SecondOrder:
-		//TODO add logic for second test
-		s.log.Debug("successfully fetch resolved data from token", zap.String("consumer_id", data.ID.String()))
-	case kind.ThirdOrder:
-		//TODO add logic for third logic
-		s.log.Debug("successfully fetch resolved data from token", zap.String("consumer_id", data.ID.String()))
-	default:
-		s.log.Debug("failed to determinate test type", zap.Any("test type", req.ResolvedType))
-		return nil, service.NewError(
-			controller.ErrInternal,
-			errors.Wrap(err, "failed to determinate test type"))
-	}
-
-	s.log.Debug("successfully get priority fields", zap.Any("result", areas))
-
-	//TODO add logic for ml model
-
-	s.log.Debug("successfully get professions from ml", zap.Any("profession", profession))
-
-	//TODO ImageLocation
-	res := dto.Result{
-		ID:            uuid.New(),
-		UserID:        data.ID,
-		ResolvedID:    req.ID,
-		ImageLocation: nil,
-		Profession:    profession,
-		CreatedAt:     req.CreatedAt,
 	}
 
 	err = s.repo.Resolved().CreateResolved(ctx, resp)
@@ -603,18 +551,140 @@ func (s *Service) PassTest(ctx context.Context, token string, req dto.ResolvedRe
 		return nil, service.NewError(
 			controller.ErrInternal,
 			errors.Wrap(err, "failed to determinate test type"))
-
 	}
 
-	err = s.repo.Results().InsertResult(ctx, res)
+	return &resp, nil
+}
+
+func (s *Service) CreateResultByFirstTest(ctx context.Context, token string, req dto.Resolved) (*dto.Result, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	if req.ResolvedType != kind.FirstOrder {
+		s.log.Debug("test type incorrect", zap.Any("result", req))
+	}
+
+	topMarks := make([]dto.Mark, len(req.Questions))
+
+	for i := 0; i < len(req.Questions); i++ {
+		mark := dto.Mark{
+			Order: req.Questions[i].QuestionOrder,
+			Mark:  req.Questions[i].Mark,
+		}
+		topMarks[i] = mark
+	}
+
+	areas, err := s.study.First().GetAreas(topMarks)
+	if err != nil {
+		s.log.Debug("failed to get marks", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get areas"))
+	}
+
+	professions, err := s.ml.HandlerSendResultsForFirstTest(areas)
+
+	resp := dto.Result{
+		ID:            uuid.New(),
+		UserID:        userData.ID,
+		ResolvedID:    req.ID,
+		ImageLocation: nil,
+		Profession:    professions,
+		CreatedAt:     req.CreatedAt,
+	}
+
+	err = s.repo.Results().CreateResult(ctx, resp)
 	if err != nil {
 		s.log.Debug("failed to insert result", zap.Error(err))
 		return nil, service.NewError(
 			controller.ErrInternal,
 			errors.Wrap(err, "failed to determinate test type"))
-
 	}
 
-	return &res, nil
+	return &resp, nil
+}
 
+func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, req dto.Resolved) (*dto.Result, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	if req.ResolvedType != kind.SecondOrder {
+		s.log.Debug("test type incorrect", zap.Any("result", req))
+	}
+
+	topMarks := make([]dto.Mark, len(req.Questions))
+
+	for i := 0; i < len(req.Questions); i++ {
+		mark := dto.Mark{
+			Order: req.Questions[i].QuestionOrder,
+			Mark:  req.Questions[i].Mark,
+		}
+		topMarks[i] = mark
+	}
+
+	personality, err := s.study.Second().GetPersonality(topMarks)
+	if err != nil {
+		s.log.Debug("failed to get marks", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get personality"))
+	}
+
+	mlReq, err := s.ml.HandlerSendResultsForSecondTest(personality)
+	if err != nil {
+		s.log.Debug("failed to insert result", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get personality"))
+	}
+
+	resp := dto.Result{
+		ID:            uuid.New(),
+		UserID:        userData.ID,
+		ResolvedID:    req.ID,
+		ImageLocation: nil,
+		Profession:    mlReq.Professions,
+		CreatedAt:     req.CreatedAt,
+	}
+
+	err = s.repo.Results().CreateResult(ctx, resp)
+
+	if err != nil {
+		s.log.Debug("failed to put result in db", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get personality"))
+	}
+
+	return &resp, nil
+}
+
+func (s *Service) GetResultByTestID(ctx context.Context, token string, testID uuid.UUID) (*dto.Result, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	resp, err := s.repo.Results().GetLastResultByResolvedID(ctx, userData.ID, testID)
+	if err != nil {
+		s.log.Debug("failed to fetch result", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get result"))
+	}
+
+	return resp, err
 }

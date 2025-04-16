@@ -5,10 +5,8 @@ import (
 
 	"github.com/MTUCIhackathon/go-backend/internal/ml/client/model"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
 )
 
-// TODO need to think how to realize input python routers, maybe put in config and add func for switch type test
 func (cli *PythonClient) HandlerSendResultsForFirstTest(areas []dto.Area) ([]string, error) {
 	var (
 		err  error
@@ -26,13 +24,8 @@ func (cli *PythonClient) HandlerSendResultsForFirstTest(areas []dto.Area) ([]str
 
 	dns := cli.cfg.ML.Bind()
 
-	route, err := cli.getRouteForTests(kind.FirstOrder)
-	if err != nil {
-		cli.log.Debug("failed to get route for ml", zap.Any("error", err))
-		return nil, err
-	}
-
-	url := cli.getServerAddress(dns, route)
+	//TODO logic with url
+	url := dns
 
 	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(url)
 	if err != nil {
@@ -40,4 +33,25 @@ func (cli *PythonClient) HandlerSendResultsForFirstTest(areas []dto.Area) ([]str
 		return nil, err
 	}
 	return resp.Professions, nil
+}
+
+func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.SecondTestMLResponse, error) {
+	var (
+		err  error
+		resp model.SecondTestMLResponse
+	)
+	req := model.SecondTestMLRequest{
+		TestResult: kind,
+	}
+	//here will be logic with url
+
+	url := ""
+
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(url)
+	if err != nil {
+		cli.log.Debug("failed to send request to ml", zap.Any("error", err))
+		return nil, err
+	}
+
+	return &resp, nil
 }

@@ -1,11 +1,15 @@
 package study
 
 import (
+	"errors"
+
 	"go.uber.org/zap"
+
+	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
 )
 
 var (
-	typeList = map[int]string{
+	typeList = map[uint32]string{
 		1:  "S",
 		2:  "E",
 		3:  "F",
@@ -49,9 +53,13 @@ var (
 	}
 )
 
+var (
+	ErrWrongPersonality = errors.New("wrong personality")
+)
+
 type Second struct {
 	log      *zap.Logger
-	typeList map[int]string
+	typeList map[uint32]string
 }
 
 func NewSecond(log *zap.Logger) *Second {
@@ -64,4 +72,41 @@ func NewSecond(log *zap.Logger) *Second {
 		log:      log,
 		typeList: typeList,
 	}
+}
+
+func (s *Second) GetPersonality(marks []dto.Mark) (string, error) {
+	m := make(map[string]int8)
+	res := ""
+
+	for i := 0; i < len(marks); i++ {
+		name, err := s.getPersonality(marks[i].Order)
+		if err != nil {
+			return "", ErrWrongPersonality
+		}
+		m[name] += marks[i].Mark
+	}
+
+	for len(res) != 4 {
+		maxi := int8(-127)
+		str := ""
+		for k, v := range m {
+			if v > maxi {
+				str = k
+			}
+		}
+		res += str
+		delete(m, str)
+	}
+
+	return res, nil
+
+}
+
+func (s *Second) getPersonality(num uint32) (string, error) {
+	result, ok := s.typeList[num]
+	if !ok {
+		return "", ErrWrongPersonality
+	}
+	return result, nil
+
 }

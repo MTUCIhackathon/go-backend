@@ -72,7 +72,7 @@ func (f *First) GetAreas(marks []dto.Mark) ([]dto.Area, error) {
 
 	priorityAreas := make([]dto.Area, 5)
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		area, err := f.getArea(sortMarks[i].Order)
 		if err != nil {
 			f.log.Debug("failed to get area from sort mark", zap.Error(err))
