@@ -5,5 +5,5 @@ type ScientificTestMLRequest struct {
 }
 
 type PersonalityTestMLRequest struct {
-	TestResult string `json:"testResult"`
+	TestResult string `json:"test_result"`
 }
