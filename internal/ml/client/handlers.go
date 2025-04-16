@@ -41,13 +41,14 @@ func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.Pe
 	}
 
 	uri := cli.cfg.ML.Bind() + testPersonalityTestRoute
-	cli.log.Debug("sending request to ml", zap.Any("req", cli.cfg.ML.Bind()+testPersonalityTestRoute))
 
 	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
 	if err != nil {
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
 	}
+
+	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
 
 	return &resp, nil
 }
