@@ -500,7 +500,6 @@ func (s *Service) GetTestByID(_ context.Context, token string, testID uuid.UUID)
 
 func (s *Service) CreateResolved(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Resolved, error) {
 	var (
-		err  error
 		resp dto.Resolved
 	)
 
@@ -521,7 +520,7 @@ func (s *Service) CreateResolved(ctx context.Context, token string, req dto.Reso
 			s.log.Debug("failed to determinate result", zap.Error(err))
 			return nil, service.NewError(
 				controller.ErrInternal,
-				errors.Wrap(err, "failed to fetch consumer data from token"),
+				errors.Wrap(err, "failed to determinate result"),
 			)
 		}
 

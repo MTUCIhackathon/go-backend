@@ -2,7 +2,6 @@ package determinator
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
@@ -41,10 +40,21 @@ func NewMark(log *zap.Logger) mark.Marker {
 
 func (m *Mark) MarkResult(answer string) (int8, error) {
 	result, ok := m.markList[strings.ToLower(answer)]
-	fmt.Println(strings.ToLower(answer))
 	if !ok {
+		m.log.Debug(
+			"filed to mark result: negative process result",
+			zap.String("answer", answer),
+			zap.Int8("result", result),
+		)
 		return 0, ErrWrongAnswer
 	}
+
+	m.log.Debug(
+		"marked result",
+		zap.String("answer", answer),
+		zap.Int8("result", result),
+	)
+
 	return result, nil
 }
 
