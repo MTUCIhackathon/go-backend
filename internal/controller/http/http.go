@@ -66,6 +66,7 @@ func (ctrl *Controller) configureRoutes() {
 	{
 		test.GET("/all", ctrl.GetAllTest)
 		test.GET("/:test_id", ctrl.GetTestByID)
+		test.GET("/ai", ctrl.CreateDataForMl)
 	}
 
 	result := api.Group("/results")
@@ -82,6 +83,7 @@ func (ctrl *Controller) configureRoutes() {
 		resolved.POST("/create", ctrl.CreateResolved)
 		resolved.GET("/:resolved_id", ctrl.GetResolvedByID)
 	}
+
 }
 
 func (ctrl *Controller) Start(ctx context.Context) error {
