@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
@@ -41,7 +42,7 @@ func CreateApp() fx.Option {
 		fx.Provide(
 			logger.New,
 			config.New,
-			pgx.New,
+			createPgx,
 			fx.Annotate(webcloud.New, fx.As(new(s3.Interface))),
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),
@@ -60,6 +61,14 @@ func CreateApp() fx.Option {
 			migrate.Migrate,
 		),
 	)
+}
+
+func createPgx(log *zap.Logger, cfg *config.Config) (*pgxpool.Pool, error) {
+	pool, err := pgx.New(cfg, log, pgx.AddUUIDSupport, pgx.WithEnumTypeSupport("test_type"))
+	if err != nil {
+		return nil, err
+	}
+	return pool, nil
 }
 
 func fxLogger(log *zap.Logger) fxevent.Logger {
