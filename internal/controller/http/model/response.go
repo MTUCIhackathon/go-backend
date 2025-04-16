@@ -100,3 +100,10 @@ type (
 		Professions   []string  `json:"professions"`
 	}
 )
+
+type (
+	CreateRequestForThirstTestResponse struct {
+		Questions string   `json:"questions"`
+		Answers   []string `json:"answers"`
+	}
+)

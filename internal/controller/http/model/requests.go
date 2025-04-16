@@ -52,3 +52,9 @@ type (
 		QuestionAnswer string `json:"question_answer"`
 	}
 )
+
+type (
+	CreateRequestForThirstTestRequest struct {
+		QA map[string]string `json:"questions"`
+	}
+)

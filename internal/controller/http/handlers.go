@@ -490,3 +490,28 @@ func (ctrl *Controller) CreateResult(e echo.Context) error {
 		Professions:   resp.Profession,
 	})
 }
+
+func (ctrl *Controller) CreateDataForMl(e echo.Context) error {
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	var req model.CreateRequestForThirstTestRequest
+	if err := e.Bind(&req); err != nil {
+		ctrl.log.Error("failed to bind request")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	qa := dto.ThirdTestAnswers{
+		QA: req.QA,
+	}
+
+	data, err := ctrl.srv.GetQuestionsForThirdTest(e.Request().Context(), token, qa)
+	if err != nil {
+		ctrl.log.Error("failed to save questions for third test")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	resp := model.CreateRequestForThirstTestResponse{
+		Questions: data.Questions,
+		Answers:   data.Answers,
+	}
+
+	return e.JSON(http.StatusOK, resp)
+}

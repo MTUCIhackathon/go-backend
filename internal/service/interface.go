@@ -28,4 +28,6 @@ type Interface interface {
 
 	CreateResolved(ctx context.Context, token string, req dto.ResolvedRequest) (*dto.Resolved, error)
 	GetResolvedByID(ctx context.Context, token string, resolvedID uuid.UUID) (*dto.Resolved, error)
+
+	GetQuestionsForThirdTest(_ context.Context, token string, questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error)
 }

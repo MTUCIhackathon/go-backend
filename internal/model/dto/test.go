@@ -21,5 +21,6 @@ type ThirdTestAnswers struct {
 }
 
 type ThirdTestQuestions struct {
-	Questions map[string][]string
+	Questions string   `json:"questions"`
+	Answers   []string `json:"answers"`
 }

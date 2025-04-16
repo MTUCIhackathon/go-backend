@@ -848,7 +848,7 @@ func (s *Service) GetResolvedByID(ctx context.Context, token string, resolvedID 
 	return resolved, nil
 }
 
-func (s *Service) GetQuestionsForThirdTest(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error) {
+func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error) {
 	userData, err := s.GetConsumerDataFromToken(token)
 	if err != nil {
 		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
@@ -858,5 +858,18 @@ func (s *Service) GetQuestionsForThirdTest(ctx context.Context, token string, qu
 	}
 
 	s.log.Debug("fetched consumer data from token", zap.Any("data", userData))
-	return nil, nil
+
+	answers := dto.ThirdTestAnswers{
+		QA: questions.QA,
+	}
+	data, err := s.ml.HandlerSendResultsForThirdTest(answers)
+	if err != nil {
+		s.log.Debug("failed to send results for third test", zap.Error(err))
+		errors.Wrap(err, "failed to send results for third test")
+	}
+
+	resp := &dto.ThirdTestQuestions{
+		Questions: data.Questions,
+	}
+	return resp, nil
 }
