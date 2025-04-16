@@ -414,7 +414,7 @@ func (ctrl *Controller) CreateResult(e echo.Context) error {
 		}
 	case kind.SecondOrder:
 		request := dto.Resolved{
-			ID:           uuid.New(),
+			ID:           req.ResolvedID,
 			ResolvedType: req.TestType,
 			IsActive:     true,
 			Questions:    make([]dto.Question, len(req.Questions)),
