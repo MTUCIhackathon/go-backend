@@ -57,3 +57,26 @@ type (
 		Results []GetResultResponse `json:"results"`
 	}
 )
+
+type (
+	CreateResolvedResponse struct {
+		ID        uuid.UUID                          `json:"id"`
+		Questions []QuestionInCreateResolvedResponse `json:"questions"`
+	}
+
+	QuestionInCreateResolvedResponse struct {
+		QuestionOrder  uint32 `json:"question_order"`
+		Question       string `json:"question"`
+		QuestionAnswer string `json:"question_answer"`
+		Mark           int8   `json:"mark"`
+	}
+)
+
+type (
+	CreateResultResponse struct {
+		ID            uuid.UUID `json:"id"`
+		ResolvedID    uuid.UUID `json:"resolved_id"`
+		ImageLocation *string   `json:"image_location"`
+		Professions   []string  `json:"professions"`
+	}
+)

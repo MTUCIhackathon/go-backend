@@ -10,6 +10,7 @@ import (
 
 	"github.com/MTUCIhackathon/go-backend/internal/controller/http/model"
 	"github.com/MTUCIhackathon/go-backend/internal/model/dto"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/style/kind"
 )
 
 func (ctrl *Controller) Ping(e echo.Context) error {
@@ -247,7 +248,56 @@ func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {
 }
 
 func (ctrl *Controller) CreateResolved(e echo.Context) error {
-	panic("not implemented")
+	var (
+		req model.CreateResolvedRequest
+	)
+
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	err := e.Bind(&req)
+	if err != nil {
+		ctrl.log.Error("failed to bind request")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	request := dto.ResolvedRequest{
+		ID:           uuid.New(),
+		ResolvedType: req.TestType,
+		IsActive:     true,
+		Questions:    make([]dto.QuestionRequest, len(req.Questions)),
+	}
+
+	for i := 0; i < len(request.Questions); i++ {
+		request.Questions[i] = dto.QuestionRequest{
+			ResolvedID:     request.ID,
+			QuestionOrder:  request.Questions[i].QuestionOrder,
+			Issue:          request.Questions[i].Issue,
+			QuestionAnswer: request.Questions[i].QuestionAnswer,
+			ImageLocation:  nil,
+		}
+	}
+
+	resp, err := ctrl.srv.CreateResolved(e.Request().Context(), token, request)
+	if err != nil {
+		ctrl.log.Error("failed to create resolved request")
+		return handleErr(err)
+	}
+
+	response := model.CreateResolvedResponse{
+		ID:        resp.ID,
+		Questions: make([]model.QuestionInCreateResolvedResponse, len(req.Questions)),
+	}
+
+	for i := 0; i < len(req.Questions); i++ {
+		response.Questions[i] = model.QuestionInCreateResolvedResponse{
+			QuestionOrder:  resp.Questions[i].QuestionOrder,
+			Question:       resp.Questions[i].Issue,
+			QuestionAnswer: resp.Questions[i].QuestionAnswer,
+			Mark:           resp.Questions[i].Mark,
+		}
+	}
+
+	return e.JSON(http.StatusOK, response)
 }
 
 func (ctrl *Controller) GetResolvedByID(e echo.Context) error {
@@ -270,31 +320,7 @@ func (ctrl *Controller) GetMyResults(e echo.Context) error {
 	panic("not implemented")
 }
 
-func (ctrl *Controller) SaveResult(e echo.Context) error {
-	var (
-		req model.CreateResultRequest
-	)
-
-	token := e.Request().Header.Get(echo.HeaderAuthorization)
-
-	err := e.Bind(&req)
-	if err != nil {
-		ctrl.log.Error("failed to bind request")
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
-
-	err = ctrl.srv.SaveResult(e.Request().Context(), token, dto.ResultCreation{
-		ResolveID:     req.ResolvedID,
-		ImageLocation: req.ImageLocation,
-		Professions:   req.Professions,
-	})
-	if err != nil {
-		ctrl.log.Error("failed to save result")
-		return handleErr(err)
-	}
-
-	return e.NoContent(http.StatusOK)
-}
+// todo delete
 
 func (ctrl *Controller) GetResultByResolvedID(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
@@ -346,5 +372,80 @@ func (ctrl *Controller) GetMyResult(e echo.Context) error {
 
 	return e.JSON(http.StatusOK, model.GetResultsByUserIDResponse{
 		Results: response,
+	})
+}
+
+func (ctrl *Controller) CreateResult(e echo.Context) error {
+	var (
+		req  model.CreateResultRequest
+		resp *dto.Result
+	)
+
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	err := e.Bind(&req)
+	if err != nil {
+		ctrl.log.Error("failed to bind request")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	switch req.TestType {
+	case kind.FirstOrder:
+		request := dto.Resolved{
+			ID:           uuid.New(),
+			ResolvedType: req.TestType,
+			IsActive:     true,
+			Questions:    make([]dto.Question, len(req.Questions)),
+		}
+
+		for i := 0; i < len(req.Questions); i++ {
+			request.Questions[i] = dto.Question{
+				QuestionOrder: req.Questions[i].QuestionOrder,
+				Mark:          req.Questions[i].Mark,
+			}
+		}
+
+		resp, err = ctrl.srv.CreateResultByFirstTest(e.Request().Context(), token, request)
+		if err != nil {
+			ctrl.log.Error(
+				"failed to save result for first test",
+				zap.Error(err),
+			)
+			return handleErr(err)
+		}
+	case kind.SecondOrder:
+		request := dto.Resolved{
+			ID:           uuid.New(),
+			ResolvedType: req.TestType,
+			IsActive:     true,
+			Questions:    make([]dto.Question, len(req.Questions)),
+		}
+
+		for i := 0; i < len(req.Questions); i++ {
+			request.Questions[i] = dto.Question{
+				QuestionOrder: req.Questions[i].QuestionOrder,
+				Mark:          req.Questions[i].Mark,
+			}
+		}
+
+		resp, err = ctrl.srv.CreateResultBySecondTest(e.Request().Context(), token, request)
+		if err != nil {
+			ctrl.log.Error(
+				"failed to save result for second test",
+				zap.Error(err),
+			)
+			return handleErr(err)
+		}
+	default:
+		ctrl.log.Error(
+			"failed to save result: got unknown test type",
+		)
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	return e.JSON(http.StatusOK, model.CreateResultResponse{
+		ID:            resp.ID,
+		ResolvedID:    resp.ResolvedID,
+		ImageLocation: resp.ImageLocation,
+		Professions:   resp.Profession,
 	})
 }

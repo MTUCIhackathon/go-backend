@@ -71,10 +71,16 @@ func (ctrl *Controller) configureRoutes() {
 	result := api.Group("/results")
 	{
 		result.GET("/all", nil)
-		result.GET("/:result_id", nil)
+		result.GET("/:result_id", ctrl.GetResultByResolvedID)
+		result.GET("/my", ctrl.GetMyResult)
 		result.POST("/send", nil)
+		result.POST("/create", ctrl.CreateResult)
 	}
 
+	resolved := api.Group("/resolved")
+	{
+		resolved.POST("/create", ctrl.CreateResolved)
+	}
 }
 
 func (ctrl *Controller) Start(ctx context.Context) error {

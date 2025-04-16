@@ -75,7 +75,6 @@ VALUES ($1, $2, $3, $4, $5, $6)`
 	}
 
 	br := tx.SendBatch(ctx, batch)
-	defer br.Close()
 
 	err = multierr.Combine(br.Close())
 	if err != nil {
@@ -107,7 +106,7 @@ func (r *ResolvedRepository) GetAllActiveResolvedByUserID(ctx context.Context, i
        rq.mark
 FROM resolved r
          LEFT JOIN
-     resolved_questions rq ON r.id = rq.form_id
+     resolved_questions rq ON r.id = rq.resolved_id
 WHERE r.user_id = $1
   AND r.is_active = TRUE;`
 
@@ -147,11 +146,11 @@ WHERE r.user_id = $1
 func (r *ResolvedRepository) GetResolvedByUserID(ctx context.Context, id uuid.UUID, resolved_type string, isActive bool) (*dto.Resolved, error) {
 	const query = `SELECT 
    		r.id, r.user_id, r.resolved_type, r.is_active, r.created_at, r.passed_at, 
-    	rq.resolved_id, rq.question_order, rq.question_text, rq.answer, rq.image_location, rq.mark
+    	rq.resolved_id, rq.question_order, rq.question_text, rq.question_answer, rq.image_location, rq.mark
 		FROM 
     	resolved r
 		LEFT JOIN 
-    	resolved_question rq ON r.id = rq.form_id
+    	resolved_questions rq ON r.id = rq.resolved_id
 		WHERE 
     	r.user_id = $1 
     	AND r.is_active = $2

@@ -595,7 +595,7 @@ func (s *Service) CreateResultByFirstTest(ctx context.Context, token string, req
 		ResolvedID:    req.ID,
 		ImageLocation: nil,
 		Profession:    professions,
-		CreatedAt:     req.CreatedAt,
+		CreatedAt:     time.Now(),
 	}
 
 	err = s.repo.Results().CreateResult(ctx, resp)
@@ -654,7 +654,7 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 		ResolvedID:    req.ID,
 		ImageLocation: nil,
 		Profession:    mlReq.Professions,
-		CreatedAt:     req.CreatedAt,
+		CreatedAt:     time.Now(),
 	}
 
 	err = s.repo.Results().CreateResult(ctx, resp)
