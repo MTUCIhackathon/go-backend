@@ -659,12 +659,11 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 	s.log.Debug("created result", zap.Any("result", resp))
 
 	err = s.repo.Results().CreateResult(ctx, resp)
-
 	if err != nil {
 		s.log.Debug("failed to put result in db", zap.Error(err))
 		return nil, service.NewError(
 			controller.ErrInternal,
-			errors.Wrap(err, "failed to get personality"))
+			errors.Wrap(err, "failed to put result in db"))
 	}
 
 	return &resp, nil
