@@ -49,12 +49,6 @@ func (m *Mark) MarkResult(answer string) (int8, error) {
 		return 0, ErrWrongAnswer
 	}
 
-	m.log.Debug(
-		"marked result",
-		zap.String("answer", answer),
-		zap.Int8("result", result),
-	)
-
 	return result, nil
 }
 
