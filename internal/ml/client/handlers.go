@@ -55,3 +55,11 @@ func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.Pe
 
 	return &resp, nil
 }
+
+func (cli *PythonClient) HandlerSendResultsForThirdTest(questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error) {
+	/*var (
+		err error
+		resp
+	)*/
+	return nil, nil
+}

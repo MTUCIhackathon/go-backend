@@ -138,3 +138,38 @@ func (r *ResultsRepository) CreateResult(ctx context.Context, result dto.Result)
 	return nil
 
 }
+
+func (r *ResultsRepository) GetAllResults(ctx context.Context, userID uuid.UUID) ([][]string, error) {
+	const query = `SELECT t.profession
+FROM test_results t
+         JOIN resolved r ON r.id = t.resolved_id
+WHERE t.user_id = $1 AND r.is_active = true;`
+	var (
+		allProfessions [][]string
+		professions    []string
+	)
+
+	rows, err := r.store.pool.Query(ctx, query, userID)
+	if err != nil {
+		r.log.Error("failed to retrieve all results", zap.Error(err))
+		return nil, r.store.pgErr(err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&professions)
+		if err != nil {
+			r.log.Error("failed to retrieve all results", zap.Error(err))
+			return nil, r.store.pgErr(err)
+		}
+		allProfessions = append(allProfessions, professions)
+	}
+
+	if err := rows.Err(); err != nil {
+		r.log.Error("failed to retrieve all results", zap.Error(err))
+		return nil, r.store.pgErr(err)
+	}
+	r.log.Debug("retrieved all results", zap.Any("results", allProfessions))
+	return allProfessions, nil
+}

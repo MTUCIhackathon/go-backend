@@ -847,3 +847,16 @@ func (s *Service) GetResolvedByID(ctx context.Context, token string, resolvedID 
 
 	return resolved, nil
 }
+
+func (s *Service) GetQuestionsForThirdTest(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	s.log.Debug("fetched consumer data from token", zap.Any("data", userData))
+	return nil, nil
+}

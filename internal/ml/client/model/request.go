@@ -7,3 +7,7 @@ type ScientificTestMLRequest struct {
 type PersonalityTestMLRequest struct {
 	TestResult string `json:"test_result"`
 }
+
+type AITestMLRequest struct {
+	AQ map[string]string `json:"questions"`
+}

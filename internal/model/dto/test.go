@@ -15,3 +15,11 @@ type TestQuestion struct {
 	Order    int
 	Question string
 }
+
+type ThirdTestAnswers struct {
+	QA map[string]string
+}
+
+type ThirdTestQuestions struct {
+	Questions map[string][]string
+}
