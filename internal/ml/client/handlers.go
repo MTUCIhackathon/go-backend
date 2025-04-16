@@ -57,9 +57,24 @@ func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.Pe
 }
 
 func (cli *PythonClient) HandlerSendResultsForThirdTest(questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error) {
-	/*var (
-		err error
-		resp
-	)*/
-	return nil, nil
+	var (
+		err  error
+		resp *dto.ThirdTestQuestions
+	)
+
+	req := model.AITestMLRequest{
+		AQ: questions.QA,
+	}
+
+	uri := cli.cfg.ML.Bind() + aiTestGenerateRoute
+
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
+	if err != nil {
+		cli.log.Debug("failed to send request to ml", zap.Error(err))
+		return nil, err
+	}
+
+	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
+
+	return resp, nil
 }

@@ -9,3 +9,8 @@ type PersonalityTestMLResponse struct {
 	Description     string   `json:"description"`
 	Professions     []string `json:"professions"`
 }
+
+type AITestMLResponse struct {
+	Question string   `json:"question"`
+	Answers  []string `json:"answers"`
+}
