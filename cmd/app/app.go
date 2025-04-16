@@ -64,7 +64,7 @@ func CreateApp() fx.Option {
 }
 
 func createPgx(log *zap.Logger, cfg *config.Config) (*pgxpool.Pool, error) {
-	pool, err := pgx.New(cfg, log, pgx.AddUUIDSupport, pgx.WithEnumTypeSupport("test_type"))
+	pool, err := pgx.New(cfg, log, pgx.AddUUIDSupport, pgx.WithEnumTypeSupport())
 	if err != nil {
 		return nil, err
 	}
