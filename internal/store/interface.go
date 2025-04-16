@@ -36,6 +36,6 @@ type (
 		GetResultByResolvedIDAndUserID(ctx context.Context, userID uuid.UUID, resultID uuid.UUID) (*dto.Result, error)
 		GetResultByUserID(ctx context.Context, userID uuid.UUID) ([]dto.Result, error)
 		DeleteResult(ctx context.Context, resultID uuid.UUID) error
-		InsertResult(ctx context.Context, result dto.Result) error
+		CreateResult(ctx context.Context, result dto.Result) error
 	}
 )

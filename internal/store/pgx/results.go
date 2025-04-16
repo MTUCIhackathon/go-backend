@@ -116,7 +116,7 @@ func (r *ResultsRepository) DeleteResult(ctx context.Context, resultID uuid.UUID
 	return nil
 }
 
-func (r *ResultsRepository) InsertResult(ctx context.Context, result dto.Result) error {
+func (r *ResultsRepository) CreateResult(ctx context.Context, result dto.Result) error {
 	const query = `INSERT INTO test_results (id, user_id, resolved_id, image_location, profession, created_at) VALUES ($1, $2, $3, $4, $5, $6);`
 	commandTag, err := r.store.pool.Exec(ctx, query,
 		result.ID,

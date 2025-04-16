@@ -1,4 +1,4 @@
-package smtp
+package client
 
 import (
 	"net/smtp"
@@ -13,8 +13,10 @@ import (
 type SMTP struct {
 	log  *zap.Logger
 	cfg  *config.Config
-	smtp smtp.Auth
+	smtp *smtp.Client
 }
+
+//TODO change SMTP struct
 
 func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
 	passwordRaw, err := os.ReadFile(cfg.SMTP.Password)
@@ -22,7 +24,7 @@ func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
 		return nil, smtpclient.ErrorReadPassword
 	}
 
-	password := string(passwordRaw)
+	_ = string(passwordRaw)
 
 	log.Debug("get password")
 
@@ -31,14 +33,14 @@ func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
 		return nil, smtpclient.ErrorReadLogin
 	}
 
-	login := string(loginRaw)
+	_ = string(loginRaw)
 
 	log.Debug("get login")
-
+	s, _ := smtp.NewClient(nil, "")
 	client := &SMTP{
 		log:  log,
 		cfg:  cfg,
-		smtp: smtp.PlainAuth("", login, password, cfg.SMTP.GetSMTPServerAddress()),
+		smtp: s,
 	}
 	return client, nil
 }

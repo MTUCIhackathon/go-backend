@@ -4,12 +4,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay/study/first"
 )
 
 type Study struct {
-	log   *zap.Logger
-	first *first.First
+	log    *zap.Logger
+	first  *First
+	second *Second
 }
 
 func New(log *zap.Logger) *Study {
@@ -19,14 +19,20 @@ func New(log *zap.Logger) *Study {
 	}
 	log.Named("study")
 
-	firstTest := first.New(log)
+	firstTest := NewFirst(log)
+	secondTest := NewSecond(log)
 
 	return &Study{
-		log:   log,
-		first: firstTest,
+		log:    log,
+		first:  firstTest,
+		second: secondTest,
 	}
 }
 
 func (s *Study) First() assay.First {
 	return s.first
+}
+
+func (s *Study) Second() assay.Second {
+	return s.second
 }
