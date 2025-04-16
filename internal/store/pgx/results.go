@@ -21,7 +21,7 @@ func newResultsRepository(store *Store) *ResultsRepository {
 	}
 }
 
-func (r *ResultsRepository) GetLastResultByResolvedID(ctx context.Context, userID uuid.UUID, formID uuid.UUID) (*dto.Result, error) {
+func (r *ResultsRepository) GetResultByResolvedIDAndUserID(ctx context.Context, userID uuid.UUID, resolvedID uuid.UUID) (*dto.Result, error) {
 	const query = `SELECT
        t.id,
        t.user_id,
@@ -36,7 +36,7 @@ WHERE t.user_id = $1
   AND r.is_active = true;`
 
 	var data dto.Result
-	err := r.store.pool.QueryRow(ctx, query, userID, formID, true).Scan(
+	err := r.store.pool.QueryRow(ctx, query, userID, resolvedID, true).Scan(
 		&data.ID,
 		&data.UserID,
 		&data.ResolvedID,
@@ -52,7 +52,7 @@ WHERE t.user_id = $1
 	return &data, nil
 }
 
-func (r *ResultsRepository) GetLastResults(ctx context.Context, userID uuid.UUID) ([]dto.Result, error) {
+func (r *ResultsRepository) GetResultByUserID(ctx context.Context, userID uuid.UUID) ([]dto.Result, error) {
 	const query = `SELECT
        t.id,
        t.user_id,
@@ -63,7 +63,7 @@ func (r *ResultsRepository) GetLastResults(ctx context.Context, userID uuid.UUID
 FROM test_results t
          JOIN resolved r ON r.id = t.resolved_id
 WHERE t.user_id = $1
-  AND t.is_active = $2;`
+  AND r.is_active = $2;`
 
 	var data []dto.Result
 

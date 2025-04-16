@@ -678,7 +678,7 @@ func (s *Service) GetResultByTestID(ctx context.Context, token string, testID uu
 			errors.Wrap(err, "failed to fetch consumer data from token"))
 	}
 
-	resp, err := s.repo.Results().GetLastResultByResolvedID(ctx, userData.ID, testID)
+	resp, err := s.repo.Results().GetResultByResolvedIDAndUserID(ctx, userData.ID, testID)
 	if err != nil {
 		s.log.Debug("failed to fetch result", zap.Error(err))
 		return nil, service.NewError(
@@ -687,4 +687,125 @@ func (s *Service) GetResultByTestID(ctx context.Context, token string, testID uu
 	}
 
 	return resp, err
+}
+
+func (s *Service) SaveResult(ctx context.Context, token string, req dto.ResultCreation) error {
+	data, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Error(
+			"failed to fetch consumer data from token",
+			zap.Error(err),
+		)
+
+		return err
+	}
+
+	err = s.repo.Results().CreateResult(ctx, dto.Result{
+		ID:            uuid.New(),
+		UserID:        data.ID,
+		ResolvedID:    req.ResolveID,
+		ImageLocation: req.ImageLocation,
+		Profession:    req.Professions,
+		CreatedAt:     time.Now(),
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrAlreadyExists) {
+			s.log.Error(
+				"failed to create result: already exists",
+				zap.Error(err),
+			)
+
+			return service.NewError(
+				controller.ErrAlreadyExist,
+				errors.Wrap(err, "failed to create result"),
+			)
+		}
+		s.log.Error(
+			"failed to create result",
+			zap.Error(err),
+		)
+
+		return service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create result"),
+		)
+	}
+
+	return nil
+}
+
+func (s *Service) GetResultByResolvedID(ctx context.Context, token string, resultID uuid.UUID) (*dto.Result, error) {
+	data, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Error(
+			"failed to fetch consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, err
+	}
+
+	result, err := s.repo.Results().GetResultByResolvedIDAndUserID(ctx, data.ID, resultID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNotFound) {
+			s.log.Error(
+				"failed to get result by user id and result id: not found",
+				zap.Error(err),
+			)
+
+			return nil, service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to get result by user id and result id"),
+			)
+		}
+		s.log.Error(
+			"failed to get result by user id and result id",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get result by user id and result id"),
+		)
+	}
+
+	return result, nil
+}
+
+func (s *Service) GetResultsByUserID(ctx context.Context, token string) ([]dto.Result, error) {
+	data, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Error(
+			"failed to fetch consumer data from token",
+			zap.Error(err),
+		)
+
+		return nil, err
+	}
+
+	results, err := s.repo.Results().GetResultByUserID(ctx, data.ID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNotFound) {
+			s.log.Error(
+				"failed to get results by user id",
+				zap.Error(err),
+			)
+
+			return nil, service.NewError(
+				controller.ErrNotFound,
+				errors.Wrap(err, "failed to get results by user id"),
+			)
+		}
+		s.log.Error(
+			"failed to get results by user id",
+			zap.Error(err),
+		)
+
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to get results by user id"),
+		)
+	}
+
+	return results, nil
 }

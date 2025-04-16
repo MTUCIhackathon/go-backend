@@ -10,6 +10,8 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/controller"
 	"github.com/MTUCIhackathon/go-backend/internal/controller/http"
+	"github.com/MTUCIhackathon/go-backend/internal/ml"
+	"github.com/MTUCIhackathon/go-backend/internal/ml/client"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay/study"
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
@@ -30,6 +32,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator/tern"
 	"github.com/MTUCIhackathon/go-backend/pkg/pgx"
 	"github.com/MTUCIhackathon/go-backend/pkg/s3"
+	"github.com/MTUCIhackathon/go-backend/pkg/s3/webcloud"
 )
 
 func CreateApp() fx.Option {
@@ -39,7 +42,7 @@ func CreateApp() fx.Option {
 			logger.New,
 			config.New,
 			pgx.New,
-			s3.New,
+			fx.Annotate(webcloud.New, fx.As(new(s3.Interface))),
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),
 			fx.Annotate(jwt.NewProvider, fx.As(new(token.Provider))),
@@ -50,6 +53,7 @@ func CreateApp() fx.Option {
 			fx.Annotate(production.New, fx.As(new(service.Interface))),
 			fx.Annotate(http.New, fx.As(new(controller.Controller))),
 			fx.Annotate(study.New, fx.As(new(assay.Interface))),
+			fx.Annotate(client.New, fx.As(new(ml.Interface))),
 		),
 		fx.Invoke(
 			controller.RunControllerFx,

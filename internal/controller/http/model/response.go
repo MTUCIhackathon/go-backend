@@ -43,3 +43,17 @@ type (
 		GetTestResponse []GetTestResponse `json:"tests"`
 	}
 )
+
+type (
+	GetResultResponse struct {
+		ID            uuid.UUID `json:"id"`
+		UserID        uuid.UUID `json:"user_id"`
+		ResolvedID    uuid.UUID `json:"resolved_id"`
+		ImageLocation *string   `json:"image_location"`
+		Professions   []string  `json:"professions"`
+		CreatedAt     time.Time `json:"created_at"`
+	}
+	GetResultsByUserIDResponse struct {
+		Results []GetResultResponse `json:"results"`
+	}
+)
