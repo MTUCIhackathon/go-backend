@@ -277,6 +277,8 @@ func (ctrl *Controller) CreateResolved(e echo.Context) error {
 		}
 	}
 
+	ctrl.log.Debug("calling create resolved test with request", zap.Any("request", request))
+
 	resp, err := ctrl.srv.CreateResolved(e.Request().Context(), token, request)
 	if err != nil {
 		ctrl.log.Error("failed to create resolved request")

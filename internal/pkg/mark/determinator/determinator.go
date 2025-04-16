@@ -42,7 +42,7 @@ func (m *Mark) MarkResult(answer string) (int8, error) {
 	result, ok := m.markList[strings.ToLower(answer)]
 	if !ok {
 		m.log.Debug(
-			"filed to mark result: negative process result",
+			"failed to mark result: negative process result",
 			zap.String("answer", answer),
 			zap.Int8("result", result),
 		)
