@@ -9,9 +9,9 @@ import (
 type Type string
 
 const (
-	FirstOrder  Type = "first_order"
-	SecondOrder Type = "second_order"
-	ThirdOrder  Type = "third_order"
+	FirstOrder  Type = "first_order_test"
+	SecondOrder Type = "second_order_test"
+	ThirdOrder  Type = "third_order_test"
 )
 
 func Parse(raw string) (Type, error) {
