@@ -1,10 +1,10 @@
 package model
 
-type FirstTestMLResponse struct {
+type ScientificTestMLResponse struct {
 	Professions []string `json:"professions"`
 }
 
-type SecondTestMLResponse struct {
+type PersonalityTestMLResponse struct {
 	PersonalityType string   `json:"personality_type"`
 	Description     string   `json:"description"`
 	Professions     []string `json:"professions"`

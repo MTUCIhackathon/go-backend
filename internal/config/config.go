@@ -49,8 +49,9 @@ var defaultConfig = &Config{
 		TimeoutSeconds: 0,
 	},
 	ML: &ML{
-		Host: "localhost",
-		Port: 8000,
+		Host:  "localhost",
+		Port:  8000,
+		Route: "api",
 	},
 }
 

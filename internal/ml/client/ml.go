@@ -19,6 +19,7 @@ func New(cfg *config.Config, log *zap.Logger) (*PythonClient, error) {
 	if cfg == nil {
 		return nil, ml.ErrNilConfig
 	}
+
 	if log == nil {
 		log = zap.NewNop()
 		log.Named("python-client")

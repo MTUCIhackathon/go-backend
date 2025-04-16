@@ -7,5 +7,5 @@ import (
 
 type Interface interface {
 	HandlerSendResultsForFirstTest(areas []dto.Area) ([]string, error)
-	HandlerSendResultsForSecondTest(kind string) (*model.SecondTestMLResponse, error)
+	HandlerSendResultsForSecondTest(kind string) (*model.PersonalityTestMLResponse, error)
 }

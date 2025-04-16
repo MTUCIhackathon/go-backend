@@ -10,7 +10,7 @@ import (
 func (cli *PythonClient) HandlerSendResultsForFirstTest(areas []dto.Area) ([]string, error) {
 	var (
 		err  error
-		resp model.FirstTestMLResponse
+		resp model.ScientificTestMLResponse
 	)
 
 	data := make(map[string]int)
@@ -18,38 +18,31 @@ func (cli *PythonClient) HandlerSendResultsForFirstTest(areas []dto.Area) ([]str
 		data[area.Field] = int(area.Mark)
 	}
 
-	req := model.FirstTestMLRequest{
+	req := model.ScientificTestMLRequest{
 		Professions: data,
 	}
 
-	dns := cli.cfg.ML.Bind()
-
-	//TODO logic with url
-	url := dns
-
-	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(url)
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(cli.cfg.ML.Bind() + testScientificTestRoute)
 	if err != nil {
-		cli.log.Debug("failed to send request to ml", zap.Any("error", err))
+		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
 	}
 	return resp.Professions, nil
 }
 
-func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.SecondTestMLResponse, error) {
+func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.PersonalityTestMLResponse, error) {
 	var (
 		err  error
-		resp model.SecondTestMLResponse
+		resp model.PersonalityTestMLResponse
 	)
-	req := model.SecondTestMLRequest{
+
+	req := model.PersonalityTestMLRequest{
 		TestResult: kind,
 	}
-	//here will be logic with url
 
-	url := ""
-
-	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(url)
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(cli.cfg.ML.Bind() + testPersonalityTestRoute)
 	if err != nil {
-		cli.log.Debug("failed to send request to ml", zap.Any("error", err))
+		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
 	}
 
