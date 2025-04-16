@@ -96,10 +96,9 @@ func (f *First) getArea(num uint32) (string, error) {
 }
 
 func (f *First) sumMark(marks []dto.Mark) [29]dto.Mark {
-	length := len(marks)
 	res := [29]dto.Mark{}
 
-	for i := 0; i < length; i++ {
+	for i := 0; i < 29; i++ {
 		res[i].Mark = marks[i].Mark + marks[i+29].Mark + marks[i+29*2].Mark + marks[i+29*3].Mark + marks[i+29*4].Mark + marks[i+29*5].Mark
 		res[i].Order = uint32(i + 1)
 	}
