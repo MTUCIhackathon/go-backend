@@ -656,6 +656,8 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 		CreatedAt:     time.Now(),
 	}
 
+	s.log.Debug("created result", zap.Any("result", resp))
+
 	err = s.repo.Results().CreateResult(ctx, resp)
 
 	if err != nil {

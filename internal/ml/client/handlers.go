@@ -40,9 +40,10 @@ func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.Pe
 		TestResult: kind,
 	}
 
+	uri := cli.cfg.ML.Bind() + testPersonalityTestRoute
 	cli.log.Debug("sending request to ml", zap.Any("req", cli.cfg.ML.Bind()+testPersonalityTestRoute))
 
-	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(cli.cfg.ML.Bind() + testPersonalityTestRoute)
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
 	if err != nil {
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
