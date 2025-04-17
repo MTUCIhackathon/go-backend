@@ -91,7 +91,7 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa dto.QA) ([]string, error
 
 	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
 
-	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
+	_, err = cli.cli.R().SetBody(req.AQ).SetResult(&resp).Post(uri)
 	if err != nil {
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
