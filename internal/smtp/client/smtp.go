@@ -13,9 +13,11 @@ type SMTP struct {
 
 func New(cfg *config.Config, log *zap.Logger) (*SMTP, error) {
 	client := &SMTP{
-		log: log,
+		log: log.Named("smtp"),
 		cfg: cfg,
 	}
+
+	client.log.Info("creating SMTP client with config", zap.Any("config", cfg.SMTP))
 
 	return client, nil
 }
