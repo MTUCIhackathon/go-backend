@@ -130,7 +130,7 @@ func (cli *PythonClient) HandlerGetCommonResultByML(professions [][]string) ([]s
 
 	cli.log.Debug("prepare request to send", zap.Any("request", req))
 
-	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
+	uri := cli.cfg.ML.Bind() + summarySummarizeRoute
 
 	cli.log.Debug("get uri address", zap.Any("uri", uri))
 
