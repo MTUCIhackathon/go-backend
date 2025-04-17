@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -43,7 +45,7 @@ func CreateApp() fx.Option {
 			logger.New,
 			config.New,
 			createPgx,
-			fx.Annotate(webcloud.New, fx.As(new(s3.Interface))),
+			createS3,
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),
 			fx.Annotate(jwt.NewProvider, fx.As(new(token.Provider))),
@@ -61,6 +63,21 @@ func CreateApp() fx.Option {
 			migrate.Migrate,
 		),
 	)
+}
+
+func createS3(log *zap.Logger, cfg *config.Config) (s3.Interface, error) {
+	aws, err := webcloud.New(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Named("aws").Debug("created aws", zap.Any("aws", aws))
+
+	if aws == nil {
+		return nil, errors.New("aws is nil")
+	}
+
+	return aws, nil
 }
 
 func createPgx(log *zap.Logger, cfg *config.Config) (*pgxpool.Pool, error) {
