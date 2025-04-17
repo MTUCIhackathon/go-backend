@@ -673,7 +673,7 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 	}
 
 	if len(mlReq.Professions) != 0 {
-		professionWinner := mlReq.Professions[1]
+		professionWinner := mlReq.Professions[0]
 
 		imageKey := fmt.Sprintf("%s-%s", professionWinner, resp.ID)
 

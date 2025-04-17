@@ -64,5 +64,7 @@ func (s *Service) UploadImage(ctx context.Context, profession string, imageKey s
 		return nil, err
 	}
 
+	s.log.Debug("image link generated", zap.Any("link", imageLink))
+
 	return &imageLink, nil
 }
