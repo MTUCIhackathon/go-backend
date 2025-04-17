@@ -38,5 +38,6 @@ type (
 		DeleteResult(ctx context.Context, resultID uuid.UUID) error
 		CreateResult(ctx context.Context, result dto.Result) error
 		GetAllResults(ctx context.Context, userID uuid.UUID) ([][]string, error)
+		SetImageToResult(ctx context.Context, imageLocation string, resultID uuid.UUID) (bool, error)
 	}
 )

@@ -164,7 +164,7 @@ func (cli *PythonClient) HandlerGenerateImage(profession string) ([]byte, error)
 
 	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
 
-	encResult, err := base64.RawStdEncoding.DecodeString(resp.ImageData)
+	encResult, err := base64.StdEncoding.DecodeString(resp.ImageData)
 	if err != nil {
 		cli.log.Debug("failed to decode base64 image", zap.Error(err))
 		return nil, err

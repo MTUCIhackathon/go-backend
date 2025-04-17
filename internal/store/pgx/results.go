@@ -173,3 +173,20 @@ WHERE t.user_id = $1 AND r.is_active = true;`
 	r.log.Debug("retrieved all results", zap.Any("results", allProfessions))
 	return allProfessions, nil
 }
+
+func (r *ResultsRepository) SetImageToResult(ctx context.Context, imageLocation string, resultID uuid.UUID) (bool, error) {
+	const query = `UPDATE test_results SET image_location = $1 WHERE id = $2;`
+
+	commandTag, err := r.store.pool.Exec(ctx, query, imageLocation, resultID)
+	if err != nil {
+		r.log.Error("failed to update image to result", zap.Error(err))
+		return false, r.store.pgErr(err)
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		r.log.Error("failed to update image to result", zap.Any("result", resultID))
+		return false, ErrZeroRowsAffected
+	}
+
+	return true, nil
+}

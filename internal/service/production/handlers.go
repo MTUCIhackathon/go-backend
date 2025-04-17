@@ -2,6 +2,7 @@ package production
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -597,6 +598,21 @@ func (s *Service) CreateResultByFirstTest(ctx context.Context, token string, req
 		CreatedAt:     time.Now(),
 	}
 
+	if len(areas) != 0 {
+		professionWinner := areas[1].Field
+
+		imageKey := fmt.Sprintf("%s-%s", professionWinner, resp.ID)
+
+		resp.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
+		if err != nil {
+			s.log.Debug("failed to image generate for profession winner", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrInternal,
+				errors.Wrap(err, "failed to image generate for profession winner"),
+			)
+		}
+	}
+
 	err = s.repo.Results().CreateResult(ctx, resp)
 	if err != nil {
 		s.log.Debug("failed to insert result", zap.Error(err))
@@ -656,6 +672,21 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 		CreatedAt:     time.Now(),
 	}
 
+	if len(mlReq.Professions) != 0 {
+		professionWinner := mlReq.Professions[1]
+
+		imageKey := fmt.Sprintf("%s-%s", professionWinner, resp.ID)
+
+		resp.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
+		if err != nil {
+			s.log.Debug("failed to image generate for profession winner", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrInternal,
+				errors.Wrap(err, "failed to image generate for profession winner"),
+			)
+		}
+	}
+
 	s.log.Debug("created result", zap.Any("result", resp))
 
 	err = s.repo.Results().CreateResult(ctx, resp)
@@ -667,6 +698,96 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 	}
 
 	return &resp, nil
+}
+
+func (s *Service) CreateResultByThirdTest(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	s.log.Debug("req", zap.Any("questions", questions))
+
+	quest := make([]dto.Question, len(questions.QA))
+
+	index := 0
+
+	resolved := dto.Resolved{
+		ID:           uuid.New(),
+		UserID:       userData.ID,
+		ResolvedType: kind.ThirdOrder,
+		IsActive:     true,
+		CreatedAt:    time.Now(),
+		PassedAt:     time.Now(),
+	}
+
+	for q, a := range questions.QA {
+		question := dto.Question{
+			ResolvedID:     resolved.ID,
+			QuestionOrder:  uint32(index + 1),
+			Issue:          q,
+			QuestionAnswer: a,
+			ImageLocation:  nil,
+			Mark:           -3,
+		}
+		quest[index] = question
+		index++
+	}
+
+	resolved.Questions = quest
+
+	data, err := s.ml.HandlerGetResultByThirdTest(questions.QA)
+	if err != nil {
+		s.log.Debug("failed to get result from ml", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to fetch consumer "))
+	}
+
+	err = s.repo.Resolved().CreateResolved(ctx, resolved)
+	if err != nil {
+		s.log.Debug("failed to create resolved", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create resolved"))
+	}
+
+	result := dto.Result{
+		ID:            uuid.New(),
+		UserID:        userData.ID,
+		ResolvedID:    resolved.ID,
+		ImageLocation: nil,
+		Profession:    data,
+		CreatedAt:     time.Now(),
+	}
+
+	if len(data) != 0 {
+		professionWinner := data[1]
+
+		imageKey := fmt.Sprintf("%s-%s", professionWinner, result.ID)
+
+		result.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
+		if err != nil {
+			s.log.Debug("failed to image generate for profession winner", zap.Error(err))
+			return nil, service.NewError(
+				controller.ErrInternal,
+				errors.Wrap(err, "failed to image generate for profession winner"),
+			)
+		}
+	}
+
+	err = s.repo.Results().CreateResult(ctx, result)
+	if err != nil {
+		s.log.Debug("failed to create result", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create result"))
+	}
+
+	return &result, nil
 }
 
 func (s *Service) GetResultByTestID(ctx context.Context, token string, testID uuid.UUID) (*dto.Result, error) {
@@ -865,7 +986,11 @@ func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, ques
 	data, err := s.ml.HandlerSendResultsForThirdTest(answers)
 	if err != nil {
 		s.log.Debug("failed to send results for third test", zap.Error(err))
-		errors.Wrap(err, "failed to send results for third test")
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to send results for third test"),
+		)
+
 	}
 
 	resp := &dto.ThirdTestQuestions{
@@ -873,82 +998,6 @@ func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, ques
 		Answers:   data.Answers,
 	}
 	return resp, nil
-}
-
-func (s *Service) GetThirstTestResult(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error) {
-	userData, err := s.GetConsumerDataFromToken(token)
-	if err != nil {
-		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
-		return nil, service.NewError(
-			controller.ErrUnauthorized,
-			errors.Wrap(err, "failed to fetch consumer data from token"))
-	}
-
-	s.log.Debug("req", zap.Any("questions", questions))
-
-	quest := make([]dto.Question, len(questions.QA))
-
-	index := 0
-
-	resolved := dto.Resolved{
-		ID:           uuid.New(),
-		UserID:       userData.ID,
-		ResolvedType: kind.ThirdOrder,
-		IsActive:     true,
-		CreatedAt:    time.Now(),
-		PassedAt:     time.Now(),
-	}
-
-	for q, a := range questions.QA {
-		question := dto.Question{
-			ResolvedID:     resolved.ID,
-			QuestionOrder:  uint32(index + 1),
-			Issue:          q,
-			QuestionAnswer: a,
-			ImageLocation:  nil,
-			Mark:           -3,
-		}
-		quest[index] = question
-		index++
-	}
-
-	resolved.Questions = quest
-
-	data, err := s.ml.HandlerGetResultByThirdTest(questions.QA)
-	if err != nil {
-		s.log.Debug("failed to get result from ml", zap.Error(err))
-		return nil, service.NewError(
-			controller.ErrBadRequest,
-			errors.Wrap(err, "failed to fetch consumer "))
-	}
-
-	err = s.repo.Resolved().CreateResolved(ctx, resolved)
-	if err != nil {
-		s.log.Debug("failed to create resolved", zap.Error(err))
-		return nil, service.NewError(
-			controller.ErrInternal,
-			errors.Wrap(err, "failed to create resolved"))
-	}
-
-	result := dto.Result{
-		ID:            uuid.New(),
-		UserID:        userData.ID,
-		ResolvedID:    resolved.ID,
-		ImageLocation: nil,
-		Profession:    data,
-		CreatedAt:     time.Now(),
-	}
-
-	err = s.repo.Results().CreateResult(ctx, result)
-	if err != nil {
-		s.log.Debug("failed to create result", zap.Error(err))
-		return nil, service.NewError(
-			controller.ErrInternal,
-			errors.Wrap(err, "failed to create result"))
-	}
-
-	return &result, nil
-
 }
 
 func (s *Service) GetAllResultsByAI(ctx context.Context, token string) ([]string, error) {
@@ -991,4 +1040,55 @@ func (s *Service) GetAllResultsByAI(ctx context.Context, token string) ([]string
 	s.log.Debug("fetched common results", zap.Any("results", topProfessions))
 
 	return topProfessions, nil
+}
+
+func (s *Service) SetImageToResult(ctx context.Context, token string, image dto.ImageCreation) (bool, error) {
+	_, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"),
+		)
+	}
+
+	rawImage, err := s.ml.HandlerGenerateImage(image.Profession)
+	if err != nil {
+		s.log.Debug("failed to generate image", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to generate image"),
+		)
+	}
+
+	imageKey := fmt.Sprintf("%s-%s.png", image.Profession, image.ResultID)
+
+	err = s.s3.PutObject(ctx, imageKey, rawImage)
+	if err != nil {
+		s.log.Error("failed to upload image", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to upload image"),
+		)
+	}
+
+	imageLink, err := s.s3.GenerateLink(ctx, imageKey)
+	if err != nil {
+		s.log.Error("failed to generate link", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to generate link"),
+		)
+	}
+
+	ok, err := s.repo.Results().SetImageToResult(ctx, imageLink, image.ResultID)
+	if err != nil || ok == false {
+		s.log.Error("failed to set image to result", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to set image to result"),
+		)
+	}
+
+	return true, nil
 }

@@ -1,6 +1,8 @@
 package production
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -43,9 +45,24 @@ func (s *Service) GetConsumerDataFromToken(token string) (*dto.ConsumerDataInTok
 	}
 }
 
-func (s *Service) unmarshalPointer(str *string) (string, error) {
-	if str == nil {
-		return "", nil
+func (s *Service) UploadImage(ctx context.Context, profession string, imageKey string) (*string, error) {
+	rawImage, err := s.ml.HandlerGenerateImage(profession)
+	if err != nil {
+		s.log.Error("failed to generate image", zap.Error(err))
+		return nil, err
 	}
-	return *str, nil
+
+	err = s.s3.PutObject(ctx, imageKey, rawImage)
+	if err != nil {
+		s.log.Error("failed to upload image", zap.Error(err))
+		return nil, err
+	}
+
+	imageLink, err := s.s3.GenerateLink(ctx, imageKey)
+	if err != nil {
+		s.log.Error("failed to generate link", zap.Error(err))
+		return nil, err
+	}
+
+	return &imageLink, nil
 }

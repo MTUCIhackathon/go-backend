@@ -9,6 +9,7 @@ import (
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
+	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
@@ -26,6 +27,7 @@ type Service struct {
 	determinator mark.Marker
 	study        assay.Interface
 	ml           ml.Interface
+	s3           s3.Interface
 }
 
 func New(
@@ -39,6 +41,7 @@ func New(
 	determinator mark.Marker,
 	study assay.Interface,
 	ml ml.Interface,
+	s3 s3.Interface,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -47,12 +50,19 @@ func New(
 		)
 	}
 
-	if repo == nil || provider == nil || config == nil || encrypt == nil || inmemory == nil || valid == nil || study == nil || ml == nil {
+	if repo == nil ||
+		provider == nil ||
+		config == nil ||
+		encrypt == nil ||
+		inmemory == nil ||
+		valid == nil ||
+		study == nil ||
+		ml == nil ||
+		s3 == nil {
 		log.Warn(
 			"provided nil service dependency",
 		)
 
-		// TODO
 		return nil, ErrNilReference
 	}
 

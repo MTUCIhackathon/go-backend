@@ -517,7 +517,7 @@ func (ctrl *Controller) GetDataFromMl(e echo.Context) error {
 		QA: req.QA,
 	}
 
-	data, err := ctrl.srv.GetThirstTestResult(e.Request().Context(), token, qa)
+	data, err := ctrl.srv.CreateResultByThirdTest(e.Request().Context(), token, qa)
 	if err != nil {
 		ctrl.log.Error("failed to get result from ml")
 		return echo.NewHTTPError(http.StatusInternalServerError)

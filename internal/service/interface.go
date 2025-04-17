@@ -31,5 +31,7 @@ type Interface interface {
 	GetResolvedByID(ctx context.Context, token string, resolvedID uuid.UUID) (*dto.Resolved, error)
 
 	GetQuestionsForThirdTest(_ context.Context, token string, questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error)
-	GetThirstTestResult(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error)
+	CreateResultByThirdTest(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error)
+
+	SetImageToResult(ctx context.Context, token string, image dto.ImageCreation) (bool, error)
 }
