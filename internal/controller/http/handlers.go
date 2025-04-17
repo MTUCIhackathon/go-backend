@@ -91,6 +91,8 @@ func (ctrl *Controller) GetAllTest(e echo.Context) error {
 			Questions:   make([]model.TestQuestion, len(t.Questions)),
 		}
 
+		ctrl.log.Debug("t is len", zap.String("name", t.Name), zap.Int("len", len(t.Questions)))
+
 		for i := 0; i < len(t.Questions); i++ {
 			test.Questions[i] = model.TestQuestion{
 				Order:    t.Questions[i].Order,
