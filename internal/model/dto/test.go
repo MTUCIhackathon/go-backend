@@ -24,3 +24,7 @@ type ThirdTestQuestions struct {
 	Questions string   `json:"question"`
 	Answers   []string `json:"answers"`
 }
+
+type QA struct {
+	UserAnswers map[string]string
+}

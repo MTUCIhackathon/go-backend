@@ -11,3 +11,7 @@ type PersonalityTestMLRequest struct {
 type AITestMLRequest struct {
 	AQ map[string]string `json:"questions"`
 }
+
+type AITestMLProfessionsRequest struct {
+	AQ map[string]string `json:"user_answers"`
+}

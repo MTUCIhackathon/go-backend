@@ -14,3 +14,7 @@ type AITestMLResponse struct {
 	Question string   `json:"question"`
 	Answers  []string `json:"answers"`
 }
+
+type AITestMLProfessionsResponse struct {
+	Professions []string "top_professions"
+}

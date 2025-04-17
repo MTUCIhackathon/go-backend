@@ -78,3 +78,26 @@ func (cli *PythonClient) HandlerSendResultsForThirdTest(questions dto.ThirdTestA
 
 	return resp, nil
 }
+
+func (cli *PythonClient) HandlerGetResultByThirdTest(qa dto.QA) ([]string, error) {
+	var (
+		err  error
+		resp *model.AITestMLProfessionsResponse
+	)
+
+	req := model.AITestMLProfessionsRequest{
+		AQ: qa.UserAnswers,
+	}
+
+	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
+
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
+	if err != nil {
+		cli.log.Debug("failed to send request to ml", zap.Error(err))
+		return nil, err
+	}
+
+	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
+
+	return resp.Professions, nil
+}

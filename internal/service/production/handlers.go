@@ -874,3 +874,7 @@ func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, ques
 	}
 	return resp, nil
 }
+
+func (s *Service) GetThirstTestResult(ctx context.Context, token string, questions dto.ThirdTestQuestions) (*dto.Result, error) {
+
+}
