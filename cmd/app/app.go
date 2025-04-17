@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -34,6 +32,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator"
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator/tern"
 	"github.com/MTUCIhackathon/go-backend/pkg/pgx"
+	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 	"github.com/MTUCIhackathon/go-backend/pkg/s3/webcloud"
 )
 
@@ -44,7 +43,7 @@ func CreateApp() fx.Option {
 			logger.New,
 			config.New,
 			createPgx,
-			createS3,
+			fx.Annotate(webcloud.New, fx.As(new(s3.Interface))),
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),
 			fx.Annotate(jwt.NewProvider, fx.As(new(token.Provider))),
@@ -62,21 +61,6 @@ func CreateApp() fx.Option {
 			migrate.Migrate,
 		),
 	)
-}
-
-func createS3(log *zap.Logger, cfg *config.Config) (*webcloud.Client, error) {
-	log = log.Named("aws")
-	log.Debug("starting s3 with config", zap.Any("config", cfg.AWS))
-	aws, err := webcloud.New(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	if aws == nil {
-		return nil, errors.New("aws is nil")
-	}
-
-	return aws, nil
 }
 
 func createPgx(log *zap.Logger, cfg *config.Config) (*pgxpool.Pool, error) {

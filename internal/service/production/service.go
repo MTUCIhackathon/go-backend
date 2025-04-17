@@ -4,16 +4,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
+	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/ml"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/assay"
 	encrytpor "github.com/MTUCIhackathon/go-backend/internal/pkg/encryptor"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
-	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
-	"github.com/MTUCIhackathon/go-backend/pkg/s3"
-
-	"github.com/MTUCIhackathon/go-backend/internal/config"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
+	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
 	"github.com/MTUCIhackathon/go-backend/internal/store"
+	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 )
 
 type Service struct {
@@ -77,6 +76,7 @@ func New(
 		determinator: determinator,
 		study:        study,
 		ml:           ml,
+		s3:           s3,
 	}
 
 	return s, nil
