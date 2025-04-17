@@ -66,12 +66,14 @@ func CreateApp() fx.Option {
 }
 
 func createS3(log *zap.Logger, cfg *config.Config) (s3.Interface, error) {
+	log = log.Named("aws")
+	log.Debug("starting s3 with config", zap.Any("config", cfg.AWS))
 	aws, err := webcloud.New(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Named("aws").Debug("created aws", zap.Any("aws", aws))
+	log.Debug("created aws", zap.Any("aws", aws))
 
 	if aws == nil {
 		return nil, errors.New("aws is nil")
