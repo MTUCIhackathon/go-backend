@@ -86,7 +86,7 @@ func (cli *PythonClient) HandlerSendResultsForThirdTest(questions dto.ThirdTestA
 func (cli *PythonClient) HandlerGetResultByThirdTest(qa dto.QA) ([]string, error) {
 	var (
 		err  error
-		resp *model.AITestMLProfessionsResponse
+		resp model.AITestMLProfessionsResponse
 	)
 
 	req := model.AITestMLProfessionsRequest{
