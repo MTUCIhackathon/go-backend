@@ -14,6 +14,7 @@ type Option interface {
 	onStart(*Cache) error
 	onStop(*Cache) error
 }
+
 type optionFunc func(*Cache) error
 
 func (f optionFunc) onStart(c *Cache) error {
@@ -72,6 +73,7 @@ func (l Loader) onStart(c *Cache) error {
 		test.Name = k
 		test.Description = v[0]
 		test.ID = uuid.New()
+
 		for i := 1; i <= len(v); i++ {
 			text, _ := v[i]
 			test.Questions = append(test.Questions, dto.TestQuestion{

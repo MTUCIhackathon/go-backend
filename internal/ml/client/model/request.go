@@ -21,3 +21,7 @@ type AICommonProfessionsRequest struct {
 	SecondTest []string `json:"test_2"`
 	ThirdTest  []string `json:"test_3"`
 }
+
+type ImageGenerateRequest struct {
+	Profession string `json:"profession"`
+}

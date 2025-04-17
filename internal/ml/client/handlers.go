@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/base64"
 	"errors"
 
 	"go.uber.org/zap"
@@ -139,4 +140,35 @@ func (cli *PythonClient) HandlerGetCommonResultByML(professions [][]string) ([]s
 	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
 	return resp.Professions, nil
 
+}
+
+func (cli *PythonClient) HandlerGenerateImage(profession string) ([]byte, error) {
+	var (
+		err  error
+		resp model.ImageGenerateResponse
+	)
+
+	req := model.ImageGenerateRequest{
+		Profession: profession,
+	}
+
+	uri := cli.cfg.ML.Bind() + imageGenerateImage
+
+	cli.log.Debug("get uri address", zap.Any("uri", uri))
+
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
+	if err != nil {
+		cli.log.Debug("failed to send request to ml", zap.Error(err))
+		return nil, err
+	}
+
+	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
+
+	encResult, err := base64.RawStdEncoding.DecodeString(resp.ImageData)
+	if err != nil {
+		cli.log.Debug("failed to decode base64 image", zap.Error(err))
+		return nil, err
+	}
+
+	return encResult, nil
 }

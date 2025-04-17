@@ -11,4 +11,5 @@ type Interface interface {
 	HandlerSendResultsForThirdTest(questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error)
 	HandlerGetResultByThirdTest(qa map[string]string) ([]string, error)
 	HandlerGetCommonResultByML(professions [][]string) ([]string, error)
+	HandlerGenerateImage(profession string) ([]byte, error)
 }

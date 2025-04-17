@@ -8,4 +8,6 @@ const (
 
 	testScientificTestRoute  = "test/scientific_test"
 	testPersonalityTestRoute = "test/personality_test"
+
+	imageGenerateImage = "image/generate_image"
 )

@@ -352,17 +352,6 @@ func (ctrl *Controller) GetMyResultByResolvedID(e echo.Context) error {
 	panic("not implemented")
 }
 
-//func (ctrl *Controller) GetMyResults(e echo.Context) error {
-//	token := e.Request().Header.Get(echo.HeaderAuthorization)
-//
-//	resp, err := ctrl.srv.Get(e.Request().Context(), token, parsed)
-//	if err != nil {
-//		ctrl.log.Error("failed to save result")
-//		return handleErr(err)
-//	}
-//
-//}
-
 func (ctrl *Controller) GetResultByResolvedID(e echo.Context) error {
 	token := e.Request().Header.Get(echo.HeaderAuthorization)
 	resultID := e.Param("resolved_id")
