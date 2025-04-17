@@ -74,6 +74,33 @@ func NewSecond(log *zap.Logger) *Second {
 	}
 }
 
+//func (s *Second) GetPersonality(marks []dto.Mark) (string, error) {
+//	m := make(map[string]int8)
+//	res := ""
+//
+//	for i := 0; i < len(marks); i++ {
+//		name, err := s.getPersonality(marks[i].Order)
+//		if err != nil {
+//			return "", ErrWrongPersonality
+//		}
+//		m[name] += marks[i].Mark
+//	}
+//
+//	for len(res) != 4 {
+//		maxi := int8(-127)
+//		str := ""
+//		for k, v := range m {
+//			if v > maxi {
+//				str = k
+//			}
+//		}
+//		res += str
+//		delete(m, str)
+//	}
+//
+//	return res, nil
+//}
+
 func (s *Second) GetPersonality(marks []dto.Mark) (string, error) {
 	m := make(map[string]int8)
 	res := ""
@@ -99,7 +126,6 @@ func (s *Second) GetPersonality(marks []dto.Mark) (string, error) {
 	}
 
 	return res, nil
-
 }
 
 func (s *Second) getPersonality(num uint32) (string, error) {

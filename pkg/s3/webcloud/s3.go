@@ -12,7 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
+	s3interface "github.com/MTUCIhackathon/go-backend/pkg/s3"
 )
+
+var _ s3interface.Interface = (*Client)(nil)
 
 var (
 	ErrNilClient        = errors.New("nil client")

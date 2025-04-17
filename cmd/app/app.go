@@ -7,6 +7,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
+	"golang.org/x/net/context"
 
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
 	"github.com/MTUCIhackathon/go-backend/internal/cache/inmemory"
@@ -73,7 +74,8 @@ func createS3(log *zap.Logger, cfg *config.Config) (s3.Interface, error) {
 		return nil, err
 	}
 
-	log.Debug("created aws", zap.Any("aws", aws))
+	l, err := aws.GenerateLink(context.Background(), "")
+	log.Debug("created link", zap.String("l", l))
 
 	if aws == nil {
 		return nil, errors.New("aws is nil")
