@@ -45,7 +45,8 @@ var (
 )
 
 var (
-	ErrWrongArea = errors.New("wrong area: area not found")
+	ErrWrongArea                       = errors.New("wrong area: area not found")
+	ErrWrongNumbersOfMarksForFirstTest = errors.New("wrong numbers of marks: number of marks for first test type should be equal 174")
 )
 
 type First struct {
@@ -65,6 +66,14 @@ func NewFirst(log *zap.Logger) *First {
 }
 
 func (f *First) GetAreas(marks []dto.Mark) ([]dto.Area, error) {
+	if len(marks) != 174 {
+		f.log.Error(
+			"wrong number of marks for first test: should be 174",
+			zap.Int("marks length", len(marks)),
+		)
+
+		return nil, ErrWrongNumbersOfMarksForFirstTest
+	}
 
 	sum := f.sumMark(marks)
 

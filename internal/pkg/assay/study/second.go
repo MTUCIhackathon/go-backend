@@ -54,7 +54,8 @@ var (
 )
 
 var (
-	ErrWrongPersonality = errors.New("wrong personality")
+	ErrWrongPersonality                 = errors.New("wrong personality")
+	ErrWrongNumbersOfMarksForSecondTest = errors.New("wrong numbers of marks: number of marks for second test type should be equal 40")
 )
 
 type Second struct {
@@ -102,6 +103,15 @@ func NewSecond(log *zap.Logger) *Second {
 //}
 
 func (s *Second) GetPersonality(marks []dto.Mark) (string, error) {
+	if len(marks) != 40 {
+		s.log.Error(
+			"wrong number of marks for second test: should be 40",
+			zap.Int("marks length", len(marks)),
+		)
+
+		return "", ErrWrongNumbersOfMarksForSecondTest
+	}
+
 	m := make(map[string]int8)
 	res := ""
 
