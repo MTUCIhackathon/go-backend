@@ -9,5 +9,5 @@ type Interface interface {
 	HandlerSendResultsForFirstTest(areas []dto.Area) ([]string, error)
 	HandlerSendResultsForSecondTest(kind string) (*model.PersonalityTestMLResponse, error)
 	HandlerSendResultsForThirdTest(questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error)
-	HandlerGetResultByThirdTest(qa dto.QA) ([]string, error)
+	HandlerGetResultByThirdTest(qa map[string]string) ([]string, error)
 }

@@ -916,7 +916,7 @@ func (s *Service) GetThirstTestResult(ctx context.Context, token string, questio
 
 	resolved.Questions = quest
 
-	data, err := s.ml.HandlerGetResultByThirdTest(qa)
+	data, err := s.ml.HandlerGetResultByThirdTest(qa.UserAnswers)
 	if err != nil {
 		s.log.Debug("failed to get result from ml", zap.Error(err))
 		return nil, service.NewError(

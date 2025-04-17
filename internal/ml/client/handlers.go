@@ -83,14 +83,14 @@ func (cli *PythonClient) HandlerSendResultsForThirdTest(questions dto.ThirdTestA
 	return resp, nil
 }
 
-func (cli *PythonClient) HandlerGetResultByThirdTest(qa dto.QA) ([]string, error) {
+func (cli *PythonClient) HandlerGetResultByThirdTest(qa map[string]string) ([]string, error) {
 	var (
 		err  error
 		resp model.AITestMLProfessionsResponse
 	)
 
 	req := model.AITestMLProfessionsRequest{
-		AQ: qa.UserAnswers,
+		AQ: qa,
 	}
 
 	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
