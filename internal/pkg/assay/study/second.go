@@ -123,18 +123,29 @@ func (s *Second) GetPersonality(marks []dto.Mark) (string, error) {
 		m[name] += marks[i].Mark
 	}
 
-	for len(res) != 4 {
-		maxi := int8(-127)
-		str := ""
-		for k, v := range m {
-			if v > maxi {
-				str = k
-			}
-		}
-		res += str
-		delete(m, str)
+	if m["E"] > m["I"] {
+		res += "E"
+	} else {
+		res += "I"
 	}
 
+	if m["S"] > m["N"] {
+		res += "S"
+	} else {
+		res += "N"
+	}
+
+	if m["T"] > m["F"] {
+		res += "T"
+	} else {
+		res += "F"
+	}
+
+	if m["J"] > m["P"] {
+		res += "J"
+	} else {
+		res += "P"
+	}
 	return res, nil
 }
 
