@@ -884,9 +884,7 @@ func (s *Service) GetThirstTestResult(ctx context.Context, token string, questio
 			errors.Wrap(err, "failed to fetch consumer data from token"))
 	}
 
-	qa := dto.QA{
-		UserAnswers: questions.QA,
-	}
+	s.log.Debug("req", zap.Any("questions", questions))
 
 	quest := make([]dto.Question, len(questions.QA))
 
@@ -916,7 +914,7 @@ func (s *Service) GetThirstTestResult(ctx context.Context, token string, questio
 
 	resolved.Questions = quest
 
-	data, err := s.ml.HandlerGetResultByThirdTest(qa.UserAnswers)
+	data, err := s.ml.HandlerGetResultByThirdTest(questions.QA)
 	if err != nil {
 		s.log.Debug("failed to get result from ml", zap.Error(err))
 		return nil, service.NewError(
