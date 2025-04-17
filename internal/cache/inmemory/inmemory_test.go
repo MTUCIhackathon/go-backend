@@ -37,4 +37,6 @@ func TestCache_New(t *testing.T) {
 
 	t.Log(t1.ID, t1.Name, t1.Description, t1.Questions)
 	t.Log(t2.ID, t2.Name, t2.Description, t2.Questions)
+
+	t.Log(c.GetAll())
 }
