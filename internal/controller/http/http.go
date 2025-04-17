@@ -86,7 +86,7 @@ func (ctrl *Controller) configureRoutes() {
 	ai := api.Group("/ai")
 	{
 		ai.POST("/send_questions", ctrl.CreateDataForMl)
-		ai.POST("/summary", ctrl.GetSummary)
+		ai.GET("/summary", ctrl.GetSummary)
 		ai.POST("/get_result", ctrl.GetDataFromMl)
 	}
 }

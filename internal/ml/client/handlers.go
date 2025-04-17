@@ -128,6 +128,8 @@ func (cli *PythonClient) HandlerGetCommonResultByML(professions [][]string) ([]s
 		ThirdTest:  professions[2],
 	}
 
+	cli.log.Debug("prepare request to send", zap.Any("request", req))
+
 	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
 
 	cli.log.Debug("get uri address", zap.Any("uri", uri))
@@ -137,7 +139,9 @@ func (cli *PythonClient) HandlerGetCommonResultByML(professions [][]string) ([]s
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
 	}
+
 	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
+
 	return resp.Professions, nil
 
 }
