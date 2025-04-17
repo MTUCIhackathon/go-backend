@@ -67,7 +67,6 @@ func (ctrl *Controller) configureRoutes() {
 	{
 		test.GET("/all", ctrl.GetAllTest)
 		test.GET("/:test_id", ctrl.GetTestByID)
-		test.POST("/ai", ctrl.CreateDataForMl)
 	}
 
 	result := api.Group("/results")
@@ -75,10 +74,7 @@ func (ctrl *Controller) configureRoutes() {
 		result.GET("/all", nil)
 		result.GET("/:result_id", ctrl.GetResultByResolvedID)
 		result.GET("/my", ctrl.GetMyResult)
-		result.POST("/send", nil)
 		result.POST("/create", ctrl.CreateResult)
-		result.POST("/ai", ctrl.GetDataFromMl)
-		result.POST("/summary", ctrl.GetSummary)
 	}
 
 	resolved := api.Group("/resolved")
@@ -87,6 +83,12 @@ func (ctrl *Controller) configureRoutes() {
 		resolved.GET("/:resolved_id", ctrl.GetResolvedByID)
 	}
 
+	ai := api.Group("/ai")
+	{
+		ai.POST("/send_questions", ctrl.CreateDataForMl)
+		ai.POST("/summary", ctrl.GetSummary)
+		ai.POST("/get_result", ctrl.GetDataFromMl)
+	}
 }
 
 func (ctrl *Controller) Start(ctx context.Context) error {

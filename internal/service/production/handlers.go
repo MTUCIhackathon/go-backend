@@ -652,7 +652,7 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 		s.log.Debug("failed to get marks", zap.Error(err))
 		return nil, service.NewError(
 			controller.ErrInternal,
-			errors.Wrap(err, "failed to get personality"))
+			errors.Wrap(err, "failed to get marks"))
 	}
 
 	mlReq, err := s.ml.HandlerSendResultsForSecondTest(personality)
