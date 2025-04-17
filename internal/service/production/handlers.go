@@ -875,6 +875,80 @@ func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, ques
 	return resp, nil
 }
 
-func (s *Service) GetThirstTestResult(ctx context.Context, token string, questions dto.ThirdTestQuestions) (*dto.Result, error) {
+func (s *Service) GetThirstTestResult(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	qa := dto.QA{
+		UserAnswers: questions.QA,
+	}
+
+	quest := make([]dto.Question, len(questions.QA))
+
+	index := 0
+
+	resolved := dto.Resolved{
+		ID:           uuid.New(),
+		UserID:       userData.ID,
+		ResolvedType: kind.ThirdOrder,
+		IsActive:     true,
+		CreatedAt:    time.Now(),
+		PassedAt:     time.Now(),
+	}
+
+	for q, a := range questions.QA {
+		question := dto.Question{
+			ResolvedID:     resolved.ID,
+			QuestionOrder:  uint32(index + 1),
+			Issue:          q,
+			QuestionAnswer: a,
+			ImageLocation:  nil,
+			Mark:           -3,
+		}
+		quest[index] = question
+		index++
+	}
+
+	resolved.Questions = quest
+
+	data, err := s.ml.HandlerGetResultByThirdTest(qa)
+	if err != nil {
+		s.log.Debug("failed to get result from ml", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to fetch consumer "))
+	}
+
+	err = s.repo.Resolved().CreateResolved(ctx, resolved)
+	if err != nil {
+		s.log.Debug("failed to create resolved", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create resolved"))
+	}
+
+	result := dto.Result{
+		ID:            uuid.New(),
+		UserID:        userData.ID,
+		ResolvedID:    resolved.ID,
+		ImageLocation: nil,
+		Profession:    data,
+		CreatedAt:     time.Now(),
+	}
+
+	err = s.repo.Results().CreateResult(ctx, result)
+	if err != nil {
+		s.log.Debug("failed to create result", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to create result"))
+	}
+
+	return &result, nil
 
 }
