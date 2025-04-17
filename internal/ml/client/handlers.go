@@ -45,6 +45,8 @@ func (cli *PythonClient) HandlerSendResultsForSecondTest(kind string) (*model.Pe
 
 	uri := cli.cfg.ML.Bind() + testPersonalityTestRoute
 
+	cli.log.Debug("get uri address", zap.Any("uri", uri))
+
 	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
 	if err != nil {
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
@@ -68,6 +70,8 @@ func (cli *PythonClient) HandlerSendResultsForThirdTest(questions dto.ThirdTestA
 
 	uri := cli.cfg.ML.Bind() + aiTestGenerateRoute
 
+	cli.log.Debug("get uri address", zap.Any("uri", uri))
+
 	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
 	if err != nil {
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
@@ -90,6 +94,8 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa dto.QA) ([]string, error
 	}
 
 	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
+
+	cli.log.Debug("get uri address", zap.Any("uri", uri))
 
 	_, err = cli.cli.R().SetBody(req.AQ).SetResult(&resp).Post(uri)
 	if err != nil {
