@@ -108,4 +108,4 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa map[string]string) ([]st
 	return resp.Professions, nil
 }
 
-func (cli *PythonClient) HandlerGetCommonResultByML()
+//func (cli *PythonClient) HandlerGetCommonResultByML()
