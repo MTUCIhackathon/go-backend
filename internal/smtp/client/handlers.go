@@ -39,7 +39,7 @@ func (s *SMTP) SendResultOnEmail(professions []string, testName string, email st
 
 	plainAuth := smtp.PlainAuth("", s.cfg.SMTP.Login, s.cfg.SMTP.Password, s.cfg.SMTP.Host)
 
-	s.log.Debug("created smtp plain auth")
+	s.log.Debug("created smtp plain auth", zap.Any("auth", plainAuth))
 
 	err := smtp.SendMail(s.cfg.SMTP.GetSMTPServerAddress(), plainAuth, s.cfg.SMTP.Login, []string{email}, sprintedBytes)
 	if err != nil {
