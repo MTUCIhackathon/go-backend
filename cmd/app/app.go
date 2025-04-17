@@ -7,7 +7,6 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 
 	"github.com/MTUCIhackathon/go-backend/internal/cache"
 	"github.com/MTUCIhackathon/go-backend/internal/cache/inmemory"
@@ -35,7 +34,6 @@ import (
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator"
 	"github.com/MTUCIhackathon/go-backend/pkg/migrator/tern"
 	"github.com/MTUCIhackathon/go-backend/pkg/pgx"
-	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 	"github.com/MTUCIhackathon/go-backend/pkg/s3/webcloud"
 )
 
@@ -66,16 +64,13 @@ func CreateApp() fx.Option {
 	)
 }
 
-func createS3(log *zap.Logger, cfg *config.Config) (s3.Interface, error) {
+func createS3(log *zap.Logger, cfg *config.Config) (*webcloud.Client, error) {
 	log = log.Named("aws")
 	log.Debug("starting s3 with config", zap.Any("config", cfg.AWS))
 	aws, err := webcloud.New(cfg)
 	if err != nil {
 		return nil, err
 	}
-
-	l, err := aws.GenerateLink(context.Background(), "")
-	log.Debug("created link", zap.String("l", l))
 
 	if aws == nil {
 		return nil, errors.New("aws is nil")
