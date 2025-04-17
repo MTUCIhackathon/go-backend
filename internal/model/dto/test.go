@@ -21,6 +21,6 @@ type ThirdTestAnswers struct {
 }
 
 type ThirdTestQuestions struct {
-	Questions string   `json:"questions"`
+	Questions string   `json:"question"`
 	Answers   []string `json:"answers"`
 }
