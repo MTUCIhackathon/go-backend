@@ -14,6 +14,7 @@ var (
 )
 
 func (s *SMTP) SendResultOnEmail(professions []string, testName string, email string) error {
+	s.log.Info("smtp cfg", zap.Any("smtp config", s.cfg.SMTP))
 	if len(professions) == 0 {
 		s.log.Error(
 			"got nil professions list: should be more than zero",
