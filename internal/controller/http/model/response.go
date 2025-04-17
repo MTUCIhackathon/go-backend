@@ -117,4 +117,7 @@ type (
 		Profession    []string  `json:"profession"`
 		CreatedAt     time.Time `json:"created_at"`
 	}
+	GetSummaryResponse struct {
+		Professions []string `json:"professions"`
+	}
 )

@@ -534,3 +534,17 @@ func (ctrl *Controller) GetDataFromMl(e echo.Context) error {
 
 	return e.JSON(http.StatusOK, resp)
 }
+
+func (ctrl *Controller) GetSummary(e echo.Context) error {
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	resp, err := ctrl.srv.GetAllResultsByAI(e.Request().Context(), token)
+	if err != nil {
+		ctrl.log.Error("failed to get result from ml")
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return e.JSON(http.StatusOK, model.GetSummaryResponse{
+		Professions: resp,
+	})
+}

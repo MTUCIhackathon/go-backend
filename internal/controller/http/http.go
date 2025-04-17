@@ -78,6 +78,7 @@ func (ctrl *Controller) configureRoutes() {
 		result.POST("/send", nil)
 		result.POST("/create", ctrl.CreateResult)
 		result.POST("/ai", ctrl.GetDataFromMl)
+		result.POST("/summary", ctrl.GetSummary)
 	}
 
 	resolved := api.Group("/resolved")
