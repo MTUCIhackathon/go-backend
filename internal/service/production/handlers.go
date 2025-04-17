@@ -677,6 +677,8 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 
 		imageKey := fmt.Sprintf("%s-%s", professionWinner, resp.ID)
 
+		s.log.Debug("test type incorrect", zap.Any("result", resp))
+
 		resp.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
 		if err != nil {
 			s.log.Debug("failed to image generate for profession winner", zap.Error(err))
@@ -685,6 +687,8 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 				errors.Wrap(err, "failed to image generate for profession winner"),
 			)
 		}
+
+		s.log.Debug("link for generated image", zap.Any("loc", resp.ImageLocation))
 	}
 
 	s.log.Debug("created result", zap.Any("result", resp))
