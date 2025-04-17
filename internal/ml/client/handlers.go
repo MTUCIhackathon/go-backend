@@ -97,7 +97,7 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa map[string]string) ([]st
 
 	cli.log.Debug("get uri address", zap.Any("uri", uri))
 
-	_, err = cli.cli.R().SetBody(req.AQ).SetResult(&resp).Post(uri)
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
 	if err != nil {
 		cli.log.Debug("failed to send request to ml", zap.Error(err))
 		return nil, err
@@ -108,4 +108,4 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa map[string]string) ([]st
 	return resp.Professions, nil
 }
 
-//func (cli *PythonClient) HandlerGetCommonResultByML()
+func (cli *PythonClient) HandlerGetCommonResultByML()
