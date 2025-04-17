@@ -458,6 +458,8 @@ func (s *Service) GetAllTests(_ context.Context, token string) ([]dto.Test, erro
 		)
 	}
 
+	s.log.Debug("successfully got test list", zap.Any("tests", tests))
+
 	s.log.Debug(
 		"successfully got tests for consumer",
 		zap.String("consumer_id", data.ID.String()),
