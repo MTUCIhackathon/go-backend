@@ -870,6 +870,7 @@ func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, ques
 
 	resp := &dto.ThirdTestQuestions{
 		Questions: data.Questions,
+		Answers:   data.Answers,
 	}
 	return resp, nil
 }
