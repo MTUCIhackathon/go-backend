@@ -676,7 +676,7 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 		var imageLink *string
 		professionWinner := mlReq.Professions[0]
 
-		imageKey := fmt.Sprintf("%s-%s", professionWinner, resp.ID)
+		imageKey := fmt.Sprintf("%s-%s.png", professionWinner, resp.ID)
 
 		s.log.Debug("test type incorrect", zap.Any("result", resp))
 
