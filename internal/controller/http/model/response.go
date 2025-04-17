@@ -107,3 +107,14 @@ type (
 		Answers   []string `json:"answers"`
 	}
 )
+
+type (
+	ResultResponse struct {
+		ID            uuid.UUID `json:"id"`
+		UserID        uuid.UUID `json:"userID"`
+		ResolvedID    uuid.UUID `json:"resolved_id"`
+		ImageLocation *string   `json:"image_location"`
+		Profession    []string  `json:"profession"`
+		CreatedAt     time.Time `json:"created_at"`
+	}
+)

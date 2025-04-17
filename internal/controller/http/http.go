@@ -66,7 +66,7 @@ func (ctrl *Controller) configureRoutes() {
 	{
 		test.GET("/all", ctrl.GetAllTest)
 		test.GET("/:test_id", ctrl.GetTestByID)
-		test.GET("/ai", ctrl.CreateDataForMl)
+		test.POST("/ai", ctrl.CreateDataForMl)
 	}
 
 	result := api.Group("/results")
@@ -76,6 +76,7 @@ func (ctrl *Controller) configureRoutes() {
 		result.GET("/my", ctrl.GetMyResult)
 		result.POST("/send", nil)
 		result.POST("/create", ctrl.CreateResult)
+		result.GET("/create/ai", ctrl.GetDataFromMl)
 	}
 
 	resolved := api.Group("/resolved")

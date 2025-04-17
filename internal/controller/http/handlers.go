@@ -515,3 +515,33 @@ func (ctrl *Controller) CreateDataForMl(e echo.Context) error {
 
 	return e.JSON(http.StatusOK, resp)
 }
+
+func (ctrl *Controller) GetDataFromMl(e echo.Context) error {
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+	var req model.CreateResponseForThirstTestRequest
+	if err := e.Bind(&req); err != nil {
+		ctrl.log.Error("failed to bind request")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	qa := dto.ThirdTestAnswers{
+		QA: req.QA,
+	}
+
+	data, err := ctrl.srv.GetThirstTestResult(e.Request().Context(), token, qa)
+	if err != nil {
+		ctrl.log.Error("failed to get result from ml")
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	resp := model.ResultResponse{
+		ID:            data.ID,
+		UserID:        data.UserID,
+		ResolvedID:    data.ResolvedID,
+		ImageLocation: data.ImageLocation,
+		Profession:    data.Profession,
+		CreatedAt:     data.CreatedAt,
+	}
+
+	return e.JSON(http.StatusOK, resp)
+}
