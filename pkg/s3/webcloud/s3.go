@@ -3,6 +3,7 @@ package webcloud
 import (
 	"bytes"
 	"context"
+	"errors"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -11,6 +12,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
+)
+
+var (
+	ErrNilClient        = errors.New("nil client")
+	ErrNilPresignClient = errors.New("nil presign client")
 )
 
 const imageKeyDir = "images"
@@ -40,6 +46,13 @@ func New(cfg *config.Config) (*Client, error) {
 
 	client := s3.NewFromConfig(loadAWSConfig)
 	presigned := s3.NewPresignClient(client)
+
+	if client == nil {
+		return nil, ErrNilClient
+	}
+	if presigned == nil {
+		return nil, ErrNilPresignClient
+	}
 
 	return &Client{
 		client:        client,
