@@ -767,7 +767,7 @@ func (s *Service) CreateResultByThirdTest(ctx context.Context, token string, que
 	if len(data) != 0 {
 		professionWinner := data[1]
 
-		imageKey := fmt.Sprintf("%s-%s", professionWinner, result.ID)
+		imageKey := fmt.Sprintf("%s-%s.png", professionWinner, result.ID)
 
 		result.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
 		if err != nil {
