@@ -598,10 +598,10 @@ func (s *Service) CreateResultByFirstTest(ctx context.Context, token string, req
 		CreatedAt:     time.Now(),
 	}
 
-	if len(areas) != 0 {
-		professionWinner := areas[1].Field
+	if len(professions) != 0 {
+		professionWinner := professions[0]
 
-		imageKey := fmt.Sprintf("%s-%s", professionWinner, resp.ID)
+		imageKey := fmt.Sprintf("%s-%s.png", professionWinner, resp.ID)
 
 		resp.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
 		if err != nil {
@@ -673,26 +673,17 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 	}
 
 	if len(mlReq.Professions) != 0 {
-		var imageLink *string
 		professionWinner := mlReq.Professions[0]
 
 		imageKey := fmt.Sprintf("%s-%s.png", professionWinner, resp.ID)
 
-		s.log.Debug("test type incorrect", zap.Any("result", resp))
-
-		imageLink, err = s.UploadImage(ctx, professionWinner, imageKey)
+		resp.ImageLocation, err = s.UploadImage(ctx, professionWinner, imageKey)
 		if err != nil {
 			s.log.Debug("failed to image generate for profession winner", zap.Error(err))
 			return nil, service.NewError(
 				controller.ErrInternal,
 				errors.Wrap(err, "failed to image generate for profession winner"),
 			)
-		}
-
-		s.log.Debug("link for generated image", zap.Any("loc", resp.ImageLocation))
-
-		if imageLink != nil {
-			resp.ImageLocation = imageLink
 		}
 	}
 
