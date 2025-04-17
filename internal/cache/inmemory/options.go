@@ -74,7 +74,7 @@ func (l Loader) onStart(c *Cache) error {
 		test.Description = v[0]
 		test.ID = uuid.New()
 
-		for i := 1; i <= len(v); i++ {
+		for i := 1; i <= len(v)-1; i++ {
 			text, _ := v[i]
 			test.Questions = append(test.Questions, dto.TestQuestion{
 				Order:    i,
