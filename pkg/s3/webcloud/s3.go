@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/MTUCIhackathon/go-backend/internal/config"
+	s3interface "github.com/MTUCIhackathon/go-backend/pkg/s3"
 )
 
 const imageKeyDir = "images"
@@ -21,7 +22,7 @@ type Client struct {
 	config        *config.AWS
 }
 
-func New(cfg *config.Config) (*Client, error) {
+func New(cfg *config.Config) (s3interface.Interface, error) {
 	loadAWSConfig, err := awsConfig.LoadDefaultConfig(
 		context.Background(),
 		awsConfig.WithCredentialsProvider(
@@ -41,11 +42,13 @@ func New(cfg *config.Config) (*Client, error) {
 	client := s3.NewFromConfig(loadAWSConfig)
 	presigned := s3.NewPresignClient(client)
 
-	return &Client{
+	c := &Client{
 		client:        client,
 		presignClient: presigned,
 		config:        cfg.AWS,
-	}, nil
+	}
+
+	return c, nil
 }
 
 func (c *Client) ListObjects(ctx context.Context) ([]string, error) {
