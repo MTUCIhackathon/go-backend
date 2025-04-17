@@ -37,11 +37,10 @@ func (s *SMTP) SendResultOnEmail(professions []string, testName string, email st
 
 	sprintedBytes := []byte(fmt.Sprintf(html, testName, professions[0], professions[1], professions[2]))
 
-	plainAuth := smtp.PlainAuth("", "mtuci_career_guidance_system@mail.ru", "q9PLwfD54xVuvwQ1ysxe", "smtp.mail.ru")
-
+	plainAuth := smtp.PlainAuth("", s.cfg.SMTP.Login, s.cfg.SMTP.Password, s.cfg.SMTP.Host)
 	s.log.Debug("created smtp plain auth", zap.Any("auth", plainAuth))
 
-	err := smtp.SendMail("smtp.mail.ru:587", plainAuth, "mtuci_career_guidance_system@mail.ru", []string{email}, sprintedBytes)
+	err := smtp.SendMail(s.cfg.SMTP.GetSMTPServerAddress(), plainAuth, s.cfg.SMTP.Login, []string{email}, sprintedBytes)
 	if err != nil {
 		s.log.Error(
 			"failed to send mail",

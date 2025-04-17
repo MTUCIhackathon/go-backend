@@ -244,6 +244,7 @@ func (ctrl *Controller) RefreshToken(e echo.Context) error {
 }
 
 func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {
+	return echo.NewHTTPError(http.StatusInternalServerError)
 	var (
 		req model.SendResultOnEmailRequest
 	)
