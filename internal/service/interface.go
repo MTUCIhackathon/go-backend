@@ -22,6 +22,7 @@ type Interface interface {
 	CreateResultByFirstTest(ctx context.Context, token string, req dto.Resolved) (*dto.Result, error)
 	CreateResultBySecondTest(ctx context.Context, token string, req dto.Resolved) (*dto.Result, error)
 	GetResultByTestID(ctx context.Context, token string, testID uuid.UUID) (*dto.Result, error)
+	GetAllResultsByAI(ctx context.Context, token string) ([]string, error)
 
 	GetAllTests(_ context.Context, token string) ([]dto.Test, error)
 	GetTestByID(_ context.Context, token string, testID uuid.UUID) (*dto.Test, error)

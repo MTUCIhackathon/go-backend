@@ -1,6 +1,8 @@
 package client
 
 import (
+	"errors"
+
 	"go.uber.org/zap"
 
 	"github.com/MTUCIhackathon/go-backend/internal/ml/client/model"
@@ -108,4 +110,33 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa map[string]string) ([]st
 	return resp.Professions, nil
 }
 
-//func (cli *PythonClient) HandlerGetCommonResultByML()
+func (cli *PythonClient) HandlerGetCommonResultByML(professions [][]string) ([]string, error) {
+	var (
+		err  error
+		resp model.AICommonProfessionsResponse
+	)
+
+	if len(professions) != 3 {
+		cli.log.Debug("professions length is not correct", zap.Any("professions", professions))
+		return nil, errors.New("professions length is not correct")
+	}
+
+	req := model.AICommonProfessionsRequest{
+		FirstTest:  professions[0],
+		SecondTest: professions[1],
+		ThirdTest:  professions[2],
+	}
+
+	uri := cli.cfg.ML.Bind() + aiTestSummarizeRoute
+
+	cli.log.Debug("get uri address", zap.Any("uri", uri))
+
+	_, err = cli.cli.R().SetBody(req).SetResult(&resp).Post(uri)
+	if err != nil {
+		cli.log.Debug("failed to send request to ml", zap.Error(err))
+		return nil, err
+	}
+	cli.log.Debug("received response from ml ml", zap.Any("resp", resp))
+	return resp.Professions, nil
+
+}

@@ -950,3 +950,45 @@ func (s *Service) GetThirstTestResult(ctx context.Context, token string, questio
 	return &result, nil
 
 }
+
+func (s *Service) GetAllResultsByAI(ctx context.Context, token string) ([]string, error) {
+	userData, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Debug("failed to fetch consumer data from token", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"))
+	}
+
+	professions, err := s.repo.Results().GetAllResults(ctx, userData.ID)
+	if err != nil {
+		s.log.Error("failed to get results", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to get results"))
+	}
+
+	s.log.Debug("fetched results", zap.Any("results", professions))
+
+	if len(professions) > 3 {
+		professions = professions[:3]
+	} else if len(professions) < 3 {
+		for len(professions) < 3 {
+			professions = append(professions, []string{})
+		}
+	}
+
+	s.log.Debug("validate results", zap.Any("results", professions))
+
+	topProfessions, err := s.ml.HandlerGetCommonResultByML(professions)
+	if err != nil {
+		s.log.Error("failed to get common results", zap.Error(err))
+		return nil, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to get results"))
+	}
+
+	s.log.Debug("fetched common results", zap.Any("results", topProfessions))
+
+	return topProfessions, nil
+}

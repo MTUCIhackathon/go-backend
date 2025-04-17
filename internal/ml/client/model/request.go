@@ -15,3 +15,9 @@ type AITestMLRequest struct {
 type AITestMLProfessionsRequest struct {
 	AQ map[string]string `json:"user_answers"`
 }
+
+type AICommonProfessionsRequest struct {
+	FirstTest  []string `json:"test_1"`
+	SecondTest []string `json:"test_2"`
+	ThirdTest  []string `json:"test_3"`
+}

@@ -18,3 +18,7 @@ type AITestMLResponse struct {
 type AITestMLProfessionsResponse struct {
 	Professions []string `json:"top_professions"`
 }
+
+type AICommonProfessionsResponse struct {
+	Professions []string `json:"top_professions"`
+}
