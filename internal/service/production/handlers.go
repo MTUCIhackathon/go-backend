@@ -689,11 +689,11 @@ func (s *Service) CreateResultBySecondTest(ctx context.Context, token string, re
 			)
 		}
 
+		s.log.Debug("link for generated image", zap.Any("loc", resp.ImageLocation))
+
 		if imageLink != nil {
 			resp.ImageLocation = imageLink
 		}
-
-		s.log.Debug("link for generated image", zap.Any("loc", resp.ImageLocation))
 	}
 
 	s.log.Debug("created result", zap.Any("result", resp))

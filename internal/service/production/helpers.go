@@ -52,13 +52,15 @@ func (s *Service) UploadImage(ctx context.Context, profession string, imageKey s
 		return nil, err
 	}
 
-	s.log.Debug("raw image", zap.Any("rawImage", rawImage[:50]))
+	s.log.Debug("raw image", zap.Any("rawImage", rawImage[:50]), zap.String("imageKey", imageKey))
 
 	err = s.s3.PutObject(ctx, imageKey, rawImage)
 	if err != nil {
 		s.log.Error("failed to upload image", zap.Error(err))
 		return nil, err
 	}
+
+	s.log.Debug("image uploaded", zap.String("imageKey", imageKey))
 
 	imageLink, err := s.s3.GenerateLink(ctx, imageKey)
 	if err != nil {
