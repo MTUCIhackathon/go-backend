@@ -21,9 +21,9 @@ type Client struct {
 	config        *config.AWS
 }
 
-func New(ctx context.Context, cfg *config.Config) (*Client, error) {
+func New(cfg *config.Config) (*Client, error) {
 	loadAWSConfig, err := awsConfig.LoadDefaultConfig(
-		ctx,
+		context.Background(),
 		awsConfig.WithCredentialsProvider(
 			credentials.NewStaticCredentialsProvider(
 				cfg.AWS.AccessKey,
