@@ -520,7 +520,7 @@ func (ctrl *Controller) GetDataFromMl(e echo.Context) error {
 	data, err := ctrl.srv.CreateResultByThirdTest(e.Request().Context(), token, qa)
 	if err != nil {
 		ctrl.log.Error("failed to get result from ml")
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 
 	resp := model.ResultResponse{
@@ -541,7 +541,7 @@ func (ctrl *Controller) GetSummary(e echo.Context) error {
 	resp, err := ctrl.srv.GetAllResultsByAI(e.Request().Context(), token)
 	if err != nil {
 		ctrl.log.Error("failed to get result from ml")
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return handleErr(err)
 	}
 
 	return e.JSON(http.StatusOK, model.GetSummaryResponse{

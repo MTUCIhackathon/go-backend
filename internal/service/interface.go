@@ -16,12 +16,12 @@ type Interface interface {
 	Login(ctx context.Context, req dto.Login) (*dto.Token, error)
 	RefreshToken(_ context.Context, token string) (*dto.Token, error)
 
-	SaveResult(ctx context.Context, token string, req dto.ResultCreation) error
+	SaveResult(ctx context.Context, token string, req dto.ResultCreation) error // todo
 	GetResultByResolvedID(ctx context.Context, token string, resultID uuid.UUID) (*dto.Result, error)
 	GetResultsByUserID(ctx context.Context, token string) ([]dto.Result, error)
 	CreateResultByFirstTest(ctx context.Context, token string, req dto.Resolved) (*dto.Result, error)
 	CreateResultBySecondTest(ctx context.Context, token string, req dto.Resolved) (*dto.Result, error)
-	GetResultByTestID(ctx context.Context, token string, testID uuid.UUID) (*dto.Result, error)
+	GetResultByTestID(ctx context.Context, token string, testID uuid.UUID) (*dto.Result, error) // todo
 	GetAllResultsByAI(ctx context.Context, token string) ([]string, error)
 
 	GetAllTests(_ context.Context, token string) ([]dto.Test, error)
@@ -33,5 +33,5 @@ type Interface interface {
 	GetQuestionsForThirdTest(_ context.Context, token string, questions dto.ThirdTestAnswers) (*dto.ThirdTestQuestions, error)
 	CreateResultByThirdTest(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error)
 
-	SetImageToResult(ctx context.Context, token string, image dto.ImageCreation) (bool, error)
+	SetImageToResult(ctx context.Context, token string, image dto.ImageCreation) (bool, error) // todo
 }
