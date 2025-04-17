@@ -244,7 +244,36 @@ func (ctrl *Controller) RefreshToken(e echo.Context) error {
 }
 
 func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {
-	panic("not implemented")
+	var (
+		req model.SendResultOnEmailRequest
+	)
+
+	token := e.Request().Header.Get(echo.HeaderAuthorization)
+
+	err := e.Bind(&req)
+	if err != nil {
+		ctrl.log.Error("failed to bind request")
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	request := dto.MailSending{
+		TestName:    req.TestName,
+		Email:       req.Email,
+		Professions: req.Professions,
+	}
+
+	ok, err := ctrl.srv.SendResultOnEmail(e.Request().Context(), token, request)
+	if err != nil {
+		ctrl.log.Error("failed to send result on email")
+		return handleErr(err)
+	}
+
+	if !ok {
+		ctrl.log.Error("failed to send result on email: negative process result")
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return e.NoContent(http.StatusOK)
 }
 
 func (ctrl *Controller) CreateResolved(e echo.Context) error {

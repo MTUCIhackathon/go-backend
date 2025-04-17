@@ -33,10 +33,13 @@ func TestCache_New(t *testing.T) {
 	assert.NoError(t, err)
 	t2, err := c.Get(keys[1])
 	assert.NoError(t, err)
-	require.Len(t, keys, 2)
+	t3, err := c.Get(keys[2])
+	assert.NoError(t, err)
+	require.Len(t, keys, 3)
 
 	t.Log(t1.ID, t1.Name, t1.Description, t1.Questions)
+	t.Log("")
 	t.Log(t2.ID, t2.Name, t2.Description, t2.Questions)
-
-	t.Log(c.GetAll())
+	t.Log("")
+	t.Log(t3.ID, t3.Name, t3.Description, t3.Questions)
 }

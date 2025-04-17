@@ -983,6 +983,7 @@ func (s *Service) GetQuestionsForThirdTest(_ context.Context, token string, ques
 	answers := dto.ThirdTestAnswers{
 		QA: questions.QA,
 	}
+
 	data, err := s.ml.HandlerSendResultsForThirdTest(answers)
 	if err != nil {
 		s.log.Debug("failed to send results for third test", zap.Error(err))
@@ -1087,6 +1088,36 @@ func (s *Service) SetImageToResult(ctx context.Context, token string, image dto.
 		return false, service.NewError(
 			controller.ErrInternal,
 			errors.Wrap(err, "failed to set image to result"),
+		)
+	}
+
+	return true, nil
+}
+
+func (s *Service) SendResultOnEmail(_ context.Context, token string, req dto.MailSending) (bool, error) {
+	_, err := s.GetConsumerDataFromToken(token)
+	if err != nil {
+		s.log.Error("failed to fetch consumer data from token", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrUnauthorized,
+			errors.Wrap(err, "failed to fetch consumer data from token"),
+		)
+	}
+
+	if err = s.valid.ValidateEmail(req.Email); err != nil {
+		s.log.Error("failed to validate consumer email", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrBadRequest,
+			errors.Wrap(err, "failed to validate consumer email"),
+		)
+	}
+
+	err = s.smtp.SendResultOnEmail(req.Professions, req.TestName, req.Email)
+	if err != nil {
+		s.log.Error("failed to send email", zap.Error(err))
+		return false, service.NewError(
+			controller.ErrInternal,
+			errors.Wrap(err, "failed to send email"),
 		)
 	}
 

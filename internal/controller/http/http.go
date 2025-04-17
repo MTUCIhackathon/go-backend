@@ -75,6 +75,7 @@ func (ctrl *Controller) configureRoutes() {
 		result.GET("/:result_id", ctrl.GetResultByResolvedID)
 		result.GET("/my", ctrl.GetMyResult)
 		result.POST("/create", ctrl.CreateResult)
+		result.POST("/send_on_email", ctrl.SendResultOnEmail)
 	}
 
 	resolved := api.Group("/resolved")

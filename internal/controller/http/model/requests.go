@@ -64,3 +64,11 @@ type (
 		QA map[string]string `json:"questions"`
 	}
 )
+
+type (
+	SendResultOnEmailRequest struct {
+		TestName    string   `json:"test_name"`
+		Email       string   `json:"email"`
+		Professions []string `json:"professions"`
+	}
+)

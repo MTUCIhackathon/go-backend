@@ -26,6 +26,8 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator/valid"
 	"github.com/MTUCIhackathon/go-backend/internal/service"
 	"github.com/MTUCIhackathon/go-backend/internal/service/production"
+	"github.com/MTUCIhackathon/go-backend/internal/smtp"
+	smtpClient "github.com/MTUCIhackathon/go-backend/internal/smtp/client"
 	"github.com/MTUCIhackathon/go-backend/internal/store"
 	storage "github.com/MTUCIhackathon/go-backend/internal/store/pgx"
 	"github.com/MTUCIhackathon/go-backend/pkg/logger"
@@ -43,6 +45,7 @@ func CreateApp() fx.Option {
 			logger.New,
 			config.New,
 			createPgx,
+			fx.Annotate(smtpClient.New, fx.As(new(smtp.Interface))),
 			fx.Annotate(webcloud.New, fx.As(new(s3.Interface))),
 			fx.Annotate(tern.New, fx.As(new(migrator.Interface))),
 			fx.Annotate(cacheCreate, fx.As(new(cache.Cache))),

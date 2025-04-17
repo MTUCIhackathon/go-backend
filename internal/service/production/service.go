@@ -11,6 +11,7 @@ import (
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/mark"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/token"
 	"github.com/MTUCIhackathon/go-backend/internal/pkg/validator"
+	"github.com/MTUCIhackathon/go-backend/internal/smtp"
 	"github.com/MTUCIhackathon/go-backend/internal/store"
 	"github.com/MTUCIhackathon/go-backend/pkg/s3"
 )
@@ -27,6 +28,7 @@ type Service struct {
 	study        assay.Interface
 	ml           ml.Interface
 	s3           s3.Interface
+	smtp         smtp.Interface
 }
 
 func New(
@@ -41,6 +43,7 @@ func New(
 	study assay.Interface,
 	ml ml.Interface,
 	s3 s3.Interface,
+	smtp smtp.Interface,
 ) (*Service, error) {
 	if log == nil {
 		log = zap.L().Named("service.production")
@@ -57,7 +60,8 @@ func New(
 		valid == nil ||
 		study == nil ||
 		ml == nil ||
-		s3 == nil {
+		s3 == nil ||
+		smtp == nil {
 		log.Warn(
 			"provided nil service dependency",
 		)
@@ -77,6 +81,7 @@ func New(
 		study:        study,
 		ml:           ml,
 		s3:           s3,
+		smtp:         smtp,
 	}
 
 	return s, nil

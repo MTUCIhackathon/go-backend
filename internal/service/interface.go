@@ -34,4 +34,6 @@ type Interface interface {
 	CreateResultByThirdTest(ctx context.Context, token string, questions dto.ThirdTestAnswers) (*dto.Result, error)
 
 	SetImageToResult(ctx context.Context, token string, image dto.ImageCreation) (bool, error) // todo
+
+	SendResultOnEmail(_ context.Context, token string, req dto.MailSending) (bool, error)
 }
