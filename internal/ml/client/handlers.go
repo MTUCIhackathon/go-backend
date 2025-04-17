@@ -88,7 +88,7 @@ func (cli *PythonClient) HandlerGetResultByThirdTest(qa map[string]string) ([]st
 		err  error
 		resp model.AITestMLProfessionsResponse
 	)
-
+	cli.log.Debug("qa", zap.Any("map", qa))
 	req := model.AITestMLProfessionsRequest{
 		AQ: qa,
 	}
