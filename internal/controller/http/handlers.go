@@ -262,6 +262,8 @@ func (ctrl *Controller) SendResultOnEmail(e echo.Context) error {
 		Professions: req.Professions,
 	}
 
+	ctrl.log.Debug("prepare to send request", zap.Any("request", request))
+
 	ok, err := ctrl.srv.SendResultOnEmail(e.Request().Context(), token, request)
 	if err != nil {
 		ctrl.log.Error("failed to send result on email")
